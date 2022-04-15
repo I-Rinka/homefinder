@@ -1,0 +1,1 @@
+mongoimport --host irinka.cn:26926 --username finder --password finder --db homefinder --collection house_coord --type json --jsonArray --file coord.json
