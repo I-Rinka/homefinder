@@ -16,5 +16,9 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style>
+.anchorBL{
+  opacity: 100%;
+  display: none;
+}
 </style>
