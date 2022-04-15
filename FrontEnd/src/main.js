@@ -10,7 +10,7 @@ import "element-ui/lib/theme-chalk/index.css";
 Vue.config.productionTip = false;
 Vue.use(ElementUI);
 Vue.use(BaiduMap, {
-  ak: "ODpi3pGmHfZFVpQTCEfb90yE1hcNMuWA"
+  ak: "ODpi3pGmHfZFVpQTCEfb90yE1hcNMuWA",
 });
 
 /* eslint-disable no-new */
