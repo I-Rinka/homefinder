@@ -1,14 +1,13 @@
 import Express from "express";
-import { processData } from "../script/upload_data.js"
-import { cors } from "./cors.js";
-
-processData("./script/dataset/house_deal.xlsx")
-
-
+import cors from "./cors.js"
+import { api } from "./api/index.js";
 const app = Express();
+
 app.use(cors);
 
-app.get('/', (req, res) => res.send('Hello!'));
+app.get('/', (req, res) => res.send('Use /api/ to send request!'));
+
+app.use('/api', api);
 
 let server = app.listen(27727, () => {
     let port = server.address().port;
