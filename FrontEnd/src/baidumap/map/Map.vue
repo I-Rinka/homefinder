@@ -185,7 +185,7 @@ export default {
       const map = new BMapGL.Map($el, { enableHighResolution: this.highResolution, enableMapClick: this.mapClick })
       this.map = map
       const { setMapOptions, zoom, getCenterPoint, theme, mapStyle } = this
-      // theme ? map.setMapStyle({styleJson: theme}) : map.setMapStyle(mapStyle)
+      theme ? map.setMapStyleV2({styleJson: theme}) : map.setMapStyleV2(mapStyle)
       setMapOptions()
       // map.enableTiltGestures()
       bindEvents.call(this, map)
