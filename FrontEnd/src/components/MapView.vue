@@ -1,16 +1,13 @@
 <template>
   <div id="MapView">
+    <div class="zoom-slider">
+      <el-button circle style="margin-bottom: 1vh" size="big" @click="ResetPos"><i class="el-icon-map-location"></i>
+      </el-button>
+      <el-slider v-model="zoom" :step="0.1" :max="20" :min="10" vertical>
+      </el-slider>
+    </div>
     <baidu-map id="bm-view" :center="center" :zoom="zoom" :scroll-wheel-zoom="true" :continuous-zoom="true"
-      :max-zoom="20" :mapStyle="theme" @moving="SyncCenterAndZoom" @moveend="SyncCenterAndZoom"
-      @zoomend="SyncCenterAndZoom">
-      <div class="zoom-slider">
-        <el-button circle style="margin-bottom: 1vh" size="big" @click="ResetPos"><i class="el-icon-map-location"></i>
-        </el-button>
-        <el-slider v-model="zoom" :step="0.1" :max="20" :min="10" vertical>
-        </el-slider>
-      </div>
-
-      <bm-control> </bm-control>
+      :max-zoom="20" :mapStyle="theme" @moveend="MoveEnd" @zoomend="ZoomEnd">
     </baidu-map>
     <div style="height: 8vh;">
       <time-line></time-line>
@@ -45,14 +42,19 @@ export default {
       this.center.lng = df_lng;
       this.center.lat = df_lat;
       this.zoom = df_zoom;
-      //   console.log("ff", center.lng, center.lat, df_zoom);
     },
-    SyncCenterAndZoom(e) {
-      const { lng, lat } = e.target.getCenter();
+    MoveEnd(e) {
+      const { lng, lat } = e.target.getCenter()
       this.center.lng = lng;
       this.center.lat = lat;
-      this.zoom = e.target.getZoom();
     },
+    ZoomEnd(e) {
+      this.zoom = e.target.getZoom();
+
+      const { lng, lat } = e.target.getCenter()
+      this.center.lng = lng;
+      this.center.lat = lat;
+    }
   },
 };
 </script>
@@ -74,8 +76,9 @@ export default {
   position: absolute;
   top: 15vh;
   filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.5));
-  left: 2vw;
-  z-index: 2;
+  left: 3vw;
+  z-index: 6;
+  cursor: default;
 
   >div {
     height: 20vh;
