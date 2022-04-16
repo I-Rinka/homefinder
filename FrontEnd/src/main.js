@@ -4,7 +4,7 @@ import Vue from "vue";
 import App from "./App";
 import router from "./router";
 import ElementUI from "element-ui";
-import BaiduMap from "vue-baidu-map";
+import BaiduMap from "./baidumap/index";
 import "element-ui/lib/theme-chalk/index.css";
 
 Vue.config.productionTip = false;

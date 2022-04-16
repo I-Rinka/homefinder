@@ -12,17 +12,22 @@
 
       <bm-control> </bm-control>
     </baidu-map>
+    <div style="height: 8vh;">
+      <time-line></time-line>
+    </div>
   </div>
 </template>
 
 <script>
 import { theme } from "./Map/style";
+import TimeLine from './TimeLine.vue';
 const df_lng = 116.404;
 const df_lat = 39.915;
 const df_zoom = 15;
 
 export default {
   name: "MapView",
+  components: { TimeLine },
   data() {
     return { center: { lng: 0, lat: 0 }, zoom: 3, theme: { styleJson: theme } };
   },

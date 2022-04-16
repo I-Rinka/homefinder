@@ -15,6 +15,6 @@ export default {
 <style>
 #weight-view {
   height: 40vh;
-  background-color: lightgray;
+  background-color: rgb(234, 234, 234);
 }
 </style>
