@@ -1,25 +1,11 @@
 <template>
   <div id="MapView">
-    <baidu-map
-      id="bm-view"
-      :center="center"
-      :zoom="zoom"
-      :scroll-wheel-zoom="true"
-      :continuous-zoom="true"
-      :max-zoom="20"
-      :mapStyle="theme"
-      @moving="SyncCenterAndZoom"
-      @moveend="SyncCenterAndZoom"
-      @zoomend="SyncCenterAndZoom"
-    >
+    <baidu-map id="bm-view" :center="center" :zoom="zoom" :scroll-wheel-zoom="true" :continuous-zoom="true"
+      :max-zoom="20" :mapStyle="theme" @moving="SyncCenterAndZoom" @moveend="SyncCenterAndZoom"
+      @zoomend="SyncCenterAndZoom">
       <div class="zoom-slider">
-        <el-button
-          circle
-          style="margin-bottom: 1vh"
-          size="big"
-          @click="ResetPos"
-          ><i class="el-icon-map-location"></i
-        ></el-button>
+        <el-button circle style="margin-bottom: 1vh" size="big" @click="ResetPos"><i class="el-icon-map-location"></i>
+        </el-button>
         <el-slider v-model="zoom" :step="0.1" :max="20" :min="10" vertical>
         </el-slider>
       </div>
@@ -68,11 +54,16 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less" >
+#MapView {
+  height: 58vh;
+}
+
 #bm-view {
   width: 98%;
   height: 50vh;
   margin: 1%;
 }
+
 .zoom-slider {
   display: inline;
   position: absolute;
@@ -80,8 +71,10 @@ export default {
   filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.5));
   left: 2vw;
   z-index: 2;
-  > div {
+
+  >div {
     height: 20vh;
+
     .el-slider__runway {
       background-color: white !important;
     }

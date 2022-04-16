@@ -1,7 +1,8 @@
 import Express from "express";
-import { selectHouse, selectRecord } from "./sql.js";
+import { selectHouse, selectRecords, getNewestRecords } from "../db/sql.js";
 
 export const api = Express.Router();
 
 api.get('/selecthouse', selectHouse);
-api.get('/selectrecord', selectRecord);
+api.get('/selectrecord', selectRecords);
+api.get('/currentrecord', getNewestRecords);
