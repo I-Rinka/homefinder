@@ -86,15 +86,15 @@ export default {
       }
     },
     'center.lng' (val, oldVal) {
-      const {BMap, map, zoom, center} = this
+      const {BMapGL, map, zoom, center} = this
       if (val !== oldVal && val >= -180 && val <= 180) {
-        map.centerAndZoom(new BMap.Point(val, center.lat), zoom)
+        map.centerAndZoom(new BMapGL.Point(val, center.lat), zoom)
       }
     },
     'center.lat' (val, oldVal) {
-      const {BMap, map, zoom, center} = this
+      const {BMapGL, map, zoom, center} = this
       if (val !== oldVal && val >= -74 && val <= 74) {
-        map.centerAndZoom(new BMap.Point(center.lng, val), zoom)
+        map.centerAndZoom(new BMapGL.Point(center.lng, val), zoom)
       }
     },
     zoom (val, oldVal) {
@@ -210,7 +210,7 @@ export default {
       pinchToZoom ? map.enablePinchToZoom() : map.disablePinchToZoom()
       autoResize ? map.enableAutoResize() : map.disableAutoResize()
     },
-    init (BMap) {
+    init (BMapGL) {
       if (this.map) {
         return
       }
@@ -221,53 +221,53 @@ export default {
           $el = $node.elm
         }
       }
-      const map = new BMap.Map($el, {enableHighResolution: this.highResolution, enableMapClick: this.mapClick})
+      const map = new BMapGL.Map($el, {enableHighResolution: this.highResolution, enableMapClick: this.mapClick})
       this.map = map
       const {setMapOptions, zoom, getCenterPoint, theme, mapStyle} = this
-      theme ? map.setMapStyle({styleJson: theme}) : map.setMapStyle(mapStyle)
+      // theme ? map.setMapStyle({styleJson: theme}) : map.setMapStyle(mapStyle)
       setMapOptions()
       // map.enableTiltGestures()
       bindEvents.call(this, map)
       // 此处强行初始化一次地图 回避一个由于错误的 center 字符串导致初始化失败抛出的错误
       map.reset()
       map.centerAndZoom(getCenterPoint(), zoom)
-      this.$emit('ready', {BMap, map})
+      this.$emit('ready', {BMapGL, map})
       // Debug
       // global.map = map
       // global.mapComponent = this
     },
     getCenterPoint () {
-      const {center, BMap} = this
+      const {center, BMapGL} = this
       switch (checkType(center)) {
         case 'String': return center
-        case 'Object': return new BMap.Point(center.lng, center.lat)
-        default: return new BMap.Point()
+        case 'Object': return new BMapGL.Point(center.lng, center.lat)
+        default: return new BMapGL.Point()
       }
     },
-    initMap (BMap) {
-      this.BMap = BMap
-      this.init(BMap)
+    initMap (BMapGL) {
+      this.BMapGL = BMapGL
+      this.init(BMapGL)
     },
     getMapScript () {
-      if (!global.BMap) {
+      if (!global.BMapGL) {
         const ak = this.ak || this._BMap().ak
-        global.BMap = {}
-        global.BMap._preloader = new Promise((resolve, reject) => {
+        global.BMapGL = {}
+        global.BMapGL._preloader = new Promise((resolve, reject) => {
           global._initBaiduMap = function () {
-            resolve(global.BMap)
+            resolve(global.BMapGL)
             global.document.body.removeChild($script)
-            global.BMap._preloader = null
+            global.BMapGL._preloader = null
             global._initBaiduMap = null
           }
           const $script = document.createElement('script')
           global.document.body.appendChild($script)
-          $script.src = `https://api.map.baidu.com/api?v=2.0&ak=${ak}&callback=_initBaiduMap`
+          $script.src = `https://api.map.baidu.com/api?type=webgl&v=1.0&ak=${ak}&callback=_initBaiduMap`
         })
-        return global.BMap._preloader
-      } else if (!global.BMap._preloader) {
-        return Promise.resolve(global.BMap)
+        return global.BMapGL._preloader
+      } else if (!global.BMapGL._preloader) {
+        return Promise.resolve(global.BMapGL)
       } else {
-        return global.BMap._preloader
+        return global.BMapGL._preloader
       }
     },
     reset () {
