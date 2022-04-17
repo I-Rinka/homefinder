@@ -8,6 +8,7 @@
 import MarkerClusterer from 'bmaplib.markerclusterer'
 import {createSize} from '../base/factory.js'
 import commonMixin from '../base/mixins/common.js'
+import mapvgl from "mapvgl";
 
 export default {
   name: 'bml-marker-clusterer',
@@ -36,8 +37,8 @@ export default {
   watch: {
     gridSize: {
       handler (val) {
-        const {BMap, originInstance} = this
-        originInstance.setGridSize(BMap, val.map)
+        const {BMapGL, originInstance} = this
+        originInstance.setGridSize(BMapGL, val.map)
       },
       deep: true
     },
@@ -47,16 +48,16 @@ export default {
     },
     minClusterSize: {
       handler (val) {
-        const {BMap, originInstance} = this
-        originInstance.setMinClusterSize(createSize(BMap, val))
+        const {BMapGL, originInstance} = this
+        originInstance.setMinClusterSize(createSize(BMapGL, val))
       },
       deep: true
     },
     styles: {
       handler (val) {
-        const {BMap, originInstance} = this
+        const {BMapGL, originInstance} = this
         const obj = JSON.parse(JSON.stringify(val)).map(item => {
-          item.size = item.size && createSize(BMap, item.size)
+          item.size = item.size && createSize(BMapGL, item.size)
           return item
         })
         originInstance.setStyles(obj)
@@ -69,19 +70,25 @@ export default {
   },
   methods: {
     load () {
-      const {BMap, map, gridSize, minClusterSize, maxZoom, styles, averageCenter} = this
-      this.originInstance = new MarkerClusterer(map, {
-        gridSize: gridSize && createSize(BMap, gridSize),
-        maxZoom,
-        minClusterSize: minClusterSize && createSize(BMap, minClusterSize),
-        styles: styles.map(item => {
-          item.size = createSize(BMap, item.size)
-          return item
-        }),
-        isAverageCenter: averageCenter
-      })
+      const {BMapGL, map, gridSize, minClusterSize, maxZoom, styles, averageCenter} = this
+
+      this.originInstance=new mapvgl.View(
+        map
+      )
+
+
+      // this.originInstance = new MarkerClusterer(map, {
+      //   gridSize: gridSize && createSize(BMapGL, gridSize),
+      //   maxZoom,
+      //   minClusterSize: minClusterSize && createSize(BMapGL, minClusterSize),
+      //   styles: styles.map(item => {
+      //     item.size = createSize(BMapGL, item.size)
+      //     return item
+      //   }),
+      //   isAverageCenter: averageCenter
+      // })
       this.$nextTick(() => {
-        const markers = this.$children.map(inst => inst.originInstance).filter(marker => marker instanceof BMap.Marker)
+        const markers = this.$children.map(inst => inst.originInstance).filter(marker => marker instanceof BMapGL.Marker)
         this.originInstance.addMarkers(markers)
       })
     }

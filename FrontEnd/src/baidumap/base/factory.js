@@ -1,6 +1,6 @@
-export function createPoint (BMap, options = {}) {
+export function createPoint (BMapGL, options = {}) {
   const {lng, lat} = options
-  return new BMap.Point(lng, lat)
+  return new BMapGL.Point(lng, lat)
 }
 
 export function createPixel (BMap, options = {}) {

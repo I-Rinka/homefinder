@@ -6,10 +6,11 @@
       <el-slider v-model="zoom" :step="0.1" :max="20" :min="10" vertical>
       </el-slider>
     </div>
-    <baidu-map id="bm-view" :center="center" :zoom="zoom" :scroll-wheel-zoom="true" :continuous-zoom="true"
-      :max-zoom="20" :mapStyle="theme" @moveend="MoveEnd" @zoomend="ZoomEnd">
-    </baidu-map>
+    <div v-if="!hasBmView" ref="view" style="width: 100%; height: 100%"></div>
+
     <div style="height: 8vh;">
+      <el-button @click="GetData">GetData</el-button>
+      <el-button @click="AddPoint">Add RandomPoint</el-button>
       <time-line></time-line>
     </div>
   </div>
@@ -18,6 +19,8 @@
 <script>
 import { theme } from "./Map/style";
 import TimeLine from './TimeLine.vue';
+import { GetCurrentRecord } from "../database/query.js";
+
 const df_lng = 116.404;
 const df_lat = 39.915;
 const df_zoom = 15;
@@ -26,16 +29,13 @@ export default {
   name: "MapView",
   components: { TimeLine },
   data() {
-    return { center: { lng: 0, lat: 0 }, zoom: 3, theme: { styleJson: theme } };
+
+    return { center: { lng: 0, lat: 0 }, zoom: 3, theme: { styleJson: theme }, markers: [], hasBmView: false };
   },
   mounted() {
     this.ResetPos();
 
-    document.getElementById("bm-view").childNodes[0].style.borderRadius =
-      "20px";
-    document.getElementById("bm-view").childNodes[0].style.border =
-      "rgb(200,200,200) 3px solid";
-    // document.getElementById("MapView").onmousewheel = this.ScrollMap;
+    this.reset()
   },
   methods: {
     ResetPos() {
@@ -54,7 +54,69 @@ export default {
       const { lng, lat } = e.target.getCenter()
       this.center.lng = lng;
       this.center.lat = lat;
-    }
+    },
+    GetData() {
+      GetCurrentRecord().then((res) => {
+        console.log(Object.keys(res).length)
+        console.log(res)
+      });
+    },
+    AddPoint() {
+
+      const { BMapGL, map, zoom, center } = this
+      console.log(BMapGL)
+    },
+    init(BMapGL) {
+      if (this.map) {
+        return
+      }
+      let $el = this.$refs.view
+      for (let $node of this.$slots.default || []) {
+        if ($node.componentOptions && $node.componentOptions.tag === 'bm-view') {
+          this.hasBmView = true
+          $el = $node.elm
+        }
+      }
+      const map = new BMapGL.Map($el, {})
+      this.map = map
+      const { setMapOptions, zoom, getCenterPoint, theme, mapStyle } = this
+      map.reset()
+      map.centerAndZoom(this.center, zoom)
+      // Debug
+      // global.map = map
+      // global.mapComponent = this
+    },
+    initMap(BMapGL) {
+      this.BMapGL = BMapGL
+      this.init(BMapGL)
+    },
+    reset() {
+      const { getMapScript, initMap } = this
+      getMapScript()
+        .then(initMap)
+    },
+    getMapScript() {
+      if (!global.BMapGL) {
+        const ak = this.ak || this._BMap().ak
+        global.BMapGL = {}
+        global.BMapGL._preloader = new Promise((resolve, reject) => {
+          global._initBaiduMap = function () {
+            resolve(global.BMapGL)
+            global.document.body.removeChild($script)
+            global.BMapGL._preloader = null
+            global._initBaiduMap = null
+          }
+          const $script = document.createElement('script')
+          global.document.body.appendChild($script)
+          $script.src = `https://api.map.baidu.com/api?type=webgl&v=1.0&ak=${ak}&callback=_initBaiduMap`
+        })
+        return global.BMapGL._preloader
+      } else if (!global.BMapGL._preloader) {
+        return Promise.resolve(global.BMapGL)
+      } else {
+        return global.BMapGL._preloader
+      }
+    },
   },
 };
 </script>
