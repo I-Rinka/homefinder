@@ -54,6 +54,14 @@ onMounted(() => {
     mapInstance = map.Instance;
     mapInstance.enableScrollWheelZoom();
     mapInstance.setMapStyleV2({ styleJson: theme });
+    mapInstance.addEventListener('zooming', () => {
+      if (zoomThrottle != null) {
+      }
+      else {
+        data.zoom = mapInstance.getZoom()
+      }
+    }
+    );
   });
 });
 
@@ -65,7 +73,7 @@ function SetZoom(newVal) {
     zoomThrottle = setTimeout(() => {
       mapInstance.setZoom(zoomScale);
       zoomThrottle = null;
-    }, 60)
+    }, 100)
   }
 }
 
@@ -92,7 +100,8 @@ function AddPoint() {
 #BaiduMap {
   width: 100%;
   height: 100%;
-  border-radius: 10px;
+  border: solid gray 2px;
+  border-radius: 15px;
 }
 
 .map-frame {
