@@ -25,6 +25,7 @@ export async function initBaiduMap(el, ak, options) {
 function initMap(BMapGL) {
     MapEsstential.BMapGL = BMapGL
     const map = new BMapGL.Map(MapEsstential.el, MapEsstential.options)
+    window.mmmp=map;
     return map;
 }
 
