@@ -7,9 +7,9 @@
     </div>
 
     <div class="zoom-slider">
-      <el-button :icon="LocationFilled" style="margin-bottom: 1vh" circle>
+      <el-button :icon="LocationFilled" style="margin-bottom: 1vh" @click="ResetPosition" circle>
       </el-button>
-      <el-slider v-model="data.zoom" :step="0.1" :max="20" :min="10" vertical>
+      <el-slider v-model="data.zoom" @input="SetZoom" :step="0.1" :max="20" :min="10" vertical>
       </el-slider>
     </div>
 
@@ -25,7 +25,7 @@
 import { theme } from "./Map/style";
 import TimeLine from './TimeLine.vue';
 import { GetCurrentRecord } from "../database/query.js";
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import { LocationFilled } from "@element-plus/icons-vue";
 import { initBaiduMap } from "./Map/baidumap.js";
 
@@ -41,6 +41,7 @@ const data = reactive({
   zoom: df_zoom
 })
 
+
 let ak = "ODpi3pGmHfZFVpQTCEfb90yE1hcNMuWA"
 let BMapGL = null
 let mapInstance = null
@@ -50,9 +51,29 @@ onMounted(() => {
   initBaiduMap("BaiduMap", ak, { minZoom: 10, maxZoom: 20 }).then(map => {
     map.Instance.centerAndZoom(data.center, data.zoom);
     BMapGL = map.BMapGL;
-    mapInstance = map.Instance
+    mapInstance = map.Instance;
+    mapInstance.enableScrollWheelZoom();
+    mapInstance.setMapStyleV2({ styleJson: theme });
   });
 });
+
+let zoomThrottle = null
+let zoomScale = df_zoom;
+function SetZoom(newVal) {
+  zoomScale = newVal;
+  if (zoomThrottle == null) {
+    zoomThrottle = setTimeout(() => {
+      mapInstance.setZoom(zoomScale);
+      zoomThrottle = null;
+    }, 60)
+  }
+}
+
+function ResetPosition() {
+  mapInstance.centerAndZoom({ lng: df_lng, lat: df_lat }, df_zoom);
+  data.center = { lng: df_lng, lat: df_lat };
+  data.zoom = df_zoom;
+}
 
 function GetData() {
 
