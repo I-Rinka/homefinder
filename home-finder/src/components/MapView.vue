@@ -1,12 +1,17 @@
 <template>
   <div id="MapView">
+
+    <!-- The Map -->
+    <div class="map-frame">
+      <div id="BaiduMap"></div>
+    </div>
+
     <div class="zoom-slider">
-      <el-button circle style="margin-bottom: 1vh" size="big" @click="ResetPos"><i class="el-icon-map-location"></i>
+      <el-button :icon="LocationFilled" style="margin-bottom: 1vh" circle>
       </el-button>
-      <el-slider v-model="zoom" :step="0.1" :max="20" :min="10" vertical>
+      <el-slider v-model="data.zoom" :step="0.1" :max="20" :min="10" vertical>
       </el-slider>
     </div>
-    <div :id="MapEsstential.el" style="width: 100%; height: 100%"></div>
 
     <div style="height: 8vh;">
       <el-button @click="GetData">GetData</el-button>
@@ -21,6 +26,8 @@ import { theme } from "./Map/style";
 import TimeLine from './TimeLine.vue';
 import { GetCurrentRecord } from "../database/query.js";
 import { ref, reactive, onMounted } from "vue";
+import { LocationFilled } from "@element-plus/icons-vue";
+import { initBaiduMap } from "./Map/baidumap.js";
 
 const df_lng = 116.404;
 const df_lat = 39.915;
@@ -33,51 +40,25 @@ const data = reactive({
   },
   zoom: df_zoom
 })
-let MapEsstential = {
-  ak: "ODpi3pGmHfZFVpQTCEfb90yE1hcNMuWA",
-  el: "BaiduMap",
-  BMapGL: null
-}
+
+let ak = "ODpi3pGmHfZFVpQTCEfb90yE1hcNMuWA"
+let BMapGL = null
+let mapInstance = null
 
 
 onMounted(() => {
-  getMapScript().then(initMap)
-})
+  initBaiduMap("BaiduMap", ak, { minZoom: 10, maxZoom: 20 }).then(map => {
+    map.Instance.centerAndZoom(data.center, data.zoom);
+    BMapGL = map.BMapGL;
+    mapInstance = map.Instance
+  });
+});
 
-function initMap(BMapGL) {
-  MapEsstential.BMapGL = BMapGL
-  init(BMapGL)
-}
+function GetData() {
 
-function init(BMapGL) {
-  const map = new BMapGL.Map(MapEsstential.el, {})
-  map.reset()
-  map.centerAndZoom(data.center, data.zoom)
 }
-if (global === undefined) {
-  var global = window;
-}
-function getMapScript() {
-  if (!global.BMapGL) {
-    const ak = MapEsstential.ak
-    global.BMapGL = {}
-    global.BMapGL._preloader = new Promise((resolve, reject) => {
-      global._initBaiduMap = function () {
-        resolve(global.BMapGL)
-        global.document.body.removeChild($script)
-        global.BMapGL._preloader = null
-        global._initBaiduMap = null
-      }
-      const $script = document.createElement('script')
-      global.document.body.appendChild($script)
-      $script.src = `https://api.map.baidu.com/api?type=webgl&v=1.0&ak=${ak}&callback=_initBaiduMap`
-    })
-    return global.BMapGL._preloader
-  } else if (!global.BMapGL._preloader) {
-    return Promise.resolve(global.BMapGL)
-  } else {
-    return global.BMapGL._preloader
-  }
+function AddPoint() {
+
 }
 </script>
 
@@ -87,16 +68,28 @@ function getMapScript() {
   height: 58vh;
 }
 
-#bm-view {
+#BaiduMap {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+.map-frame {
   width: 98%;
-  height: 50vh;
+  height: 90%;
   margin: 1%;
+}
+
+.anchorBL {
+  opacity: 100%;
+  display: none;
 }
 
 .zoom-slider {
   display: inline;
   position: absolute;
   top: 15vh;
+  height: 15vh;
   filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.5));
   left: 3vw;
   z-index: 6;
