@@ -6,7 +6,12 @@
     </div>
 
     <div class="zoom-slider">
-      <el-button :icon="LocationFilled" style="margin-bottom: 1vh" circle>
+      <el-button
+        @click="ResetPosition"
+        :icon="LocationFilled"
+        style="margin-bottom: 1vh"
+        circle
+      >
       </el-button>
       <!-- @click="ResetPosition"
         @input="SetZoom" -->
@@ -25,23 +30,28 @@
 <script setup>
 import { reactive } from "@vue/reactivity";
 import { theme } from "./Map/style";
-import TimeLine from "./TimeLine.vue";
 import { GetCurrentRecord, GetBlocks } from "../database/query.js";
 import { LocationFilled } from "@element-plus/icons-vue";
+import TimeLine from "./TimeLine.vue";
 import Map from "ol/Map";
 import View from "ol/View";
-import TileLayer from "ol/layer/Tile";
-import OSM from "ol/source/OSM";
 import { Layer } from "./Map/vectorlayer";
-import { useGeographic } from "ol/proj";
+import { fromLonLat, useGeographic } from "ol/proj";
 import { onMounted } from "@vue/runtime-core";
-import { baiduMapLayer } from "./Map/baidumap";
 import { mapboxlayer } from "./Map/mapboxlayer";
-import {stylefunction} from 'ol-mapbox-style';
+import WebGLPointsLayer from "ol/layer/WebGLPoints";
+import Point from "ol/geom/Point";
+import VectorSource from "ol/source/Vector";
+import Feature from "ol/Feature";
+import VectorLayer from "ol/layer/Vector";
+import { Fill, Icon, Stroke, Style } from "ol/style";
+import CircleStyle from "ol/style/Circle";
 
 const data = reactive({ zoom: 15 });
 // 116.39142503729663, 39.90484407050692
 let map = null;
+let pointSource = null;
+
 onMounted(() => {
   useGeographic();
 
@@ -49,7 +59,7 @@ onMounted(() => {
     target: "map",
     layers: [
       // baiduMapLayer,
-      mapboxlayer,
+      // mapboxlayer,
       Layer,
     ],
     view: new View({
@@ -58,11 +68,63 @@ onMounted(() => {
     }),
     controls: [],
   });
+
+  let point_feature = new Feature({});
+  let point_geom = new Point([116.39142503729663, 39.90484407050692]);
+  point_feature.setGeometry(point_geom);
+  let vector_layer = new VectorLayer({
+    source: new VectorSource({
+      features: [point_feature],
+    }),
+  });
+  map.addLayer(vector_layer);
+  console.log(map);
+  var fill = new Fill({
+    color: [180, 0, 0, 0.3],
+  });
+
+  var stroke = new Stroke({
+    color: [180, 0, 0, 1],
+    width: 1,
+  });
+  var style = new Style({
+    image: new CircleStyle({
+      fill: fill,
+      stroke: stroke,
+      radius: 8,
+    }),
+    fill: fill,
+    stroke: stroke,
+  });
+  vector_layer.setStyle(style);
 });
 
 function AddPoint() {
   GetBlocks().then((res) => {
     console.log(res);
+
+    pointSource = new VectorSource({});
+    for (let i = 0; i < res.length; i++) {
+      const element = res[i];
+      const geom = new Point(fromLonLat([element.lng, element.lat]));
+      const feature = new Feature(geom);
+      pointSource.addFeature(feature);
+      console.log(geom);
+    }
+
+    console.log(pointSource);
+    map.addLayer(
+      new VectorLayer({
+        source: pointSource,
+      })
+    );
+  });
+}
+function ResetPosition() {
+  map.getView().animate({
+    center: [116.39142503729663, 39.90484407050692],
+    zoom: 10,
+    duration: 500,
   });
 }
 </script>
