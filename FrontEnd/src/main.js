@@ -1,22 +1,8 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import Vue from "vue";
-import App from "./App";
-import router from "./router";
-import ElementUI from "element-ui";
-import BaiduMap from "./baidumap/index";
-import "element-ui/lib/theme-chalk/index.css";
+import { createApp } from 'vue'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 
-Vue.config.productionTip = false;
-Vue.use(ElementUI);
-Vue.use(BaiduMap, {
-  ak: "ODpi3pGmHfZFVpQTCEfb90yE1hcNMuWA",
-});
-
-/* eslint-disable no-new */
-new Vue({
-  el: "#app",
-  router,
-  components: { App },
-  template: "<App/>"
-});
+import App from './App.vue'
+const app = createApp(App)
+app.use(ElementPlus)
+app.mount('#app')

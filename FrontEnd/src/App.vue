@@ -1,18 +1,20 @@
-<template>
-  <div id="app">
-    <router-view/>
-  </div>
-</template>
-
-<script>
-export default {
-  name: 'App'
-}
+<script setup>
+// This starter template is using Vue 3 <script setup> SFCs
+// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
+// import MapView from "./components/MapView.vue";
+import MapView from "./components/MapView.vue";
+import WeightView from "./components/WeightView.vue";
 </script>
+
+<template>
+  <!-- <map-view></map-view> -->
+  <map-view></map-view>
+  <weight-view></weight-view>
+</template>
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

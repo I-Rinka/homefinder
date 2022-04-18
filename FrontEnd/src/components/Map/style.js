@@ -95,7 +95,6 @@ export const theme = [
     elementType: "geometry",
     stylers: {
       visibility: "on",
-      weight: 1
     }
   },
   {
@@ -165,14 +164,14 @@ export const theme = [
     featureType: "subwaylabel",
     elementType: "labels",
     stylers: {
-      visibility: "off"
+      visibility: "on"
     }
   },
   {
     featureType: "subwaylabel",
     elementType: "labels.icon",
     stylers: {
-      visibility: "off"
+      visibility: "on"
     }
   },
   {
@@ -620,14 +619,14 @@ export const theme = [
     featureType: "poilabel",
     elementType: "labels",
     stylers: {
-      visibility: "on"
+      visibility: "off"
     }
   },
   {
     featureType: "poilabel",
     elementType: "labels.icon",
     stylers: {
-      visibility: "on"
+      visibility: "off"
     }
   },
   {
@@ -683,7 +682,7 @@ export const theme = [
     featureType: "scenicspotslabel",
     elementType: "labels",
     stylers: {
-      visibility: "on"
+      visibility: "off"
     }
   },
   {
@@ -734,14 +733,14 @@ export const theme = [
     featureType: "airportlabel",
     elementType: "labels.icon",
     stylers: {
-      visibility: "on"
+      visibility: "off"
     }
   },
   {
     featureType: "scenicspotslabel",
     elementType: "labels.icon",
     stylers: {
-      visibility: "on"
+      visibility: "off"
     }
   },
   {
@@ -783,14 +782,14 @@ export const theme = [
     featureType: "districtlabel",
     elementType: "labels",
     stylers: {
-      visibility: "on"
+      visibility: "off"
     }
   },
   {
     featureType: "districtlabel",
     elementType: "labels.icon",
     stylers: {
-      visibility: "on"
+      visibility: "off"
     }
   },
   {
@@ -804,7 +803,7 @@ export const theme = [
     featureType: "road",
     elementType: "labels",
     stylers: {
-      visibility: "on"
+      visibility: "off"
     }
   },
   {
@@ -848,6 +847,7 @@ export const theme = [
     featureType: "subway",
     elementType: "geometry.stroke",
     stylers: {
+      weight: 5,
       color: "#868383ff"
     }
   },
