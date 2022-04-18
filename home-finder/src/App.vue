@@ -2,13 +2,13 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 // import MapView from "./components/MapView.vue";
-import GMapView from "./components/GMapView.vue";
+import MapView from "./components/MapView.vue";
 import WeightView from "./components/WeightView.vue";
 </script>
 
 <template>
   <!-- <map-view></map-view> -->
-  <g-map-view></g-map-view>
+  <map-view></map-view>
   <weight-view></weight-view>
 </template>
 
