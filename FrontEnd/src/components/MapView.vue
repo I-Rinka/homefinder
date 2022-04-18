@@ -16,7 +16,7 @@
 
     <div style="height: 8vh">
       <!-- <el-button @click="GetData">GetData</el-button> -->
-      <!-- <el-button @click="AddPoint">Add RandomPoint</el-button> -->
+      <el-button @click="AddPoint">Add Point</el-button>
       <time-line></time-line>
     </div>
   </div>
@@ -26,34 +26,48 @@
 import { reactive } from "@vue/reactivity";
 import { theme } from "./Map/style";
 import TimeLine from "./TimeLine.vue";
-import { GetCurrentRecord } from "../database/query.js";
+import { GetCurrentRecord, GetBlocks } from "../database/query.js";
 import { LocationFilled } from "@element-plus/icons-vue";
 import Map from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
-import XYZ from "ol/source/XYZ";
 import OSM from "ol/source/OSM";
+import { Layer } from "./Map/vectorlayer";
+import { useGeographic } from "ol/proj";
 import { onMounted } from "@vue/runtime-core";
-const data = reactive({ zoom: 15 });
+import { baiduMapLayer } from "./Map/baidumap";
+import { mapboxlayer } from "./Map/mapboxlayer";
+import {stylefunction} from 'ol-mapbox-style';
 
+const data = reactive({ zoom: 15 });
+// 116.39142503729663, 39.90484407050692
+let map = null;
 onMounted(() => {
-  new Map({
+  useGeographic();
+
+  map = new Map({
     target: "map",
     layers: [
-      new TileLayer({
-        source: new OSM(),
-      }),
+      // baiduMapLayer,
+      mapboxlayer,
+      Layer,
     ],
     view: new View({
-      center: [0, 0],
-      zoom: 2,
+      center: [116.39142503729663, 39.90484407050692],
+      zoom: 10,
     }),
-    controls:[]
+    controls: [],
   });
 });
+
+function AddPoint() {
+  GetBlocks().then((res) => {
+    console.log(res);
+  });
+}
 </script>
 
-<style>
+<style lang="less">
 #MapView {
   height: 58vh;
 }
@@ -63,6 +77,12 @@ onMounted(() => {
   height: 100%;
   border: solid gray 2px;
   border-radius: 15px;
+}
+
+.ol-layer {
+  > canvas {
+    border-radius: 14px;
+  }
 }
 
 .map-frame {

@@ -12,3 +12,8 @@ export async function GetCurrentRecord() {
     }
     return ans;
 }
+
+export async function GetBlocks() {
+    let res= await axios.get("http://localhost:3000/block_data.json")
+    return res.data;
+}

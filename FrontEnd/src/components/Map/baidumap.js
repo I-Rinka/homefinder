@@ -1,53 +1,48 @@
-var MapEsstential = {
-    ak: "ODpi3pGmHfZFVpQTCEfb90yE1hcNMuWA",
-    el: "BaiduMap",
-    BMapGL: null,
-    options: {},
-    mapInstance: null
-}
+import TileGrid from "ol/tilegrid/TileGrid";
+import { Tile } from "ol/layer";
+import { XYZ } from "ol/source";
 
-if (global === undefined) {
-    var global = window;
-}
+// 自定义分辨率和瓦片坐标系
+var resolutions = [];
+var maxZoom = 18;
 
-export async function initBaiduMap(el, ak, options) {
-    MapEsstential.ak = ak;
-    MapEsstential.el = el;
-    MapEsstential.options = options;
-    MapEsstential.Instance = await getMapScript().then(initMap)
-    return {
-        BMapGL: MapEsstential.BMapGL,
-        Instance: MapEsstential.Instance
-    }
+// 计算百度使用的分辨率
+for (var i = 0; i <= maxZoom; i++) {
+  resolutions[i] = Math.pow(2, maxZoom - i);
 }
+var tilegrid = new TileGrid({
+  origin: [0, 0], // 将原点设置成和百度瓦片坐标系一致
+  resolutions: resolutions, // 设置分辨率
+});
 
+// 百度地图图层
+export let baiduMapLayer = new Tile({
+  source: new XYZ({
+    tilePixelRatio: 2,
+    tileGrid: tilegrid,
+    tileUrlFunction: function (tileCoord) {
+      let z = tileCoord[0];
+      let x = tileCoord[1];
+      let y = -tileCoord[2]-1;
 
-function initMap(BMapGL) {
-    MapEsstential.BMapGL = BMapGL
-    const map = new BMapGL.Map(MapEsstential.el, MapEsstential.options)
-    window.mmmp=map;
-    return map;
-}
+      // 百度瓦片服务url将负数使用M前缀来标识
+      if (x < 0) {
+        x = "M" + -x;
+      }
+      if (y < 0) {
+        y = "M" + -y;
+      }
 
-function getMapScript() {
-    if (!global.BMapGL) {
-        const ak = MapEsstential.ak
-        global.BMapGL = {}
-        global.BMapGL._preloader = new Promise((resolve, reject) => {
-            global._initBaiduMap = function () {
-                resolve(global.BMapGL)
-                global.document.body.removeChild($script)
-                global.BMapGL._preloader = null
-                global._initBaiduMap = null
-            }
-            const $script = document.createElement('script')
-            global.document.body.appendChild($script)
-            $script.src = `https://api.map.baidu.com/api?type=webgl&v=1.0&ak=${ak}&callback=_initBaiduMap`
-        })
-        return global.BMapGL._preloader
-    } else if (!global.BMapGL._preloader) {
-        return Promise.resolve(global.BMapGL)
-    } else {
-        return global.BMapGL._preloader
-    }
-}
+      // 返回经过转换后，对应于百度在线瓦片的url
+      return (
+        "http://online2.map.bdimg.com/onlinelabel/?qt=tile&x=" +
+        x +
+        "&y=" +
+        y +
+        "&z=" +
+        z +
+        "&styles=pl&udt=20160321&scaler=2&p=0"
+      );
+    },
+  }),
+});
