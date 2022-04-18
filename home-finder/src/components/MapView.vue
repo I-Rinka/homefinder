@@ -34,7 +34,6 @@ import TileLayer from "ol/layer/Tile";
 import XYZ from "ol/source/XYZ";
 import OSM from "ol/source/OSM";
 import { onMounted } from "@vue/runtime-core";
-
 const data = reactive({ zoom: 15 });
 
 onMounted(() => {
@@ -49,6 +48,7 @@ onMounted(() => {
       center: [0, 0],
       zoom: 2,
     }),
+    controls:[]
   });
 });
 </script>
