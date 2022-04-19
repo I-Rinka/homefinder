@@ -59,7 +59,7 @@ onMounted(() => {
     target: "map",
     layers: [
       // baiduMapLayer,
-      // mapboxlayer,
+      mapboxlayer,
       Layer,
     ],
     view: new View({
@@ -68,56 +68,44 @@ onMounted(() => {
     }),
     controls: [],
   });
-
-  let point_feature = new Feature({});
-  let point_geom = new Point([116.39142503729663, 39.90484407050692]);
-  point_feature.setGeometry(point_geom);
-  let vector_layer = new VectorLayer({
-    source: new VectorSource({
-      features: [point_feature],
-    }),
-  });
-  map.addLayer(vector_layer);
-  console.log(map);
-  var fill = new Fill({
-    color: [180, 0, 0, 0.3],
-  });
-
-  var stroke = new Stroke({
-    color: [180, 0, 0, 1],
-    width: 1,
-  });
-  var style = new Style({
-    image: new CircleStyle({
-      fill: fill,
-      stroke: stroke,
-      radius: 8,
-    }),
-    fill: fill,
-    stroke: stroke,
-  });
-  vector_layer.setStyle(style);
 });
 
 function AddPoint() {
   GetBlocks().then((res) => {
-    console.log(res);
-
-    pointSource = new VectorSource({});
+    let features = [];
     for (let i = 0; i < res.length; i++) {
       const element = res[i];
-      const geom = new Point(fromLonLat([element.lng, element.lat]));
-      const feature = new Feature(geom);
-      pointSource.addFeature(feature);
-      console.log(geom);
+      let point_feature = new Feature({});
+      let point_geom = new Point([element.lng, element.lat]);
+      point_feature.setGeometry(point_geom);
+      features.push(point_feature);
     }
 
-    console.log(pointSource);
-    map.addLayer(
-      new VectorLayer({
-        source: pointSource,
-      })
-    );
+    let vector_layer = new VectorLayer({
+      source: new VectorSource({
+        features: features,
+      }),
+    });
+    map.addLayer(vector_layer);
+    console.log(map);
+    let fill = new Fill({
+      color: [180, 0, 0, 0.3],
+    });
+
+    let stroke = new Stroke({
+      color: [180, 0, 0, 1],
+      width: 1,
+    });
+    var style = new Style({
+      image: new CircleStyle({
+        fill: fill,
+        stroke: stroke,
+        radius: 8,
+      }),
+      fill: fill,
+      stroke: stroke,
+    });
+    vector_layer.setStyle(style);
   });
 }
 function ResetPosition() {
