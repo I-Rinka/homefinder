@@ -159,7 +159,7 @@ function AddPoint() {
           new Style({
             image:
               new CircleStyle({
-                radius: Math.log10(size + 10) * 10,
+                radius: Math.sqrt(Math.log(size + 3) * 250),
                 fill: outerCircleFill,
               })
           }),
@@ -167,7 +167,7 @@ function AddPoint() {
           // inner
           new Style({
             image: new CircleStyle({
-              radius: Math.log10(size + 10) * 10 - 5,
+              radius: Math.sqrt(Math.log(size + 3) * 250)-5,
               fill: innerCircleFill,
             }),
             text: new Text({
