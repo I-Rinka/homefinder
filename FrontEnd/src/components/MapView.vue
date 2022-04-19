@@ -6,22 +6,17 @@
     </div>
 
     <div class="zoom-slider">
-      <el-button
-        @click="ResetPosition"
-        :icon="LocationFilled"
-        style="margin-bottom: 1vh"
-        circle
-      >
+      <el-button @click="ResetPosition" :icon="LocationFilled" style="margin-bottom: 1vh" circle>
       </el-button>
       <!-- @click="ResetPosition"
         @input="SetZoom" -->
-      <el-slider v-model="data.zoom" :step="0.1" :max="20" :min="10" vertical>
+      <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
       </el-slider>
     </div>
 
     <div style="height: 8vh">
       <!-- <el-button @click="GetData">GetData</el-button> -->
-      <el-button @click="AddPoint">Add Point</el-button>
+      <!-- <el-button @click="AddPoint">Add Point</el-button> -->
       <time-line></time-line>
     </div>
   </div>
@@ -47,10 +42,14 @@ import VectorLayer from "ol/layer/Vector";
 import { Fill, Icon, Stroke, Style } from "ol/style";
 import CircleStyle from "ol/style/Circle";
 
-const data = reactive({ zoom: 15 });
-// 116.39142503729663, 39.90484407050692
+const config = {
+  zoom: 10,
+  minZoom: 8,
+  maxZoom: 18,
+  center: [116.39142503729663, 39.90484407050692]
+}
+const data = reactive({ zoom: Math.floor((config.zoom - config.minZoom) * 100 / (config.maxZoom - config.minZoom)) });
 let map = null;
-let pointSource = null;
 
 onMounted(() => {
   useGeographic();
@@ -58,16 +57,21 @@ onMounted(() => {
   map = new Map({
     target: "map",
     layers: [
-      // baiduMapLayer,
       mapboxlayer,
       Layer,
     ],
     view: new View({
-      center: [116.39142503729663, 39.90484407050692],
-      zoom: 10,
+      center: config.center,
+      zoom: config.zoom,
     }),
     controls: [],
   });
+
+  map.getView().setMaxZoom(config.maxZoom);
+  map.getView().setMinZoom(config.minZoom);
+
+  map.getView().on('change', ChangeView);
+  AddPoint();
 });
 
 function AddPoint() {
@@ -87,7 +91,7 @@ function AddPoint() {
       }),
     });
     map.addLayer(vector_layer);
-    console.log(map);
+
     let fill = new Fill({
       color: [180, 0, 0, 0.3],
     });
@@ -106,14 +110,42 @@ function AddPoint() {
       stroke: stroke,
     });
     vector_layer.setStyle(style);
+
   });
 }
+
 function ResetPosition() {
   map.getView().animate({
-    center: [116.39142503729663, 39.90484407050692],
-    zoom: 10,
+    center: config.center,
+    zoom: config.zoom,
     duration: 500,
   });
+}
+
+let zoomThrottle = null;
+let zoom_percentage = 50;
+function ChangeZoom(value) {
+  zoom_percentage = value;
+  if (zoomThrottle == null) {
+    zoomThrottle = setTimeout(
+      () => {
+        zoomThrottle = null;
+        let new_zoom = config.minZoom + (config.maxZoom - config.minZoom) * zoom_percentage / 100;
+        map.getView().animate({
+          zoom: new_zoom,
+          duration: 100,
+        });
+      }, 100
+    )
+  }
+}
+
+function ChangeView() {
+  let zoom = map.getView().getZoom();
+  let new_percentage_zoom = Math.floor((zoom - config.minZoom) * 100 / (config.maxZoom - config.minZoom));
+  if (data.zoom - new_percentage_zoom >= 1 || data.zoom - new_percentage_zoom <= -1) {
+    data.zoom = new_percentage_zoom;
+  }
 }
 </script>
 
@@ -130,7 +162,7 @@ function ResetPosition() {
 }
 
 .ol-layer {
-  > canvas {
+  >canvas {
     border-radius: 14px;
   }
 }
@@ -156,11 +188,21 @@ function ResetPosition() {
   z-index: 6;
   cursor: default;
 
-  > div {
+  >div {
     height: 20vh;
 
     .el-slider__runway {
       background-color: white !important;
+
+      .el-slider__bar {
+        transition-duration: 0.2s;
+        transition-timing-function: ease-out;
+      }
+
+      .el-slider__button-wrapper {
+        transition-duration: 0.2s;
+        transition-timing-function: ease-out;
+      }
     }
   }
 }
