@@ -155,11 +155,21 @@ function AddPoint() {
       const size = feature.get('features').length;
       if (size > 1) {
         return [
+          // outer style
           new Style({
-            image: outerCircle,
+            image:
+              new CircleStyle({
+                radius: Math.log10(size + 10) * 10,
+                fill: outerCircleFill,
+              })
           }),
+
+          // inner
           new Style({
-            image: innerCircle,
+            image: new CircleStyle({
+              radius: Math.log10(size + 10) * 10 - 5,
+              fill: innerCircleFill,
+            }),
             text: new Text({
               text: size.toString(),
               fill: textFill,
