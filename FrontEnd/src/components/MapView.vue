@@ -15,7 +15,8 @@
     </div>
     <div style="height: 8vh">
       <!-- <el-button @click="GetData">GetData</el-button> -->
-      <el-button @click="AddOverlay">Add Point</el-button>
+      <el-button @click="AddOverlay">Add Ticks</el-button>
+      <el-button @click="GetViewPort">Get View Port</el-button>
       <time-line></time-line>
     </div>
     <div>
@@ -52,10 +53,16 @@ import { createEmpty, extend, getWidth } from 'ol/extent';
 
 const config = {
   zoom: 10,
-  // minZoom: 8,
-  minZoom: 3,
+  minZoom: 8,
+  // minZoom: 3,
   maxZoom: 18,
-  center: [116.39142503729663, 39.90484407050692]
+  center: [116.39142503729663, 39.90484407050692],
+  extend: [
+    112.91586151114309,
+    39.13767962555457,
+    119.71639862051808,
+    41.264546138018204
+  ]
 }
 const data = reactive({
   zoom: Math.floor((config.zoom - config.minZoom) * 100 / (config.maxZoom - config.minZoom)),
@@ -75,6 +82,7 @@ onMounted(() => {
     view: new View({
       center: config.center,
       zoom: config.zoom,
+      extent: config.extend
     }),
     controls: [],
   });
@@ -85,6 +93,7 @@ onMounted(() => {
   map.getView().on('change', ChangeView);
   AddPoint();
 });
+
 function AddOverlay() {
   for (let i = 0; i < data.blocks.length; i++) {
     const element = data.blocks[i];
@@ -96,7 +105,9 @@ function AddOverlay() {
 
   }
 }
-
+function GetViewPort() {
+  console.log(map.getView().calculateExtent(map.getSize()));
+}
 
 const circleDistanceMultiplier = 1;
 const circleFootSeparation = 28;
@@ -167,7 +178,7 @@ function AddPoint() {
           // inner
           new Style({
             image: new CircleStyle({
-              radius: Math.sqrt(Math.log(size + 3) * 250)-5,
+              radius: Math.sqrt(Math.log(size + 3) * 250) - 5,
               fill: innerCircleFill,
             }),
             text: new Text({
@@ -230,8 +241,10 @@ function AddPoint() {
     }
     function clusterHullStyle(cluster) {
       if (cluster !== hoverFeature) {
+        // console.log("not this one",cluster.get('features').length) // 获取到屏幕上的点的方法
         return;
       }
+      // console.log(cluster.get('features'))
       const originalFeatures = cluster.get('features');
       const points = originalFeatures.map((feature) =>
         feature.getGeometry().getCoordinates()
@@ -277,29 +290,17 @@ function AddPoint() {
 
     map.on('pointermove', (event) => {
       let features = map.getFeaturesAtPixel(event.pixel)
+
+      // 不知道为什么，会自动将hover的那些点输入到setStyle里面  
       clusterHulls.setStyle(clusterHullStyle);
       hoverFeature = features[0]
+      // console.log(hoverFeature)
       // Change the cursor style to indicate that the cluster is clickable.
       map.getTargetElement().style.cursor =
         hoverFeature && hoverFeature.get('features').length > 1
           ? 'pointer'
           : '';
-      // map.getFeaturesAtPixel(event.pixel).then((features) => {
-      //   console.log(features);
-      // })
-      // clusterLayer.getFeatures(event.pixel).then((features) => {
-      //   console.log(features)
-      //   if (features[0] !== hoverFeature) {
-      //     // Display the convex hull on hover.
-      //     hoverFeature = features[0];
-      //     clusterHulls.setStyle(clusterHullStyle);
-      //     // Change the cursor style to indicate that the cluster is clickable.
-      //     map.getTargetElement().style.cursor =
-      //       hoverFeature && hoverFeature.get('features').length > 1
-      //         ? 'pointer'
-      //         : '';
-      //   }
-      // });
+
     })
   });
 }
