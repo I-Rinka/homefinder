@@ -41,6 +41,7 @@ import { mapboxlayer } from "./Map/mapboxlayer";
 import WebGLPointsLayer from "ol/layer/WebGLPoints";
 import Point from "ol/geom/Point";
 import VectorSource from "ol/source/Vector";
+import Cluster from "ol/source/Cluster";
 import Feature from "ol/Feature";
 import VectorLayer from "ol/layer/Vector";
 import { Fill, Icon, Stroke, Style } from "ol/style";
@@ -97,11 +98,10 @@ function AddPoint() {
   GetBlocks().then((res) => {
     data.blocks = res;
     let features = [];
-    let vector_layer = new VectorLayer({
-      source: new VectorSource({
-        features: features,
-      }),
+    let point_source = new VectorSource({
+      features: features,
     });
+
     for (let i = 0; i < res.length; i++) {
       const element = res[i];
       let point_feature = new Feature({});
@@ -113,10 +113,19 @@ function AddPoint() {
       let point_geom = new Point([element.lng, element.lat]);
       point_feature.setGeometry(point_geom);
 
-      vector_layer.getSource().addFeature(point_feature);
+      point_source.addFeature(point_feature);
       // features.push(point_feature);
 
     }
+
+    const clusterSource = new Cluster({
+      distance: 100,
+      source: point_source
+    })
+
+    let vector_layer = new VectorLayer({
+      source: clusterSource
+    })
 
     map.addLayer(vector_layer);
 
