@@ -28,6 +28,7 @@
 
 <script setup>
 import { reactive } from "@vue/reactivity";
+import monotoneChainConvexHull from 'monotone-chain-convex-hull';
 import { theme } from "./Map/style";
 import { GetCurrentRecord, GetBlocks } from "../database/query.js";
 import { LocationFilled } from "@element-plus/icons-vue";
@@ -38,15 +39,16 @@ import { Layer } from "./Map/vectorlayer";
 import { fromLonLat, useGeographic } from "ol/proj";
 import { onMounted } from "@vue/runtime-core";
 import { mapboxlayer } from "./Map/mapboxlayer";
-import WebGLPointsLayer from "ol/layer/WebGLPoints";
 import Point from "ol/geom/Point";
 import VectorSource from "ol/source/Vector";
 import Cluster from "ol/source/Cluster";
 import Feature from "ol/Feature";
 import VectorLayer from "ol/layer/Vector";
-import { Fill, Icon, Stroke, Style } from "ol/style";
+import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import Overlay from "ol/Overlay";
+import { LineString, Polygon } from "ol/geom";
+import { createEmpty, extend, getWidth } from 'ol/extent';
 
 const config = {
   zoom: 10,
@@ -68,7 +70,7 @@ onMounted(() => {
     target: "map",
     layers: [
       mapboxlayer,
-      Layer,
+      // Layer,
     ],
     view: new View({
       center: config.center,
@@ -94,28 +96,141 @@ function AddOverlay() {
 
   }
 }
+
+
+const circleDistanceMultiplier = 1;
+const circleFootSeparation = 28;
+const circleStartAngle = Math.PI / 2;
+
+const convexHullFill = new Fill({
+  color: 'rgba(255, 153, 0, 0.4)',
+});
+const convexHullStroke = new Stroke({
+  color: 'rgba(204, 85, 0, 1)',
+  width: 1.5,
+});
+const outerCircleFill = new Fill({
+  color: 'rgba(255, 153, 102, 0.3)',
+});
+const innerCircleFill = new Fill({
+  color: 'rgba(255, 165, 0, 0.7)',
+});
+const textFill = new Fill({
+  color: '#fff',
+});
+const textStroke = new Stroke({
+  color: 'rgba(0, 0, 0, 0.6)',
+  width: 3,
+});
+const innerCircle = new CircleStyle({
+  radius: 30,
+  fill: innerCircleFill,
+});
+const outerCircle = new CircleStyle({
+  radius: 35,
+  fill: outerCircleFill,
+});
+
+let clickFeature, clickResolution;
+let hoverFeature;
+
 function AddPoint() {
   GetBlocks().then((res) => {
     data.blocks = res;
-    let features = [];
     let point_source = new VectorSource({
-      features: features,
+      features: [],
     });
 
     for (let i = 0; i < res.length; i++) {
       const element = res[i];
       let point_feature = new Feature({});
 
-      if (element['block'] === '环城南路') {
-        console.log(element)
-      }
-
       let point_geom = new Point([element.lng, element.lat]);
       point_feature.setGeometry(point_geom);
 
       point_source.addFeature(point_feature);
-      // features.push(point_feature);
+    }
 
+    function clusterStyle(feature) {
+      const size = feature.get('features').length;
+      if (size > 1) {
+        return [
+          new Style({
+            image: outerCircle,
+          }),
+          new Style({
+            image: innerCircle,
+            text: new Text({
+              text: size.toString(),
+              fill: textFill,
+              stroke: textStroke,
+            }),
+          }),
+        ];
+      } else {
+        const originalFeature = feature.get('features')[0];
+        return clusterMemberStyle(originalFeature);
+      }
+    }
+
+    function clusterCircleStyle(cluster, resolution) {
+      if (cluster !== clickFeature || resolution !== clickResolution) {
+        return;
+      }
+      const clusterMembers = cluster.get('features');
+      const centerCoordinates = cluster.getGeometry().getCoordinates();
+      return generatePointsCircle(
+        clusterMembers.length,
+        cluster.getGeometry().getCoordinates(),
+        resolution
+      ).reduce((styles, coordinates, i) => {
+        const point = new Point(coordinates);
+        const line = new LineString([centerCoordinates, coordinates]);
+        styles.unshift(
+          new Style({
+            geometry: line,
+            stroke: convexHullStroke,
+          })
+        );
+        styles.push(
+          clusterMemberStyle(
+            new Feature({
+              ...clusterMembers[i].getProperties(),
+              geometry: point,
+            })
+          )
+        );
+        return styles;
+      }, []);
+    }
+
+
+    function clusterMemberStyle(clusterMember) {
+      return new Style({
+        geometry: clusterMember.getGeometry(),
+        image: new CircleStyle({
+          fill: fill,
+          stroke: stroke,
+          radius: 8,
+          // image: clusterMember.get('LEISTUNG') > 5 ? darkIcon : lightIcon,
+        }),
+        fill: fill,
+        stroke: stroke,
+      });
+    }
+    function clusterHullStyle(cluster) {
+      if (cluster !== hoverFeature) {
+        return;
+      }
+      const originalFeatures = cluster.get('features');
+      const points = originalFeatures.map((feature) =>
+        feature.getGeometry().getCoordinates()
+      );
+      return new Style({
+        geometry: new Polygon([monotoneChainConvexHull(points)]),
+        fill: convexHullFill,
+        stroke: convexHullStroke,
+      });
     }
 
     const clusterSource = new Cluster({
@@ -123,11 +238,23 @@ function AddPoint() {
       source: point_source
     })
 
-    let vector_layer = new VectorLayer({
-      source: clusterSource
+    let clusterLayer = new VectorLayer({
+      source: clusterSource,
+      style: clusterStyle
     })
+    // Layer displaying the expanded view of overlapping cluster members.
+    const clusterCircles = new VectorLayer({
+      source: clusterSource,
+      style: clusterCircleStyle,
+    });
+    const clusterHulls = new VectorLayer({
+      source: clusterSource,
+      style: clusterHullStyle,
+    });
 
-    map.addLayer(vector_layer);
+    map.addLayer(clusterHulls);
+    map.addLayer(clusterCircles);
+    map.addLayer(clusterLayer);
 
     let fill = new Fill({
       color: [180, 0, 0, 0.3],
@@ -137,17 +264,33 @@ function AddPoint() {
       color: [180, 0, 0, 1],
       width: 1,
     });
-    var style = new Style({
-      image: new CircleStyle({
-        fill: fill,
-        stroke: stroke,
-        radius: 8,
-      }),
-      fill: fill,
-      stroke: stroke,
-    });
-    vector_layer.setStyle(style);
 
+    map.on('pointermove', (event) => {
+      let features = map.getFeaturesAtPixel(event.pixel)
+      clusterHulls.setStyle(clusterHullStyle);
+      hoverFeature = features[0]
+      // Change the cursor style to indicate that the cluster is clickable.
+      map.getTargetElement().style.cursor =
+        hoverFeature && hoverFeature.get('features').length > 1
+          ? 'pointer'
+          : '';
+      // map.getFeaturesAtPixel(event.pixel).then((features) => {
+      //   console.log(features);
+      // })
+      // clusterLayer.getFeatures(event.pixel).then((features) => {
+      //   console.log(features)
+      //   if (features[0] !== hoverFeature) {
+      //     // Display the convex hull on hover.
+      //     hoverFeature = features[0];
+      //     clusterHulls.setStyle(clusterHullStyle);
+      //     // Change the cursor style to indicate that the cluster is clickable.
+      //     map.getTargetElement().style.cursor =
+      //       hoverFeature && hoverFeature.get('features').length > 1
+      //         ? 'pointer'
+      //         : '';
+      //   }
+      // });
+    })
   });
 }
 
