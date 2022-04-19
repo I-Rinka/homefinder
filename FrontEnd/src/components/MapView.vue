@@ -13,11 +13,13 @@
       <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
       </el-slider>
     </div>
-
     <div style="height: 8vh">
       <!-- <el-button @click="GetData">GetData</el-button> -->
-      <!-- <el-button @click="AddPoint">Add Point</el-button> -->
+      <el-button @click="AddOverlay">Add Point</el-button>
       <time-line></time-line>
+    </div>
+    <div>
+      <div style="transition-duration: 0.2s;" :id="block['block']" v-for="block in data.blocks" :key="block['block']">{{ block['block'] }}</div>
     </div>
   </div>
 </template>
@@ -41,14 +43,19 @@ import Feature from "ol/Feature";
 import VectorLayer from "ol/layer/Vector";
 import { Fill, Icon, Stroke, Style } from "ol/style";
 import CircleStyle from "ol/style/Circle";
+import Overlay from "ol/Overlay";
 
 const config = {
   zoom: 10,
-  minZoom: 8,
+  // minZoom: 8,
+  minZoom: 3,
   maxZoom: 18,
   center: [116.39142503729663, 39.90484407050692]
 }
-const data = reactive({ zoom: Math.floor((config.zoom - config.minZoom) * 100 / (config.maxZoom - config.minZoom)) });
+const data = reactive({
+  zoom: Math.floor((config.zoom - config.minZoom) * 100 / (config.maxZoom - config.minZoom)),
+  blocks: []
+});
 let map = null;
 
 onMounted(() => {
@@ -73,16 +80,34 @@ onMounted(() => {
   map.getView().on('change', ChangeView);
   AddPoint();
 });
+function AddOverlay() {
+  for (let i = 0; i < data.blocks.length; i++) {
+    const element = data.blocks[i];
+    const overlay = new Overlay({
+      position: [element['lng'], element['lat']],
+      element: document.getElementById(element['block'])
+    })
+    map.addOverlay(overlay);
 
+  }
+}
 function AddPoint() {
   GetBlocks().then((res) => {
+    data.blocks = res;
     let features = [];
+    console.log(res);
     for (let i = 0; i < res.length; i++) {
       const element = res[i];
       let point_feature = new Feature({});
+
+      if (element['block']==='环城南路') {
+        console.log(element)
+      }
+
       let point_geom = new Point([element.lng, element.lat]);
       point_feature.setGeometry(point_geom);
       features.push(point_feature);
+
     }
 
     let vector_layer = new VectorLayer({
