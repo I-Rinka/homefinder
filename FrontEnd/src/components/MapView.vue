@@ -19,7 +19,9 @@
       <time-line></time-line>
     </div>
     <div>
-      <div style="transition-duration: 0.2s;" :id="block['block']" v-for="block in data.blocks" :key="block['block']">{{ block['block'] }}</div>
+      <div style="transition-duration: 0.2s;" :id="block['block']" v-for="block in data.blocks" :key="block['block']">{{
+        block['block']
+      }}</div>
     </div>
   </div>
 </template>
@@ -95,26 +97,27 @@ function AddPoint() {
   GetBlocks().then((res) => {
     data.blocks = res;
     let features = [];
-    console.log(res);
-    for (let i = 0; i < res.length; i++) {
-      const element = res[i];
-      let point_feature = new Feature({});
-
-      if (element['block']==='环城南路') {
-        console.log(element)
-      }
-
-      let point_geom = new Point([element.lng, element.lat]);
-      point_feature.setGeometry(point_geom);
-      features.push(point_feature);
-
-    }
-
     let vector_layer = new VectorLayer({
       source: new VectorSource({
         features: features,
       }),
     });
+    for (let i = 0; i < res.length; i++) {
+      const element = res[i];
+      let point_feature = new Feature({});
+
+      if (element['block'] === '环城南路') {
+        console.log(element)
+      }
+
+      let point_geom = new Point([element.lng, element.lat]);
+      point_feature.setGeometry(point_geom);
+
+      vector_layer.getSource().addFeature(point_feature);
+      // features.push(point_feature);
+
+    }
+
     map.addLayer(vector_layer);
 
     let fill = new Fill({
@@ -190,6 +193,10 @@ function ChangeView() {
   >canvas {
     border-radius: 14px;
   }
+}
+
+.ol-viewport {
+  border-radius: 10px;
 }
 
 .map-frame {
