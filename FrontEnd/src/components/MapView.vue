@@ -273,8 +273,54 @@ function AddPoint() {
       style: clusterHullStyle,
     });
 
+    const clusterCluster = new VectorLayer({
+      source: new Cluster({
+        source: clusterSource,
+        distance: 200
+      }),
+      style: (feature) => {
+        let size = 0;
+        let fts = feature.get('features')
+        fts.forEach(ft => size += ft.get('features').length)
+
+        if (size > 1) {
+          return [
+            // outer style
+            new Style({
+              image:
+                new CircleStyle({
+                  radius: Math.sqrt(Math.log(size + 3) * 1000),
+                  fill: new Fill({
+                    color: 'rgba(75, 154, 233, 0.3)',
+                  })
+                })
+            }),
+
+            // inner
+            new Style({
+              image: new CircleStyle({
+                radius: Math.sqrt(Math.log(size + 3) * 1000) - 5,
+                fill: new Fill({
+                  color: 'rgba(52, 120, 198, 0.3)',
+                })
+              }),
+              text: new Text({
+                text: size.toString(),
+                fill: textFill,
+                stroke: textStroke,
+              }),
+            }),
+          ];
+        } else {
+          const originalFeature = feature.get('features')[0];
+          return clusterMemberStyle(originalFeature);
+        }
+      }
+    })
+
     map.addLayer(clusterHulls);
     map.addLayer(clusterLayer);
+    map.addLayer(clusterCluster);
 
     let fill = new Fill({
       color: [180, 0, 0, 0.3],
