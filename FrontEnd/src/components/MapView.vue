@@ -33,11 +33,19 @@
       <time-line></time-line>
     </div>
 
-    <div id="popUp" style="background-color: white">
+    <el-card
+      id="popUp"
+      style="background-color: white; height: 30vh; overflow: scroll; overflow-x:hidden"
+    >
+      <template #header>
+        <span>Selected Blocks</span>
+      </template>
       <div v-for="block in data.popOver" :key="block">
-        {{ block }}
+        <el-checkbox>
+          {{ block }}
+        </el-checkbox>
       </div>
-    </div>
+    </el-card>
   </div>
 </template>
 
@@ -164,7 +172,7 @@ onMounted(() => {
       overLay = new Overlay({
         element: document.getElementById("popUp"),
       });
-      console.log(overLay.getElement())
+      console.log(overLay.getElement());
       overLay.getElement().style.visibility = "visible";
       overLay.setPosition(event.coordinate);
       if (rm != null) {
@@ -296,6 +304,10 @@ function ChangeView() {
         transition-timing-function: ease-out;
       }
     }
+  }
+
+  ::-webkit-scrollbar {
+    width: 15px;
   }
 }
 </style>
