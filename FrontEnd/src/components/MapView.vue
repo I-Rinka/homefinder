@@ -101,9 +101,7 @@ const data = reactive({
 // The Openlayers
 useGeographic();
 const map = new Map({
-  layers: [
-    mapboxlayer,
-  ],
+  layers: [mapboxlayer],
   view: new View({
     center: config.center,
     zoom: config.zoom,
@@ -118,6 +116,8 @@ map.getView().on("change", ChangeView);
 onMounted(() => {
   map.setTarget("map");
   AddPoint();
+
+  map.on("click", (event) => {});
 });
 
 function AddOverlay() {
@@ -153,7 +153,7 @@ function AddPoint() {
     GetRegionClusterArray(res).forEach((layer) => map.addLayer(layer));
 
     ChangeClusterView(data.zoom);
- });
+  });
 }
 
 function ResetPosition() {
