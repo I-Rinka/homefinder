@@ -32,14 +32,10 @@
       <el-button @click="GetViewPort">Get View Port</el-button>
       <time-line></time-line>
     </div>
-    <div>
-      <div
-        style="transition-duration: 0.2s"
-        :id="block['block']"
-        v-for="block in data.blocks"
-        :key="block['block']"
-      >
-        {{ block["block"] }}
+
+    <div id="popUp" style="background-color: white">
+      <div v-for="block in data.popOver" :key="block">
+        {{ block }}
       </div>
     </div>
   </div>
@@ -96,29 +92,10 @@ const data = reactive({
     ((config.zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
   ),
   blocks: [],
+  popOver: [],
 });
 
-// The Openlayers
-useGeographic();
-const map = new Map({
-  layers: [mapboxlayer],
-  view: new View({
-    center: config.center,
-    zoom: config.zoom,
-    extent: config.extend,
-    minZoom: config.minZoom,
-    maxZoom: config.maxZoom,
-  }),
-  controls: [],
-});
-map.getView().on("change", ChangeView);
-
-onMounted(() => {
-  map.setTarget("map");
-  AddPoint();
-
-  map.on("click", (event) => {});
-});
+// for test
 
 function AddOverlay() {
   // let currentExtent = map.getView().calculateExtent(map.getSize());
@@ -146,6 +123,64 @@ function GetViewPort() {
 
 // -------------------------- Useful functions ---------------------------
 
+// The Openlayers
+useGeographic();
+const map = new Map({
+  layers: [mapboxlayer],
+  view: new View({
+    center: config.center,
+    zoom: config.zoom,
+    extent: config.extend,
+    minZoom: config.minZoom,
+    maxZoom: config.maxZoom,
+  }),
+  controls: [],
+});
+map.getView().on("change", ChangeView);
+
+let overLay = null;
+onMounted(() => {
+  map.setTarget("map");
+  AddPoint();
+
+  map.on("click", (event) => {
+    let features = map.getFeaturesAtPixel(event.pixel);
+    let clickFeature = features[0];
+
+    if (overLay != null) {
+      overLay.getElement().style.visibility = "hidden";
+    }
+
+    if (clickFeature) {
+      features = clickFeature.get("features");
+      let new_popOver = features.map((feature) => feature.get("block"));
+      data.popOver = new_popOver;
+
+      let rm = null;
+      if (overLay != null) {
+        rm = overLay.getElement().parentElement;
+        overLay = null;
+      }
+      overLay = new Overlay({
+        element: document.getElementById("popUp"),
+      });
+      console.log(overLay.getElement())
+      overLay.getElement().style.visibility = "visible";
+      overLay.setPosition(event.coordinate);
+      if (rm != null) {
+        rm.remove();
+      }
+      map.addOverlay(overLay);
+      // rm.remove();
+    }
+  });
+
+  // hover
+  map.on("pointermove", (event) => {
+    let features = map.getFeaturesAtPixel(event.pixel);
+    map.getTargetElement().style.cursor = features[0] ? "pointer" : "";
+  });
+});
 function AddPoint() {
   GetBlocks().then((res) => {
     GetBlockClusterArray(res).forEach((layer) => map.addLayer(layer));

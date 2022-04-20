@@ -23,7 +23,7 @@ export function GetPointFeatures(blocks) {
     for (let i = 0; i < blocks.length; i++) {
       const element = blocks[i];
       let point_feature = new Feature({
-        name: element.block,
+        block: element.block,
         region: element.region,
         sub_region: element.sub_region,
       });
@@ -51,7 +51,6 @@ export function GetBlockClusterArray(blocks) {
 
     for (const sub_region in block_dic) {
       if (Object.hasOwnProperty.call(block_dic, sub_region)) {
-        const element = block_dic[sub_region];
         let cluster = new Cluster({
           source: block_dic[sub_region],
           distance: config.sub_region_distance,
