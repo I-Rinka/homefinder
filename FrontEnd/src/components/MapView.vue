@@ -6,39 +6,32 @@
     </div>
 
     <div class="zoom-slider">
-      <el-button
-        @click="ResetPosition"
-        :icon="LocationFilled"
-        style="margin-bottom: 1vh"
-        circle
-      >
+      <el-button @click="ResetPosition" :icon="LocationFilled" style="margin-bottom: 1vh" circle>
       </el-button>
       <!-- @click="ResetPosition"
         @input="SetZoom" -->
-      <el-slider
-        v-model="data.zoom"
-        :step="1"
-        :max="100"
-        :min="0"
-        @input="ChangeZoom"
-        vertical
-      >
+      <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
       </el-slider>
     </div>
     <div style="height: 8vh">
       <!-- <el-button @click="GetData">GetData</el-button> -->
-      <el-button @click="AddOverlay">Add Ticks</el-button>
-      <el-button @click="RemoveOverlay">Remove Ticks</el-button>
+      <!-- <el-button @click="AddOverlay">Add Ticks</el-button> -->
+      <!-- <el-button @click="RemoveOverlay">Remove Ticks</el-button> -->
+      <el-button @click="GetOnScreenFeatures">Get Features</el-button>
       <el-button @click="GetViewPort">Get View Port</el-button>
       <time-line></time-line>
     </div>
+    <div>
+      <sun-chart v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"></sun-chart>
+      <!-- <div v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()">{{
+        feature.getGeometry().getCoordinates()
+      }}</div> -->
+    </div>
 
-    <el-card
-      id="popUp"
-      style="background-color: white; height: 30vh; overflow: scroll; overflow-x:hidden"
-    >
+    <el-card id="popUp" style="background-color: white; height: 30vh; overflow: scroll; overflow-x:hidden">
       <template #header>
-        <span>Selected Blocks</span>
+        <div>Selected Blocks</div>
+        <span>{{ data.popOverCoord }}</span>
       </template>
       <div v-for="block in data.popOver" :key="block">
         <el-checkbox>
@@ -46,19 +39,19 @@
         </el-checkbox>
       </div>
     </el-card>
+
   </div>
 </template>
 
 <script setup>
-import { reactive } from "@vue/reactivity";
+import { reactive, toRaw } from "@vue/reactivity";
 import monotoneChainConvexHull from "monotone-chain-convex-hull";
-import { theme } from "./Map/style";
 import { GetCurrentRecord, GetBlocks, GetRegions } from "../database/query.js";
 import { LocationFilled } from "@element-plus/icons-vue";
 import TimeLine from "./TimeLine.vue";
 import Map from "ol/Map";
 import View from "ol/View";
-import { Layer } from "./Map/vectorlayer";
+import { beijingLayer } from "./Map/vectorlayer";
 import { fromLonLat, useGeographic } from "ol/proj";
 import { onMounted } from "@vue/runtime-core";
 import { mapboxlayer } from "./Map/mapboxlayer";
@@ -72,6 +65,7 @@ import CircleStyle from "ol/style/Circle";
 import Overlay from "ol/Overlay";
 import { GetBlockClusterArray, GetRegionClusterArray } from "./Map/cluster";
 import { LineString, Polygon } from "ol/geom";
+import SunChart from "./Vis/SunChart.vue"
 
 import {
   createEmpty,
@@ -101,6 +95,8 @@ const data = reactive({
   ),
   blocks: [],
   popOver: [],
+  popOverCoord: '',
+  features: []
 });
 
 // for test
@@ -134,7 +130,7 @@ function GetViewPort() {
 // The Openlayers
 useGeographic();
 const map = new Map({
-  layers: [mapboxlayer],
+  layers: [mapboxlayer, beijingLayer],
   view: new View({
     center: config.center,
     zoom: config.zoom,
@@ -161,8 +157,13 @@ onMounted(() => {
 
     if (clickFeature) {
       features = clickFeature.get("features");
+      // not a cluster
+      if (!features) {
+        return
+      }
       let new_popOver = features.map((feature) => feature.get("block"));
       data.popOver = new_popOver;
+      data.popOverCoord = clickFeature.getGeometry().getCoordinates();
 
       let rm = null;
       if (overLay != null) {
@@ -172,7 +173,6 @@ onMounted(() => {
       overLay = new Overlay({
         element: document.getElementById("popUp"),
       });
-      console.log(overLay.getElement());
       overLay.getElement().style.visibility = "visible";
       overLay.setPosition(event.coordinate);
       if (rm != null) {
@@ -185,8 +185,11 @@ onMounted(() => {
 
   // hover
   map.on("pointermove", (event) => {
-    let features = map.getFeaturesAtPixel(event.pixel);
-    map.getTargetElement().style.cursor = features[0] ? "pointer" : "";
+    let features = map.getFeaturesAtPixel(event.pixel)[0];
+
+    if (features) {
+      map.getTargetElement().style.cursor = features.get('features') ? "pointer" : "";
+    }
   });
 });
 function AddPoint() {
@@ -247,7 +250,51 @@ function ChangeView() {
     data.zoom = new_percentage_zoom;
   }
   ChangeClusterView(data.zoom);
+  GetOnScreenFeatures();
 }
+
+function GetOnScreenFeatures() {
+  let currentExtent = map.getView().calculateExtent(map.getSize());
+
+  let features = [];
+  let features_dic = {};
+
+  GetRegionClusterArray().forEach((layer) => {
+    if (layer.getVisible()) {
+      layer.getSource().forEachFeatureInExtent(currentExtent, (feature) => {
+        features_dic[feature.getGeometry().getCoordinates().toString()] = feature
+        // features.push(feature);
+      })
+    }
+  });
+  GetBlockClusterArray().forEach((layer) => {
+    if (layer.getVisible()) {
+      layer.getSource().forEachFeatureInExtent(currentExtent, (feature) => {
+        features_dic[feature.getGeometry().getCoordinates().toString()] = feature
+      })
+    }
+  });
+
+  let discard_feature = []
+  for (let i = data.features.length - 1; i >= 0; i--) {
+    const feature = data.features[i];
+    if (features_dic.hasOwnProperty(feature.getGeometry().getCoordinates().toString())) {
+      delete features_dic[feature.getGeometry().getCoordinates().toString()];
+    }
+    else {
+      data.features.splice(i, 1);
+      discard_feature.push(toRaw(feature));
+    }
+  }
+  for (const key in features_dic) {
+    if (Object.hasOwnProperty.call(features_dic, key)) {
+      const feature = features_dic[key];
+      data.features.push(feature);
+    }
+  }
+  // console.log(discard_feature)
+}
+
 </script>
 
 <style lang="less">
@@ -263,7 +310,7 @@ function ChangeView() {
 }
 
 .ol-layer {
-  > canvas {
+  >canvas {
     border-radius: 14px;
   }
 }
@@ -288,7 +335,7 @@ function ChangeView() {
   z-index: 6;
   cursor: default;
 
-  > div {
+  >div {
     height: 20vh;
 
     .el-slider__runway {

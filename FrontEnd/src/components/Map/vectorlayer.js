@@ -20,7 +20,7 @@ const style = new Style({
   }),
 });
 
-export const Layer = new VectorLayer({
+export const beijingLayer = new VectorLayer({
   source: vectorSource,
   background: "#000000ff",
   opacity: 0.2,
