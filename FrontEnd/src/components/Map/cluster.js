@@ -61,6 +61,7 @@ function GetRegionClusterArray() {}
 
 function blockClusterStyle(feature) {
   const size = feature.get("features").length;
+  const block_name = feature.get("features")[0].get("sub_region");
   if (size > 1) {
     return [
       // outer style
@@ -78,7 +79,7 @@ function blockClusterStyle(feature) {
           fill: innerCircleFill,
         }),
         text: new Text({
-          text: size.toString(),
+          text: block_name,
           fill: textFill,
           stroke: textStroke,
         }),
