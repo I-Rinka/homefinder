@@ -6,11 +6,23 @@
     </div>
 
     <div class="zoom-slider">
-      <el-button @click="ResetPosition" :icon="LocationFilled" style="margin-bottom: 1vh" circle>
+      <el-button
+        @click="ResetPosition"
+        :icon="LocationFilled"
+        style="margin-bottom: 1vh"
+        circle
+      >
       </el-button>
       <!-- @click="ResetPosition"
         @input="SetZoom" -->
-      <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
+      <el-slider
+        v-model="data.zoom"
+        :step="1"
+        :max="100"
+        :min="0"
+        @input="ChangeZoom"
+        vertical
+      >
       </el-slider>
     </div>
     <div style="height: 8vh">
@@ -22,18 +34,23 @@
       <time-line></time-line>
     </div>
     <div>
-      <div style="transition-duration: 0.2s;" :id="block['block']" v-for="block in data.blocks" :key="block['block']">{{
-        block['block']
-      }}</div>
+      <div
+        style="transition-duration: 0.2s"
+        :id="block['block']"
+        v-for="block in data.blocks"
+        :key="block['block']"
+      >
+        {{ block["block"] }}
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { reactive } from "@vue/reactivity";
-import monotoneChainConvexHull from 'monotone-chain-convex-hull';
+import monotoneChainConvexHull from "monotone-chain-convex-hull";
 import { theme } from "./Map/style";
-import { GetCurrentRecord, GetBlocks,GetRegions } from "../database/query.js";
+import { GetCurrentRecord, GetBlocks, GetRegions } from "../database/query.js";
 import { LocationFilled } from "@element-plus/icons-vue";
 import TimeLine from "./TimeLine.vue";
 import Map from "ol/Map";
@@ -51,13 +68,18 @@ import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import Overlay from "ol/Overlay";
 import { LineString, Polygon } from "ol/geom";
-import { createEmpty, extend, getWidth, containsXY, containsExtent, containsCoordinate } from 'ol/extent';
+import {
+  createEmpty,
+  extend,
+  getWidth,
+  containsXY,
+  containsExtent,
+  containsCoordinate,
+} from "ol/extent";
 
 function GetRegion() {
-  GetRegions().then(res=>
-  console.log(res))
+  GetRegions().then((res) => console.log(res));
 }
-
 
 // the configuration
 const config = {
@@ -67,16 +89,16 @@ const config = {
   maxZoom: 18,
   center: [116.39142503729663, 39.90484407050692],
   extend: [
-    112.91586151114309,
-    39.13767962555457,
-    119.71639862051808,
-    41.264546138018204
-  ]
-}
+    112.91586151114309, 39.13767962555457, 119.71639862051808,
+    41.264546138018204,
+  ],
+};
 
 // the reactive data
 const data = reactive({
-  zoom: Math.floor((config.zoom - config.minZoom) * 100 / (config.maxZoom - config.minZoom)),
+  zoom: Math.floor(
+    ((config.zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
+  ),
   blocks: [],
 });
 
@@ -93,14 +115,14 @@ const map = new Map({
     zoom: config.zoom,
     extent: config.extend,
     minZoom: config.minZoom,
-    maxZoom: config.maxZoom
+    maxZoom: config.maxZoom,
   }),
   controls: [],
 });
-map.getView().on('change', ChangeView);
+map.getView().on("change", ChangeView);
 
 onMounted(() => {
-  map.setTarget("map")
+  map.setTarget("map");
   AddPoint();
 });
 
@@ -108,14 +130,13 @@ function AddOverlay() {
   let currentExtent = map.getView().calculateExtent(map.getSize());
   for (let i = 0; i < data.blocks.length; i++) {
     const element = data.blocks[i];
-    if (containsXY(currentExtent, element['lng'], element['lat'])) {
-
+    if (containsXY(currentExtent, element["lng"], element["lat"])) {
       const overlay = new Overlay({
-        id: element['block'],
-        position: [element['lng'], element['lat']],
-        element: document.getElementById(element['block']),
+        id: element["block"],
+        position: [element["lng"], element["lat"]],
+        element: document.getElementById(element["block"]),
         insertFirst: true,
-      })
+      });
       map.addOverlay(overlay);
     }
   }
@@ -125,31 +146,26 @@ function RemoveOverlay() {
   let overlays = map.getOverlays();
   let currentExtent = map.getView().calculateExtent(map.getSize());
   let er = false;
-  let remove_overlay = []
-  overlays.forEach(overlay => {
+  let remove_overlay = [];
+  overlays.forEach((overlay) => {
     try {
       if (!containsCoordinate(currentExtent, overlay.getPosition())) {
-        remove_overlay.push(overlay.getId())
-      }
-      else {
-        console.log(overlay.getId(), overlay.getPosition())
+        remove_overlay.push(overlay.getId());
+      } else {
+        console.log(overlay.getId(), overlay.getPosition());
       }
     } catch (error) {
       er = true;
     }
-  }
-  );
+  });
 
-  remove_overlay.forEach(id => {
+  remove_overlay.forEach((id) => {
     map.removeOverlay(map.getOverlayById(id));
-  })
+  });
 
   if (er) {
-    console.log(
-      map.getOverlays()
-    )
+    console.log(map.getOverlays());
   }
-
 }
 
 function GetViewPort() {
@@ -157,23 +173,23 @@ function GetViewPort() {
 }
 
 const convexHullFill = new Fill({
-  color: 'rgba(255, 153, 0, 0.4)',
+  color: "rgba(255, 153, 0, 0.4)",
 });
 const convexHullStroke = new Stroke({
-  color: 'rgba(204, 85, 0, 1)',
+  color: "rgba(204, 85, 0, 1)",
   width: 1.5,
 });
 const outerCircleFill = new Fill({
-  color: 'rgba(255, 153, 102, 0.3)',
+  color: "rgba(255, 153, 102, 0.3)",
 });
 const innerCircleFill = new Fill({
-  color: 'rgba(255, 165, 0, 0.7)',
+  color: "rgba(255, 165, 0, 0.7)",
 });
 const textFill = new Fill({
-  color: '#fff',
+  color: "#fff",
 });
 const textStroke = new Stroke({
-  color: 'rgba(0, 0, 0, 0.6)',
+  color: "rgba(0, 0, 0, 0.6)",
   width: 3,
 });
 const innerCircle = new CircleStyle({
@@ -187,6 +203,9 @@ const outerCircle = new CircleStyle({
 
 let hoverFeature;
 
+let clusterCluster = null;
+let clusterLayer = null;
+
 function AddPoint() {
   GetBlocks().then((res) => {
     data.blocks = res;
@@ -196,25 +215,27 @@ function AddPoint() {
 
     for (let i = 0; i < res.length; i++) {
       const element = res[i];
-      let point_feature = new Feature({ name: element.block, region: element.region, sub_region: element.sub_region });
+      let point_feature = new Feature({
+        name: element.block,
+        region: element.region,
+        sub_region: element.sub_region,
+      });
 
       let point_geom = new Point([element.lng, element.lat]);
       point_feature.setGeometry(point_geom);
       point_source.addFeature(point_feature);
-      console.log(point_feature)
     }
 
     function clusterStyle(feature) {
-      const size = feature.get('features').length;
+      const size = feature.get("features").length;
       if (size > 1) {
         return [
           // outer style
           new Style({
-            image:
-              new CircleStyle({
-                radius: Math.sqrt(Math.log(size + 3) * 250),
-                fill: outerCircleFill,
-              })
+            image: new CircleStyle({
+              radius: Math.sqrt(Math.log(size + 3) * 250),
+              fill: outerCircleFill,
+            }),
           }),
 
           // inner
@@ -231,7 +252,7 @@ function AddPoint() {
           }),
         ];
       } else {
-        const originalFeature = feature.get('features')[0];
+        const originalFeature = feature.get("features")[0];
         return clusterMemberStyle(originalFeature);
       }
     }
@@ -255,7 +276,7 @@ function AddPoint() {
         return;
       }
       // console.log(cluster.get('features'))
-      const originalFeatures = cluster.get('features');
+      const originalFeatures = cluster.get("features");
       const points = originalFeatures.map((feature) =>
         feature.getGeometry().getCoordinates()
       );
@@ -268,39 +289,38 @@ function AddPoint() {
 
     const clusterSource = new Cluster({
       distance: 100,
-      source: point_source
-    })
+      source: point_source,
+    });
 
-    let clusterLayer = new VectorLayer({
+    clusterLayer = new VectorLayer({
       source: clusterSource,
-      style: clusterStyle
-    })
+      style: clusterStyle,
+    });
     const clusterHulls = new VectorLayer({
       source: clusterSource,
       style: clusterHullStyle,
     });
 
-    const clusterCluster = new VectorLayer({
+    clusterCluster = new VectorLayer({
       source: new Cluster({
         source: clusterSource,
-        distance: 200
+        distance: 150,
       }),
       style: (feature) => {
         let size = 0;
-        let fts = feature.get('features')
-        fts.forEach(ft => size += ft.get('features').length)
+        let fts = feature.get("features");
+        fts.forEach((ft) => (size += ft.get("features").length));
 
         if (size > 1) {
           return [
             // outer style
             new Style({
-              image:
-                new CircleStyle({
-                  radius: Math.sqrt(Math.log(size + 3) * 1000),
-                  fill: new Fill({
-                    color: 'rgba(75, 154, 233, 0.3)',
-                  })
-                })
+              image: new CircleStyle({
+                radius: Math.sqrt(Math.log(size + 3) * 1000),
+                fill: new Fill({
+                  color: "rgba(75, 154, 233, 0.3)",
+                }),
+              }),
             }),
 
             // inner
@@ -308,8 +328,8 @@ function AddPoint() {
               image: new CircleStyle({
                 radius: Math.sqrt(Math.log(size + 3) * 1000) - 5,
                 fill: new Fill({
-                  color: 'rgba(52, 120, 198, 0.3)',
-                })
+                  color: "rgba(52, 120, 198, 0.3)",
+                }),
               }),
               text: new Text({
                 text: size.toString(),
@@ -319,15 +339,15 @@ function AddPoint() {
             }),
           ];
         } else {
-          const originalFeature = feature.get('features')[0];
+          const originalFeature = feature.get("features")[0];
           return clusterMemberStyle(originalFeature);
         }
-      }
-    })
+      },
+    });
 
-    map.addLayer(clusterHulls);
     map.addLayer(clusterLayer);
     map.addLayer(clusterCluster);
+    ChangeClusterView(data.zoom);
 
     let fill = new Fill({
       color: [180, 0, 0, 0.3],
@@ -338,20 +358,19 @@ function AddPoint() {
       width: 1,
     });
 
-    map.on('pointermove', (event) => {
-      let features = map.getFeaturesAtPixel(event.pixel)
+    map.on("pointermove", (event) => {
+      let features = map.getFeaturesAtPixel(event.pixel);
 
-      // 不知道为什么，会自动将hover的那些点输入到setStyle里面  
+      // 不知道为什么，会自动将hover的那些点输入到setStyle里面
       clusterHulls.setStyle(clusterHullStyle);
-      hoverFeature = features[0]
+      hoverFeature = features[0];
       // console.log(hoverFeature)
       // Change the cursor style to indicate that the cluster is clickable.
       map.getTargetElement().style.cursor =
-        hoverFeature && hoverFeature.get('features').length > 1
-          ? 'pointer'
-          : '';
-
-    })
+        hoverFeature && hoverFeature.get("features").length > 1
+          ? "pointer"
+          : "";
+    });
   });
 }
 
@@ -368,25 +387,41 @@ let zoom_percentage = 50;
 function ChangeZoom(value) {
   zoom_percentage = value;
   if (zoomThrottle == null) {
-    zoomThrottle = setTimeout(
-      () => {
-        zoomThrottle = null;
-        let new_zoom = config.minZoom + (config.maxZoom - config.minZoom) * zoom_percentage / 100;
-        map.getView().animate({
-          zoom: new_zoom,
-          duration: 100,
-        });
-      }, 100
-    )
+    zoomThrottle = setTimeout(() => {
+      zoomThrottle = null;
+      let new_zoom =
+        config.minZoom +
+        ((config.maxZoom - config.minZoom) * zoom_percentage) / 100;
+      map.getView().animate({
+        zoom: new_zoom,
+        duration: 100,
+      });
+    }, 100);
+  }
+}
+
+function ChangeClusterView(zoom) {
+  if (data.zoom > 33) {
+    clusterLayer.setVisible(true);
+    clusterCluster.setVisible(false);
+  } else {
+    clusterLayer.setVisible(false);
+    clusterCluster.setVisible(true);
   }
 }
 
 function ChangeView() {
   let zoom = map.getView().getZoom();
-  let new_percentage_zoom = Math.floor((zoom - config.minZoom) * 100 / (config.maxZoom - config.minZoom));
-  if (data.zoom - new_percentage_zoom >= 1 || data.zoom - new_percentage_zoom <= -1) {
+  let new_percentage_zoom = Math.floor(
+    ((zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
+  );
+  if (
+    data.zoom - new_percentage_zoom >= 1 ||
+    data.zoom - new_percentage_zoom <= -1
+  ) {
     data.zoom = new_percentage_zoom;
   }
+  ChangeClusterView(data.zoom);
 }
 </script>
 
@@ -403,7 +438,7 @@ function ChangeView() {
 }
 
 .ol-layer {
-  >canvas {
+  > canvas {
     border-radius: 14px;
   }
 }
@@ -433,7 +468,7 @@ function ChangeView() {
   z-index: 6;
   cursor: default;
 
-  >div {
+  > div {
     height: 20vh;
 
     .el-slider__runway {
