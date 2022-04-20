@@ -67,7 +67,9 @@ import VectorLayer from "ol/layer/Vector";
 import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import Overlay from "ol/Overlay";
+import { GetBlockClusterArray } from "./Map/cluster";
 import { LineString, Polygon } from "ol/geom";
+
 import {
   createEmpty,
   extend,
@@ -208,6 +210,9 @@ let clusterLayer = null;
 
 function AddPoint() {
   GetBlocks().then((res) => {
+    GetBlockClusterArray(res).forEach((layer) => map.addLayer(layer));
+
+    /*
     data.blocks = res;
     let point_source = new VectorSource({
       features: [],
@@ -345,9 +350,9 @@ function AddPoint() {
       },
     });
 
-    map.addLayer(clusterLayer);
-    map.addLayer(clusterCluster);
-    ChangeClusterView(data.zoom);
+    // map.addLayer(clusterLayer);
+    // map.addLayer(clusterCluster);
+    // ChangeClusterView(data.zoom);
 
     let fill = new Fill({
       color: [180, 0, 0, 0.3],
@@ -370,7 +375,7 @@ function AddPoint() {
         hoverFeature && hoverFeature.get("features").length > 1
           ? "pointer"
           : "";
-    });
+    });*/
   });
 }
 
@@ -421,7 +426,7 @@ function ChangeView() {
   ) {
     data.zoom = new_percentage_zoom;
   }
-  ChangeClusterView(data.zoom);
+  // ChangeClusterView(data.zoom);
 }
 </script>
 
