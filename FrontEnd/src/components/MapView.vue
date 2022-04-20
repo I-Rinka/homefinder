@@ -30,7 +30,6 @@
       <el-button @click="AddOverlay">Add Ticks</el-button>
       <el-button @click="RemoveOverlay">Remove Ticks</el-button>
       <el-button @click="GetViewPort">Get View Port</el-button>
-      <el-button @click="GetRegion">Get Regions</el-button>
       <time-line></time-line>
     </div>
     <div>
@@ -78,11 +77,6 @@ import {
   containsExtent,
   containsCoordinate,
 } from "ol/extent";
-
-function GetRegion() {
-  GetRegions().then((res) => console.log(res));
-}
-
 // the configuration
 const config = {
   zoom: 10,
@@ -107,10 +101,8 @@ const data = reactive({
 // The Openlayers
 useGeographic();
 const map = new Map({
-  // target: "map",
   layers: [
     mapboxlayer,
-    // Layer,
   ],
   view: new View({
     center: config.center,
@@ -129,84 +121,31 @@ onMounted(() => {
 });
 
 function AddOverlay() {
-  let currentExtent = map.getView().calculateExtent(map.getSize());
-  for (let i = 0; i < data.blocks.length; i++) {
-    const element = data.blocks[i];
-    if (containsXY(currentExtent, element["lng"], element["lat"])) {
-      const overlay = new Overlay({
-        id: element["block"],
-        position: [element["lng"], element["lat"]],
-        element: document.getElementById(element["block"]),
-        insertFirst: true,
-      });
-      map.addOverlay(overlay);
-    }
-  }
+  // let currentExtent = map.getView().calculateExtent(map.getSize());
+  // for (let i = 0; i < data.blocks.length; i++) {
+  //   const element = data.blocks[i];
+  //   if (containsXY(currentExtent, element["lng"], element["lat"])) {
+  //     const overlay = new Overlay({
+  //       id: element["block"],
+  //       position: [element["lng"], element["lat"]],
+  //       element: document.getElementById(element["block"]),
+  //       insertFirst: true,
+  //     });
+  //     map.addOverlay(overlay);
+  //   }
+  // }
 }
 
 function RemoveOverlay() {
-  let overlays = map.getOverlays();
-  let currentExtent = map.getView().calculateExtent(map.getSize());
-  let er = false;
-  let remove_overlay = [];
-  overlays.forEach((overlay) => {
-    try {
-      if (!containsCoordinate(currentExtent, overlay.getPosition())) {
-        remove_overlay.push(overlay.getId());
-      } else {
-        console.log(overlay.getId(), overlay.getPosition());
-      }
-    } catch (error) {
-      er = true;
-    }
-  });
-
-  remove_overlay.forEach((id) => {
-    map.removeOverlay(map.getOverlayById(id));
-  });
-
-  if (er) {
-    console.log(map.getOverlays());
-  }
+  // 不能边遍历变删，需要缓存到数组一下
 }
 
 function GetViewPort() {
   console.log(map.getView().calculateExtent(map.getSize()));
 }
 
-const convexHullFill = new Fill({
-  color: "rgba(255, 153, 0, 0.4)",
-});
-const convexHullStroke = new Stroke({
-  color: "rgba(204, 85, 0, 1)",
-  width: 1.5,
-});
-const outerCircleFill = new Fill({
-  color: "rgba(255, 153, 102, 0.3)",
-});
-const innerCircleFill = new Fill({
-  color: "rgba(255, 165, 0, 0.7)",
-});
-const textFill = new Fill({
-  color: "#fff",
-});
-const textStroke = new Stroke({
-  color: "rgba(0, 0, 0, 0.6)",
-  width: 3,
-});
-const innerCircle = new CircleStyle({
-  radius: 30,
-  fill: innerCircleFill,
-});
-const outerCircle = new CircleStyle({
-  radius: 35,
-  fill: outerCircleFill,
-});
+// -------------------------- Useful functions ---------------------------
 
-let hoverFeature;
-
-let clusterCluster = null;
-let clusterLayer = null;
 function AddPoint() {
   GetBlocks().then((res) => {
     GetBlockClusterArray(res).forEach((layer) => map.addLayer(layer));
@@ -244,7 +183,7 @@ function ChangeZoom(value) {
 }
 
 function ChangeClusterView(zoom) {
-  if (data.zoom > 50) {
+  if (zoom > 60) {
     GetRegionClusterArray().forEach((layer) => layer.setVisible(false));
     GetBlockClusterArray().forEach((layer) => layer.setVisible(true));
   } else {
@@ -294,11 +233,6 @@ function ChangeView() {
   width: 98%;
   height: 90%;
   margin: 1%;
-}
-
-.anchorBL {
-  opacity: 100%;
-  display: none;
 }
 
 .zoom-slider {

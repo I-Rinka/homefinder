@@ -7,7 +7,7 @@ import Point from "ol/geom/Point";
 import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 
 const config = {
-  sub_region_distance: 400,
+  sub_region_distance: 200,
   region_distance: 200,
 };
 
