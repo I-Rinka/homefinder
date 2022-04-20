@@ -18,6 +18,7 @@
       <el-button @click="AddOverlay">Add Ticks</el-button>
       <el-button @click="RemoveOverlay">Remove Ticks</el-button>
       <el-button @click="GetViewPort">Get View Port</el-button>
+      <el-button @click="GetRegion">Get Regions</el-button>
       <time-line></time-line>
     </div>
     <div>
@@ -32,7 +33,7 @@
 import { reactive } from "@vue/reactivity";
 import monotoneChainConvexHull from 'monotone-chain-convex-hull';
 import { theme } from "./Map/style";
-import { GetCurrentRecord, GetBlocks } from "../database/query.js";
+import { GetCurrentRecord, GetBlocks,GetRegions } from "../database/query.js";
 import { LocationFilled } from "@element-plus/icons-vue";
 import TimeLine from "./TimeLine.vue";
 import Map from "ol/Map";
@@ -51,6 +52,12 @@ import CircleStyle from "ol/style/Circle";
 import Overlay from "ol/Overlay";
 import { LineString, Polygon } from "ol/geom";
 import { createEmpty, extend, getWidth, containsXY, containsExtent, containsCoordinate } from 'ol/extent';
+
+function GetRegion() {
+  GetRegions().then(res=>
+  console.log(res))
+}
+
 
 // the configuration
 const config = {

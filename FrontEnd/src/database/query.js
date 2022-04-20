@@ -17,3 +17,8 @@ export async function GetBlocks() {
     let res= await axios.get("http://localhost:3000/block_data.json")
     return res.data;
 }
+
+export async function GetRegions() {
+    let res= await axios.get("http://localhost:3000/region_subregion.json")
+    return res.data;
+}
