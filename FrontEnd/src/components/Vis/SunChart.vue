@@ -1,9 +1,14 @@
 <template>
-    <div :id="props.feature.getGeometry().getCoordinates().toString()">hello</div>
+    <div :id="props.feature.getGeometry().getCoordinates().toString()">
+        <div style="font-size:1px">
+            {{ props.feature.getGeometry().getCoordinates()[0].toFixed(3) }} {{' , '}}
+            {{ props.feature.getGeometry().getCoordinates()[1].toFixed(3) }}
+        </div>
+    </div>
 </template>
 
 <script setup>
-import { onBeforeMount, onBeforeUnmount, onMounted, onUnmounted } from "@vue/runtime-core";
+import { onBeforeUnmount, onMounted } from "@vue/runtime-core";
 import Overlay from "ol/Overlay";
 
 const props = defineProps({
@@ -21,7 +26,6 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-    console.log("unmount")
     props.map.removeOverlay(overlay);
 })
 </script>

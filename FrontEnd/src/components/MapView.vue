@@ -199,11 +199,32 @@ onMounted(() => {
 function AddPoint() {
   GetBlocks().then((res) => {
     GetBlockClusterArray(res).forEach((layer) => map.addLayer(layer));
-    // GetRegionClusterArray(GetBlockClusterArray());
     GetRegionClusterArray(res).forEach((layer) => map.addLayer(layer));
+
+    // Make It refresh the dom on screen
+    GetRegionClusterArray().forEach((layer) => layer.on('change', AllRegionClusterLoadOK));
+    GetBlockClusterArray().forEach((layer) => layer.on('change', AllBlockClusterLoadOK));
 
     ChangeClusterView(data.zoom);
   });
+}
+
+// Because we have multiple layers, so we should use these function to minimize the fire times.
+let region_start = 0;
+function AllRegionClusterLoadOK() {
+  region_start++;
+  if (region_start === GetRegionClusterArray().length - 1) {
+    region_start = 0;
+    GetOnScreenFeatures();
+  }
+}
+let block_start = 0;
+function AllBlockClusterLoadOK() {
+  block_start++;
+  if (block_start === GetRegionClusterArray().length - 1) {
+    block_start = 0;
+    GetOnScreenFeatures();
+  }
 }
 
 function ResetPosition() {
@@ -240,7 +261,6 @@ function ChangeClusterView(zoom) {
     GetRegionClusterArray().forEach((layer) => layer.setVisible(true));
     GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
   }
-  GetOnScreenFeatures();
 }
 
 function ChangeView() {
@@ -255,10 +275,10 @@ function ChangeView() {
     data.zoom = new_percentage_zoom;
   }
   ChangeClusterView(data.zoom);
+  GetOnScreenFeatures();
 }
 
 function GetOnScreenFeatures() {
-  console.log("hello")
   let currentExtent = map.getView().calculateExtent(map.getSize());
 
   let features_dic = {};
