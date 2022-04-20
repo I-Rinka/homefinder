@@ -16,6 +16,7 @@
     <div style="height: 8vh">
       <!-- <el-button @click="GetData">GetData</el-button> -->
       <el-button @click="AddOverlay">Add Ticks</el-button>
+      <el-button @click="RemoveOverlay">Remove Ticks</el-button>
       <el-button @click="GetViewPort">Get View Port</el-button>
       <time-line></time-line>
     </div>
@@ -49,8 +50,9 @@ import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import Overlay from "ol/Overlay";
 import { LineString, Polygon } from "ol/geom";
-import { createEmpty, extend, getWidth } from 'ol/extent';
+import { createEmpty, extend, getWidth, containsXY, containsExtent, containsCoordinate } from 'ol/extent';
 
+// the configuration
 const config = {
   zoom: 10,
   minZoom: 8,
@@ -64,54 +66,88 @@ const config = {
     41.264546138018204
   ]
 }
+
+// the reactive data
 const data = reactive({
   zoom: Math.floor((config.zoom - config.minZoom) * 100 / (config.maxZoom - config.minZoom)),
-  blocks: []
+  blocks: [],
 });
-let map = null;
+
+// The Openlayers
+useGeographic();
+const map = new Map({
+  // target: "map",
+  layers: [
+    mapboxlayer,
+    // Layer,
+  ],
+  view: new View({
+    center: config.center,
+    zoom: config.zoom,
+    extent: config.extend,
+    minZoom: config.minZoom,
+    maxZoom: config.maxZoom
+  }),
+  controls: [],
+});
+map.getView().on('change', ChangeView);
 
 onMounted(() => {
-  useGeographic();
-
-  map = new Map({
-    target: "map",
-    layers: [
-      mapboxlayer,
-      // Layer,
-    ],
-    view: new View({
-      center: config.center,
-      zoom: config.zoom,
-      extent: config.extend
-    }),
-    controls: [],
-  });
-
-  map.getView().setMaxZoom(config.maxZoom);
-  map.getView().setMinZoom(config.minZoom);
-
-  map.getView().on('change', ChangeView);
+  map.setTarget("map")
   AddPoint();
 });
 
 function AddOverlay() {
+  let currentExtent = map.getView().calculateExtent(map.getSize());
   for (let i = 0; i < data.blocks.length; i++) {
     const element = data.blocks[i];
-    const overlay = new Overlay({
-      position: [element['lng'], element['lat']],
-      element: document.getElementById(element['block'])
-    })
-    map.addOverlay(overlay);
+    if (containsXY(currentExtent, element['lng'], element['lat'])) {
 
+      const overlay = new Overlay({
+        id: element['block'],
+        position: [element['lng'], element['lat']],
+        element: document.getElementById(element['block']),
+        insertFirst: true,
+      })
+      map.addOverlay(overlay);
+    }
   }
 }
+
+function RemoveOverlay() {
+  let overlays = map.getOverlays();
+  let currentExtent = map.getView().calculateExtent(map.getSize());
+  let er = false;
+  let remove_overlay = []
+  overlays.forEach(overlay => {
+    try {
+      if (!containsCoordinate(currentExtent, overlay.getPosition())) {
+        remove_overlay.push(overlay.getId())
+      }
+      else {
+        console.log(overlay.getId(), overlay.getPosition())
+      }
+    } catch (error) {
+      er = true;
+    }
+  }
+  );
+
+  remove_overlay.forEach(id => {
+    map.removeOverlay(map.getOverlayById(id));
+  })
+
+  if (er) {
+    console.log(
+      map.getOverlays()
+    )
+  }
+
+}
+
 function GetViewPort() {
   console.log(map.getView().calculateExtent(map.getSize()));
 }
-
-const circleDistanceMultiplier = 1;
-const circleFootSeparation = 28;
-const circleStartAngle = Math.PI / 2;
 
 const convexHullFill = new Fill({
   color: 'rgba(255, 153, 0, 0.4)',
