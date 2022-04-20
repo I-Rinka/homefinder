@@ -7,11 +7,33 @@ import Point from "ol/geom/Point";
 import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 
 const config = {
-  sub_region_distance: 100,
+  sub_region_distance: 400,
+  region_distance: 200,
 };
 
 let BlockCluster = null;
 let RegionCluster = null;
+let point_features = null;
+
+export function GetPointFeatures(blocks) {
+  if (point_features !== null) {
+    return point_features;
+  } else {
+    point_features = [];
+    for (let i = 0; i < blocks.length; i++) {
+      const element = blocks[i];
+      let point_feature = new Feature({
+        name: element.block,
+        region: element.region,
+        sub_region: element.sub_region,
+      });
+      let point_geom = new Point([element.lng, element.lat]);
+      point_feature.setGeometry(point_geom);
+      point_features.push(point_feature);
+    }
+    return point_features;
+  }
+}
 
 export function GetBlockClusterArray(blocks) {
   if (BlockCluster !== null) {
@@ -20,22 +42,12 @@ export function GetBlockClusterArray(blocks) {
     BlockCluster = [];
     let block_dic = {};
 
-    for (let i = 0; i < blocks.length; i++) {
-      const element = blocks[i];
-
-      let point_feature = new Feature({
-        name: element.block,
-        region: element.region,
-        sub_region: element.sub_region,
-      });
-
-      let point_geom = new Point([element.lng, element.lat]);
-      point_feature.setGeometry(point_geom);
-      if (!block_dic.hasOwnProperty(element.sub_region)) {
-        block_dic[element.sub_region] = new VectorSource();
+    GetPointFeatures(blocks).forEach((feature) => {
+      if (!block_dic.hasOwnProperty(feature.get("sub_region"))) {
+        block_dic[feature.get("sub_region")] = new VectorSource();
       }
-      block_dic[element.sub_region].addFeature(point_feature);
-    }
+      block_dic[feature.get("sub_region")].addFeature(feature);
+    });
 
     for (const sub_region in block_dic) {
       if (Object.hasOwnProperty.call(block_dic, sub_region)) {
@@ -56,8 +68,70 @@ export function GetBlockClusterArray(blocks) {
     return BlockCluster;
   }
 }
+export function GetRegionClusterArray(blocks) {
+  if (RegionCluster !== null) {
+    return RegionCluster;
+  } else {
+    RegionCluster = [];
+    let block_dic = {};
 
-function GetRegionClusterArray() {}
+    GetPointFeatures(blocks).forEach((feature) => {
+      if (!block_dic.hasOwnProperty(feature.get("region"))) {
+        block_dic[feature.get("region")] = new VectorSource();
+      }
+      block_dic[feature.get("region")].addFeature(feature);
+    });
+
+    for (const region in block_dic) {
+      if (Object.hasOwnProperty.call(block_dic, region)) {
+        let cluster = new Cluster({
+          source: block_dic[region],
+          distance: config.region_distance,
+        });
+
+        RegionCluster.push(
+          new VectorLayer({
+            source: cluster,
+            style: regionClusterStyle,
+          })
+        );
+      }
+    }
+    return RegionCluster;
+  }
+}
+
+function regionClusterStyle(feature) {
+  const size = feature.get("features").length;
+  const block_name = feature.get("features")[0].get("region");
+  if (size > 1) {
+    return [
+      // outer style
+      new Style({
+        image: new CircleStyle({
+          radius: Math.sqrt(Math.log(size + 3) * 150),
+          fill: outerCircleFill,
+        }),
+      }),
+
+      // inner
+      new Style({
+        image: new CircleStyle({
+          radius: Math.sqrt(Math.log(size + 3) * 150) - 5,
+          fill: innerCircleFill,
+        }),
+        text: new Text({
+          text: block_name,
+          fill: textFill,
+          stroke: textStroke,
+        }),
+      }),
+    ];
+  } else {
+    const originalFeature = feature.get("features")[0];
+    return clusterMemberStyle(originalFeature);
+  }
+}
 
 function blockClusterStyle(feature) {
   const size = feature.get("features").length;
@@ -68,7 +142,7 @@ function blockClusterStyle(feature) {
       new Style({
         image: new CircleStyle({
           radius: Math.sqrt(Math.log(size + 3) * 250),
-          fill: outerCircleFill,
+          fill: outerBlueFill,
         }),
       }),
 
@@ -76,7 +150,7 @@ function blockClusterStyle(feature) {
       new Style({
         image: new CircleStyle({
           radius: Math.sqrt(Math.log(size + 3) * 250) - 5,
-          fill: innerCircleFill,
+          fill: innerBlueFill,
         }),
         text: new Text({
           text: block_name,
@@ -119,6 +193,12 @@ const outerCircleFill = new Fill({
 });
 const innerCircleFill = new Fill({
   color: "rgba(255, 165, 0, 0.7)",
+});
+const outerBlueFill = new Fill({
+  color: "rgba(131, 188, 255, 0.3)",
+});
+const innerBlueFill = new Fill({
+  color: "rgba(84, 160, 255, 0.7)",
 });
 const textFill = new Fill({
   color: "#fff",

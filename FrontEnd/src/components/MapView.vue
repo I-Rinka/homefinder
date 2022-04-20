@@ -67,7 +67,7 @@ import VectorLayer from "ol/layer/Vector";
 import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import Overlay from "ol/Overlay";
-import { GetBlockClusterArray } from "./Map/cluster";
+import { GetBlockClusterArray, GetRegionClusterArray } from "./Map/cluster";
 import { LineString, Polygon } from "ol/geom";
 
 import {
@@ -207,176 +207,14 @@ let hoverFeature;
 
 let clusterCluster = null;
 let clusterLayer = null;
-
 function AddPoint() {
   GetBlocks().then((res) => {
     GetBlockClusterArray(res).forEach((layer) => map.addLayer(layer));
+    // GetRegionClusterArray(GetBlockClusterArray());
+    GetRegionClusterArray(res).forEach((layer) => map.addLayer(layer));
 
-    /*
-    data.blocks = res;
-    let point_source = new VectorSource({
-      features: [],
-    });
-
-    for (let i = 0; i < res.length; i++) {
-      const element = res[i];
-      let point_feature = new Feature({
-        name: element.block,
-        region: element.region,
-        sub_region: element.sub_region,
-      });
-
-      let point_geom = new Point([element.lng, element.lat]);
-      point_feature.setGeometry(point_geom);
-      point_source.addFeature(point_feature);
-    }
-
-    function clusterStyle(feature) {
-      const size = feature.get("features").length;
-      if (size > 1) {
-        return [
-          // outer style
-          new Style({
-            image: new CircleStyle({
-              radius: Math.sqrt(Math.log(size + 3) * 250),
-              fill: outerCircleFill,
-            }),
-          }),
-
-          // inner
-          new Style({
-            image: new CircleStyle({
-              radius: Math.sqrt(Math.log(size + 3) * 250) - 5,
-              fill: innerCircleFill,
-            }),
-            text: new Text({
-              text: size.toString(),
-              fill: textFill,
-              stroke: textStroke,
-            }),
-          }),
-        ];
-      } else {
-        const originalFeature = feature.get("features")[0];
-        return clusterMemberStyle(originalFeature);
-      }
-    }
-
-    function clusterMemberStyle(clusterMember) {
-      return new Style({
-        geometry: clusterMember.getGeometry(),
-        image: new CircleStyle({
-          fill: fill,
-          stroke: stroke,
-          radius: 8,
-          // image: clusterMember.get('LEISTUNG') > 5 ? darkIcon : lightIcon,
-        }),
-        fill: fill,
-        stroke: stroke,
-      });
-    }
-    function clusterHullStyle(cluster) {
-      if (cluster !== hoverFeature) {
-        // console.log("not this one",cluster.get('features').length) // 获取到屏幕上的点的方法
-        return;
-      }
-      // console.log(cluster.get('features'))
-      const originalFeatures = cluster.get("features");
-      const points = originalFeatures.map((feature) =>
-        feature.getGeometry().getCoordinates()
-      );
-      return new Style({
-        geometry: new Polygon([monotoneChainConvexHull(points)]),
-        fill: convexHullFill,
-        stroke: convexHullStroke,
-      });
-    }
-
-    const clusterSource = new Cluster({
-      distance: 100,
-      source: point_source,
-    });
-
-    clusterLayer = new VectorLayer({
-      source: clusterSource,
-      style: clusterStyle,
-    });
-    const clusterHulls = new VectorLayer({
-      source: clusterSource,
-      style: clusterHullStyle,
-    });
-
-    clusterCluster = new VectorLayer({
-      source: new Cluster({
-        source: clusterSource,
-        distance: 150,
-      }),
-      style: (feature) => {
-        let size = 0;
-        let fts = feature.get("features");
-        fts.forEach((ft) => (size += ft.get("features").length));
-
-        if (size > 1) {
-          return [
-            // outer style
-            new Style({
-              image: new CircleStyle({
-                radius: Math.sqrt(Math.log(size + 3) * 1000),
-                fill: new Fill({
-                  color: "rgba(75, 154, 233, 0.3)",
-                }),
-              }),
-            }),
-
-            // inner
-            new Style({
-              image: new CircleStyle({
-                radius: Math.sqrt(Math.log(size + 3) * 1000) - 5,
-                fill: new Fill({
-                  color: "rgba(52, 120, 198, 0.3)",
-                }),
-              }),
-              text: new Text({
-                text: size.toString(),
-                fill: textFill,
-                stroke: textStroke,
-              }),
-            }),
-          ];
-        } else {
-          const originalFeature = feature.get("features")[0];
-          return clusterMemberStyle(originalFeature);
-        }
-      },
-    });
-
-    // map.addLayer(clusterLayer);
-    // map.addLayer(clusterCluster);
-    // ChangeClusterView(data.zoom);
-
-    let fill = new Fill({
-      color: [180, 0, 0, 0.3],
-    });
-
-    let stroke = new Stroke({
-      color: [180, 0, 0, 1],
-      width: 1,
-    });
-
-    map.on("pointermove", (event) => {
-      let features = map.getFeaturesAtPixel(event.pixel);
-
-      // 不知道为什么，会自动将hover的那些点输入到setStyle里面
-      clusterHulls.setStyle(clusterHullStyle);
-      hoverFeature = features[0];
-      // console.log(hoverFeature)
-      // Change the cursor style to indicate that the cluster is clickable.
-      map.getTargetElement().style.cursor =
-        hoverFeature && hoverFeature.get("features").length > 1
-          ? "pointer"
-          : "";
-    });*/
-  });
+    ChangeClusterView(data.zoom);
+ });
 }
 
 function ResetPosition() {
@@ -406,12 +244,12 @@ function ChangeZoom(value) {
 }
 
 function ChangeClusterView(zoom) {
-  if (data.zoom > 33) {
-    clusterLayer.setVisible(true);
-    clusterCluster.setVisible(false);
+  if (data.zoom > 50) {
+    GetRegionClusterArray().forEach((layer) => layer.setVisible(false));
+    GetBlockClusterArray().forEach((layer) => layer.setVisible(true));
   } else {
-    clusterLayer.setVisible(false);
-    clusterCluster.setVisible(true);
+    GetRegionClusterArray().forEach((layer) => layer.setVisible(true));
+    GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
   }
 }
 
@@ -426,7 +264,7 @@ function ChangeView() {
   ) {
     data.zoom = new_percentage_zoom;
   }
-  // ChangeClusterView(data.zoom);
+  ChangeClusterView(data.zoom);
 }
 </script>
 
