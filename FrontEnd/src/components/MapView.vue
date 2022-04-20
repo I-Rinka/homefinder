@@ -22,7 +22,8 @@
       <time-line></time-line>
     </div>
     <div>
-      <sun-chart v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"></sun-chart>
+      <sun-chart v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()" :map="map"
+        :feature="feature"></sun-chart>
       <!-- <div v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()">{{
         feature.getGeometry().getCoordinates()
       }}</div> -->
@@ -179,7 +180,7 @@ onMounted(() => {
         rm.remove();
       }
       map.addOverlay(overLay);
-      // rm.remove();
+
     }
   });
 
@@ -191,7 +192,10 @@ onMounted(() => {
       map.getTargetElement().style.cursor = features.get('features') ? "pointer" : "";
     }
   });
+
+
 });
+
 function AddPoint() {
   GetBlocks().then((res) => {
     GetBlockClusterArray(res).forEach((layer) => map.addLayer(layer));
@@ -236,6 +240,7 @@ function ChangeClusterView(zoom) {
     GetRegionClusterArray().forEach((layer) => layer.setVisible(true));
     GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
   }
+  GetOnScreenFeatures();
 }
 
 function ChangeView() {
@@ -250,13 +255,12 @@ function ChangeView() {
     data.zoom = new_percentage_zoom;
   }
   ChangeClusterView(data.zoom);
-  GetOnScreenFeatures();
 }
 
 function GetOnScreenFeatures() {
+  console.log("hello")
   let currentExtent = map.getView().calculateExtent(map.getSize());
 
-  let features = [];
   let features_dic = {};
 
   GetRegionClusterArray().forEach((layer) => {
