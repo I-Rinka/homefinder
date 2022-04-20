@@ -189,11 +189,12 @@ function AddPoint() {
 
     for (let i = 0; i < res.length; i++) {
       const element = res[i];
-      let point_feature = new Feature({});
+      let point_feature = new Feature({ name: element.block, region: element.region, sub_region: element.sub_region });
 
       let point_geom = new Point([element.lng, element.lat]);
       point_feature.setGeometry(point_geom);
       point_source.addFeature(point_feature);
+      console.log(point_feature)
     }
 
     function clusterStyle(feature) {

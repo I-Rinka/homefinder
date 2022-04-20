@@ -41,7 +41,7 @@ function createEarthquakeStyle(feature) {
   // standards-violating <magnitude> tag in each Placemark.  We extract it
   // from the Placemark's name instead.
 
-  // 从feature拿到了neam
+  // 从feature拿到了names
   const name = feature.get('name');
   const magnitude = parseFloat(name.substr(2));
   const radius = 5 + 20 * (magnitude - 5);
