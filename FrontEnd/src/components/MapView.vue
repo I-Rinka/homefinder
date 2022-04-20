@@ -178,7 +178,6 @@ const outerCircle = new CircleStyle({
   fill: outerCircleFill,
 });
 
-let clickFeature, clickResolution;
 let hoverFeature;
 
 function AddPoint() {
@@ -194,7 +193,6 @@ function AddPoint() {
 
       let point_geom = new Point([element.lng, element.lat]);
       point_feature.setGeometry(point_geom);
-
       point_source.addFeature(point_feature);
     }
 
@@ -229,38 +227,6 @@ function AddPoint() {
         return clusterMemberStyle(originalFeature);
       }
     }
-
-    function clusterCircleStyle(cluster, resolution) {
-      if (cluster !== clickFeature || resolution !== clickResolution) {
-        return;
-      }
-      const clusterMembers = cluster.get('features');
-      const centerCoordinates = cluster.getGeometry().getCoordinates();
-      return generatePointsCircle(
-        clusterMembers.length,
-        cluster.getGeometry().getCoordinates(),
-        resolution
-      ).reduce((styles, coordinates, i) => {
-        const point = new Point(coordinates);
-        const line = new LineString([centerCoordinates, coordinates]);
-        styles.unshift(
-          new Style({
-            geometry: line,
-            stroke: convexHullStroke,
-          })
-        );
-        styles.push(
-          clusterMemberStyle(
-            new Feature({
-              ...clusterMembers[i].getProperties(),
-              geometry: point,
-            })
-          )
-        );
-        return styles;
-      }, []);
-    }
-
 
     function clusterMemberStyle(clusterMember) {
       return new Style({
@@ -301,18 +267,12 @@ function AddPoint() {
       source: clusterSource,
       style: clusterStyle
     })
-    // Layer displaying the expanded view of overlapping cluster members.
-    const clusterCircles = new VectorLayer({
-      source: clusterSource,
-      style: clusterCircleStyle,
-    });
     const clusterHulls = new VectorLayer({
       source: clusterSource,
       style: clusterHullStyle,
     });
 
     map.addLayer(clusterHulls);
-    map.addLayer(clusterCircles);
     map.addLayer(clusterLayer);
 
     let fill = new Fill({
