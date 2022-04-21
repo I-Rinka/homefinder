@@ -55,8 +55,9 @@ import {
   containsExtent,
   containsCoordinate,
 } from "ol/extent";
-import { DragRotateAndZoom, PinchZoom, DragBox, defaults, DragRotate, DragZoom, KeyboardPan, PinchRotate, KeyboardZoom, DragPan, MouseWheelZoom, Translate, Select } from "ol/interaction";
+import { DragRotateAndZoom, PinchZoom, DragBox, defaults, DragRotate, DragZoom, KeyboardPan, PinchRotate, KeyboardZoom, DragPan, MouseWheelZoom, Translate, Select, Modify } from "ol/interaction";
 import { shiftKeyOnly } from "ol/events/condition";
+import PointerInteraction from "ol/interaction/Pointer";
 // the configuration
 const config = {
   zoom: 10,
@@ -85,6 +86,19 @@ const data = reactive({
 const MarkSource = new VectorSource();
 const MarkLayer = new VectorLayer({ source: MarkSource })
 
+const modify = new Modify({
+  hitDetection: MarkLayer,
+  source: MarkSource,
+});
+modify.on(['modifystart', 'modifyend'], function (evt) {
+  document.getElementById('map').style.cursor = evt.type === 'modifystart' ? 'grabbing' : 'pointer';
+});
+const overlaySource = modify.getOverlay().getSource();
+overlaySource.on(['addfeature', 'removefeature'], function (evt) {
+  document.getElementById('map').style.cursor = evt.type === 'addfeature' ? 'pointer' : '';
+});
+
+
 // -------------------------- Useful functions ---------------------------
 
 // The Openlayers
@@ -99,7 +113,7 @@ const map = new Map({
     maxZoom: config.maxZoom,
   }),
   controls: [],
-  interactions: [new DragRotate(), new DragBox({ condition: shiftKeyOnly }), new DragPan(), new PinchRotate(), new PinchZoom(), new KeyboardPan(), new KeyboardZoom(), new MouseWheelZoom()]
+  interactions: [new DragRotate(), new DragBox({ condition: shiftKeyOnly }), new DragPan(), new PinchRotate(), new PinchZoom(), new KeyboardPan(), new KeyboardZoom(), new MouseWheelZoom(), modify]
 });
 map.getView().on("change", ChangeView);
 
