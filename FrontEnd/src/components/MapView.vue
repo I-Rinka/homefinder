@@ -22,8 +22,8 @@
       <time-line></time-line>
     </div>
     <div>
-      <sun-chart v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()" :map="map"
-        :feature="feature"></sun-chart>
+      <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()" :map="map"
+        :feature="feature"></sun-chart-adaptor>
       <!-- <div v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()">{{
         feature.getGeometry().getCoordinates()
       }}</div> -->
@@ -66,6 +66,7 @@ import CircleStyle from "ol/style/Circle";
 import Overlay from "ol/Overlay";
 import { GetBlockClusterArray, GetRegionClusterArray } from "./Map/cluster";
 import { LineString, Polygon } from "ol/geom";
+import SunChartAdaptor from "./Vis/SunChartAdaptor.vue"
 import SunChart from "./Vis/SunChart.vue"
 
 import {
