@@ -188,16 +188,16 @@ const stroke = new Stroke({
 });
 
 const outerCircleFill = new Fill({
-  color: "rgba(255, 153, 102, 0.3)",
+  color: "rgba(255, 153, 102, 0.0)",
 });
 const innerCircleFill = new Fill({
-  color: "rgba(255, 165, 0, 0.7)",
+  color: "rgba(255, 165, 0, 0.0)",
 });
 const outerBlueFill = new Fill({
-  color: "rgba(131, 188, 255, 0.3)",
+  color: "rgba(131, 188, 255, 0.0)",
 });
 const innerBlueFill = new Fill({
-  color: "rgba(84, 160, 255, 0.7)",
+  color: "rgba(84, 160, 255, 0.0)",
 });
 const textFill = new Fill({
   color: "#fff",

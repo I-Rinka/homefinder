@@ -14,18 +14,15 @@
         cy="0"
         fill="none"
         :stroke="MarksAdaptor(feature).color"
-        stroke-width="10"
+        stroke-width="15"
         stroke-linecap="round"
         :style="{
-          r: Number(i + 1) * 10,
-          strokeDashoffset: `${GetDash(end, radius)}`,
-          strokeDasharray: `${GetDash(0, radius)}`,
+          r: Number(i + 2) * 14,
+          strokeDashoffset: `${GetDash(end, Number(i + 1) * 10)}`,
+          strokeDasharray: `${GetDash(0, Number(i + 1) * 10)}`,
           transform: `rotate(${GetRotation(
             end,
-            GetOrientation(
-              [116.06000975863789, 39.73071710290948],
-              [116.49163115248814, 40.173677867295204]
-            )
+            GetOrientation(myCoordinates, MarksAdaptor(feature).coordinates)
           )}deg)`,
         }"
       />
