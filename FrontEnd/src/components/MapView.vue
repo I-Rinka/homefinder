@@ -6,19 +6,30 @@
     </div>
 
     <div class="zoom-slider">
-      <el-button @click="ResetPosition" :icon="LocationFilled" style="margin-bottom: 1vh" circle>
+      <el-button
+        @click="ResetPosition"
+        :icon="LocationFilled"
+        style="margin-bottom: 1vh"
+        circle
+      >
       </el-button>
       <!-- @click="ResetPosition"
         @input="SetZoom" -->
-      <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
+      <el-slider
+        v-model="data.zoom"
+        :step="1"
+        :max="100"
+        :min="0"
+        @input="ChangeZoom"
+        vertical
+      >
       </el-slider>
     </div>
-    <sun-chart></sun-chart>
-    <!-- <div>
+    <!-- <sun-chart></sun-chart> -->
+    <div>
       <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"
-        :map="map" :feature="feature"></sun-chart-adaptor>
-    </div> -->
-
+        :map="map" :feature="feature" :markArray="data.marks"></sun-chart-adaptor>
+    </div>
   </div>
 </template>
 
@@ -44,8 +55,8 @@ import CircleStyle from "ol/style/Circle";
 import Overlay from "ol/Overlay";
 import { GetBlockClusterArray, GetRegionClusterArray } from "./Map/cluster";
 import { Circle, LineString, Polygon } from "ol/geom";
-import SunChartAdaptor from "./Vis/SunChartAdaptor.vue"
-import SunChart from "./Vis/SunChart.vue"
+import SunChartAdaptor from "./Vis/SunChartAdaptor.vue";
+import SunChart from "./Vis/SunChart.vue";
 import * as d3 from "d3";
 
 import {
@@ -56,7 +67,22 @@ import {
   containsExtent,
   containsCoordinate,
 } from "ol/extent";
-import { DragRotateAndZoom, PinchZoom, DragBox, defaults, DragRotate, DragZoom, KeyboardPan, PinchRotate, KeyboardZoom, DragPan, MouseWheelZoom, Translate, Select, Modify } from "ol/interaction";
+import {
+  DragRotateAndZoom,
+  PinchZoom,
+  DragBox,
+  defaults,
+  DragRotate,
+  DragZoom,
+  KeyboardPan,
+  PinchRotate,
+  KeyboardZoom,
+  DragPan,
+  MouseWheelZoom,
+  Translate,
+  Select,
+  Modify,
+} from "ol/interaction";
 import { shiftKeyOnly } from "ol/events/condition";
 import PointerInteraction from "ol/interaction/Pointer";
 // the configuration
@@ -79,24 +105,28 @@ const data = reactive({
   ),
   blocks: [],
   popOver: [],
-  popOverCoord: '',
-  features: []
+  popOverCoord: "",
+  features: [],
+  marks: [],
 });
 
+
+// add marks
 let color_array = d3.schemeSet1;
-let feature_nu = 0;
-
-
-let svg = '<svg t="1650527293382" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"  width="40" height="40" fill="red"><path d="M553.0112 991.06133333a51.2 51.2 0 0 1-82.0224 0C259.3792 707.77173333 153.6 503.94453333 153.6 379.73333333a358.4 358.4 0 1 1 716.8 0c0 124.16-105.7792 327.9872-317.3888 611.328zM512 533.33333333a153.6 153.6 0 1 0 0-307.2 153.6 153.6 0 0 0 0 307.2z" p-id="11077"></path></svg>'
-let mysvg = new Image();
-mysvg.src = 'data:image/svg+xml,' + encodeURIComponent(svg);
+let color_nu = 0;
 
 function GetNewFeature(coordinate) {
+  let color = color_array[color_nu];
+  let svg = `<svg t="1650527293382" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"  width="40" height="40" fill="${color}"><path d="M553.0112 991.06133333a51.2 51.2 0 0 1-82.0224 0C259.3792 707.77173333 153.6 503.94453333 153.6 379.73333333a358.4 358.4 0 1 1 716.8 0c0 124.16-105.7792 327.9872-317.3888 611.328zM512 533.33333333a153.6 153.6 0 1 0 0-307.2 153.6 153.6 0 0 0 0 307.2z" p-id="11077"></path></svg>`;
+
+  let mysvg = new Image();
+  color_nu = (color_nu + 1) % color_array.length;
+  mysvg.src = "data:image/svg+xml," + encodeURIComponent(svg);
   let style = new Style({
     image: new Icon({
       anchor: [0.5, 0.8],
-      anchorXUnits: 'fraction',
-      anchorYUnits: 'fraction',
+      anchorXUnits: "fraction",
+      anchorYUnits: "fraction",
       img: mysvg,
       imgSize: [40, 40],
     }),
@@ -105,27 +135,31 @@ function GetNewFeature(coordinate) {
 
   let new_feature = new Feature({
     geometry: new Point(coordinate),
+    color: color,
   });
   new_feature.setStyle(style);
+  data.marks.push(new_feature);
+
   return new_feature;
 }
 
 const MarkSource = new VectorSource();
-const MarkLayer = new VectorLayer({ source: MarkSource })
+const MarkLayer = new VectorLayer({ source: MarkSource });
 const modify = new Modify({
   source: MarkSource,
   snapToPointer: true,
   pixelTolerance: 30,
   style: new Style(),
 });
-modify.on(['modifystart', 'modifyend'], function (evt) {
-  document.getElementById('map').style.cursor = evt.type === 'modifystart' ? 'grabbing' : 'pointer';
+modify.on(["modifystart", "modifyend"], function (evt) {
+  document.getElementById("map").style.cursor =
+    evt.type === "modifystart" ? "grabbing" : "pointer";
 });
 const overlaySource = modify.getOverlay().getSource();
-overlaySource.on(['addfeature', 'removefeature'], function (evt) {
-  document.getElementById('map').style.cursor = evt.type === 'addfeature' ? 'pointer' : '';
+overlaySource.on(["addfeature", "removefeature"], function (evt) {
+  document.getElementById("map").style.cursor =
+    evt.type === "addfeature" ? "pointer" : "";
 });
-
 
 // -------------------------- Useful functions ---------------------------
 
@@ -141,7 +175,17 @@ const map = new Map({
     maxZoom: config.maxZoom,
   }),
   controls: [],
-  interactions: [new DragRotate(), new DragBox({ condition: shiftKeyOnly }), new DragPan(), new PinchRotate(), new PinchZoom(), new KeyboardPan(), new KeyboardZoom(), new MouseWheelZoom(), modify]
+  interactions: [
+    new DragRotate(),
+    new DragBox({ condition: shiftKeyOnly }),
+    new DragPan(),
+    new PinchRotate(),
+    new PinchZoom(),
+    new KeyboardPan(),
+    new KeyboardZoom(),
+    new MouseWheelZoom(),
+    modify,
+  ],
 });
 map.getView().on("change", ChangeView);
 
@@ -153,15 +197,16 @@ onMounted(() => {
   map.on("pointermove", (event) => {
     let features = map.getFeaturesAtPixel(event.pixel)[0];
     if (features) {
-      map.getTargetElement().style.cursor = features.get('features') ? "pointer" : "";
+      map.getTargetElement().style.cursor = features.get("features")
+        ? "pointer"
+        : "";
     }
   });
 
   map.on("dblclick", (event) => {
     let new_feature = GetNewFeature(event.coordinate);
     MarkSource.addFeature(new_feature);
-  })
-
+  });
 });
 
 function AddPoint() {
@@ -170,8 +215,12 @@ function AddPoint() {
     GetRegionClusterArray(res).forEach((layer) => map.addLayer(layer));
 
     // Make It refresh the dom on screen
-    GetRegionClusterArray().forEach((layer) => layer.on('change', AllRegionClusterLoadOK));
-    GetBlockClusterArray().forEach((layer) => layer.on('change', AllBlockClusterLoadOK));
+    GetRegionClusterArray().forEach((layer) =>
+      layer.on("change", AllRegionClusterLoadOK)
+    );
+    GetBlockClusterArray().forEach((layer) =>
+      layer.on("change", AllBlockClusterLoadOK)
+    );
 
     ChangeClusterView(data.zoom);
   });
@@ -254,26 +303,31 @@ function GetOnScreenFeatures() {
   GetRegionClusterArray().forEach((layer) => {
     if (layer.getVisible()) {
       layer.getSource().forEachFeatureInExtent(currentExtent, (feature) => {
-        features_dic[feature.getGeometry().getCoordinates().toString()] = feature
+        features_dic[feature.getGeometry().getCoordinates().toString()] =
+          feature;
         // features.push(feature);
-      })
+      });
     }
   });
   GetBlockClusterArray().forEach((layer) => {
     if (layer.getVisible()) {
       layer.getSource().forEachFeatureInExtent(currentExtent, (feature) => {
-        features_dic[feature.getGeometry().getCoordinates().toString()] = feature
-      })
+        features_dic[feature.getGeometry().getCoordinates().toString()] =
+          feature;
+      });
     }
   });
 
-  let discard_feature = []
+  let discard_feature = [];
   for (let i = data.features.length - 1; i >= 0; i--) {
     const feature = data.features[i];
-    if (features_dic.hasOwnProperty(feature.getGeometry().getCoordinates().toString())) {
+    if (
+      features_dic.hasOwnProperty(
+        feature.getGeometry().getCoordinates().toString()
+      )
+    ) {
       delete features_dic[feature.getGeometry().getCoordinates().toString()];
-    }
-    else {
+    } else {
       data.features.splice(i, 1);
       discard_feature.push(toRaw(feature));
     }
@@ -286,7 +340,6 @@ function GetOnScreenFeatures() {
   }
   // console.log(discard_feature)
 }
-
 </script>
 
 <style lang="less">
@@ -302,7 +355,7 @@ function GetOnScreenFeatures() {
 }
 
 .ol-layer {
-  >canvas {
+  > canvas {
     border-radius: 14px;
   }
 }
@@ -327,7 +380,7 @@ function GetOnScreenFeatures() {
   z-index: 6;
   cursor: default;
 
-  >div {
+  > div {
     height: 20vh;
 
     .el-slider__runway {
