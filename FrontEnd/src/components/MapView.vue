@@ -14,13 +14,10 @@
       </el-slider>
     </div>
     <sun-chart></sun-chart>
-    <div>
+    <!-- <div>
       <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"
         :map="map" :feature="feature"></sun-chart-adaptor>
-      <!-- <div v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()">{{
-        feature.getGeometry().getCoordinates()
-      }}</div> -->
-    </div>
+    </div> -->
 
   </div>
 </template>
@@ -58,6 +55,8 @@ import {
   containsExtent,
   containsCoordinate,
 } from "ol/extent";
+import { DragRotateAndZoom, PinchZoom, DragBox, defaults, DragRotate, DragZoom, KeyboardPan, PinchRotate, KeyboardZoom, DragPan, MouseWheelZoom, Translate, Select } from "ol/interaction";
+import { shiftKeyOnly } from "ol/events/condition";
 // the configuration
 const config = {
   zoom: 10,
@@ -83,12 +82,15 @@ const data = reactive({
 });
 
 
+const MarkSource = new VectorSource();
+const MarkLayer = new VectorLayer({ source: MarkSource })
+
 // -------------------------- Useful functions ---------------------------
 
 // The Openlayers
 useGeographic();
 const map = new Map({
-  layers: [mapboxlayer, beijingLayer],
+  layers: [mapboxlayer, beijingLayer, MarkLayer],
   view: new View({
     center: config.center,
     zoom: config.zoom,
@@ -97,6 +99,7 @@ const map = new Map({
     maxZoom: config.maxZoom,
   }),
   controls: [],
+  interactions: [new DragRotate(), new DragBox({ condition: shiftKeyOnly }), new DragPan(), new PinchRotate(), new PinchZoom(), new KeyboardPan(), new KeyboardZoom(), new MouseWheelZoom()]
 });
 map.getView().on("change", ChangeView);
 
@@ -113,6 +116,11 @@ onMounted(() => {
     }
   });
 
+  map.on("dblclick", (event) => {
+    console.log(event.coordinate);
+    let new_feature = new Feature(new Point(event.coordinate));
+    MarkSource.addFeature(new_feature);
+  })
 
 });
 
