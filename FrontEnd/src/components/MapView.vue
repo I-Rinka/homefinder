@@ -27,8 +27,13 @@
     </div>
     <!-- <sun-chart></sun-chart> -->
     <div>
-      <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"
-        :map="map" :feature="feature" :markArray="data.marks"></sun-chart-adaptor>
+      <sun-chart-adaptor
+        v-for="feature in data.features"
+        :key="feature.getGeometry().getCoordinates().toString()"
+        :map="map"
+        :feature="feature"
+        :markArray="data.marks"
+      ></sun-chart-adaptor>
     </div>
   </div>
 </template>
@@ -53,7 +58,11 @@ import VectorLayer from "ol/layer/Vector";
 import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import Overlay from "ol/Overlay";
-import { GetBlockClusterArray, GetRegionClusterArray } from "./Map/cluster";
+import {
+  GetBlockClusterArray,
+  GetCluster,
+  GetRegionClusterArray,
+} from "./Map/cluster";
 import { Circle, LineString, Polygon } from "ol/geom";
 import SunChartAdaptor from "./Vis/SunChartAdaptor.vue";
 import SunChart from "./Vis/SunChart.vue";
@@ -109,7 +118,6 @@ const data = reactive({
   features: [],
   marks: [],
 });
-
 
 // add marks
 let color_array = d3.schemeSet1;
@@ -213,7 +221,7 @@ function AddPoint() {
   GetBlocks().then((res) => {
     GetBlockClusterArray(res).forEach((layer) => map.addLayer(layer));
     GetRegionClusterArray(res).forEach((layer) => map.addLayer(layer));
-
+    map.addLayer(GetCluster(res));
     // Make It refresh the dom on screen
     GetRegionClusterArray().forEach((layer) =>
       layer.on("change", AllRegionClusterLoadOK)
@@ -221,6 +229,7 @@ function AddPoint() {
     GetBlockClusterArray().forEach((layer) =>
       layer.on("change", AllBlockClusterLoadOK)
     );
+    GetCluster().on("change", () => GetOnScreenFeatures());
 
     ChangeClusterView(data.zoom);
   });
@@ -270,13 +279,21 @@ function ChangeZoom(value) {
   }
 }
 
+let current_view = true;
 function ChangeClusterView(zoom) {
-  if (zoom > 60) {
+  if (current_view) {
+    GetCluster().setVisible(true);
     GetRegionClusterArray().forEach((layer) => layer.setVisible(false));
-    GetBlockClusterArray().forEach((layer) => layer.setVisible(true));
-  } else {
-    GetRegionClusterArray().forEach((layer) => layer.setVisible(true));
     GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
+  } else {
+    GetCluster().setVisible(false);
+    if (zoom > 60) {
+      GetRegionClusterArray().forEach((layer) => layer.setVisible(false));
+      GetBlockClusterArray().forEach((layer) => layer.setVisible(true));
+    } else {
+      GetRegionClusterArray().forEach((layer) => layer.setVisible(true));
+      GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
+    }
   }
 }
 
@@ -317,6 +334,14 @@ function GetOnScreenFeatures() {
       });
     }
   });
+  if (GetCluster().getVisible()) {
+    GetCluster()
+      .getSource()
+      .forEachFeatureInExtent(currentExtent, (feature) => {
+        features_dic[feature.getGeometry().getCoordinates().toString()] =
+          feature;
+      });
+  }
 
   let discard_feature = [];
   for (let i = data.features.length - 1; i >= 0; i--) {

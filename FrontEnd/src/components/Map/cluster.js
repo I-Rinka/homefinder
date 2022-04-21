@@ -9,10 +9,12 @@ import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 const config = {
   sub_region_distance: 200,
   region_distance: 200,
+  normal_distance: 300,
 };
 
 let BlockCluster = null;
 let RegionCluster = null;
+let NormalCluster = null;
 let point_features = null;
 
 export function GetPointFeatures(blocks) {
@@ -100,6 +102,23 @@ export function GetRegionClusterArray(blocks) {
   }
 }
 
+export function GetCluster(blocks) {
+  if (NormalCluster !== null) {
+    return NormalCluster;
+  } else {
+    let source = new VectorSource();
+    source.addFeatures(GetPointFeatures(blocks));
+    let cluster = new Cluster({
+      source: source,
+      distance: config.normal_distance,
+    });
+
+    NormalCluster = new VectorLayer({
+      source: cluster,
+    });
+    return NormalCluster;
+  }
+}
 function regionClusterStyle(feature) {
   const size = feature.get("features").length;
   const block_name = feature.get("features")[0].get("region");
