@@ -21,15 +21,17 @@
       <el-button @click="GetViewPort">Get View Port</el-button>
       <time-line></time-line>
     </div>
+    <sun-chart></sun-chart>
     <div>
-      <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()" :map="map"
-        :feature="feature"></sun-chart-adaptor>
+      <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"
+        :map="map" :feature="feature"></sun-chart-adaptor>
       <!-- <div v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()">{{
         feature.getGeometry().getCoordinates()
       }}</div> -->
     </div>
 
-    <el-card id="popUp" style="background-color: white; height: 30vh; overflow: scroll; overflow-x:hidden">
+    <el-card id="popUp" v-show="data.popOver.length > 0"
+      style="background-color: white; height: 30vh; overflow: scroll; overflow-x:hidden">
       <template #header>
         <div>Selected Blocks</div>
         <span>{{ data.popOverCoord }}</span>

@@ -3,7 +3,7 @@
         <div style="font-size:1px">
             <!-- {{ props.feature.getGeometry().getCoordinates()[0].toFixed(3) }} {{ ' , ' }}
             {{ props.feature.getGeometry().getCoordinates()[1].toFixed(3) }} -->
-            <sun-chart></sun-chart>
+            <!-- <sun-chart></sun-chart> -->
         </div>
     </div>
 </template>
@@ -23,7 +23,8 @@ onMounted(() => {
     if (props.map && props.feature) {
         overlay = new Overlay({
             element: document.getElementById(props.feature.getGeometry().getCoordinates().toString()),
-            position: props.feature.getGeometry().getCoordinates()
+            position: props.feature.getGeometry().getCoordinates(),
+            positioning:'center-center'
         });
         props.map.addOverlay(overlay);
     }
