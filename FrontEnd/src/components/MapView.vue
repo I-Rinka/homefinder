@@ -46,6 +46,7 @@ import { GetBlockClusterArray, GetRegionClusterArray } from "./Map/cluster";
 import { LineString, Polygon } from "ol/geom";
 import SunChartAdaptor from "./Vis/SunChartAdaptor.vue"
 import SunChart from "./Vis/SunChart.vue"
+import * as d3 from "d3";
 
 import {
   createEmpty,
@@ -82,10 +83,33 @@ const data = reactive({
   features: []
 });
 
+let color_array = d3.schemeSet1;
+let feature_nu = 0;
+
+
+let svg = '<svg t="1650527293382" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"  width="40" height="40" fill="red"><path d="M553.0112 991.06133333a51.2 51.2 0 0 1-82.0224 0C259.3792 707.77173333 153.6 503.94453333 153.6 379.73333333a358.4 358.4 0 1 1 716.8 0c0 124.16-105.7792 327.9872-317.3888 611.328zM512 533.33333333a153.6 153.6 0 1 0 0-307.2 153.6 153.6 0 0 0 0 307.2z" p-id="11077"></path></svg>'
+let mysvg = new Image();
+mysvg.src = 'data:image/svg+xml,' + encodeURIComponent(svg);
+
+function GetNewFeature(coordinate) {
+  let style = new Style({
+    image: new Icon({
+      anchor: [0.5, 1],
+      anchorXUnits: 'fraction',
+      anchorYUnits: 'fraction',
+      img: mysvg,
+      imgSize: [40, 40]
+    })
+  });
+  let new_feature = new Feature({
+    geometry: new Point(coordinate), style: style
+  });
+  new_feature.setStyle(style);
+  return new_feature;
+}
 
 const MarkSource = new VectorSource();
 const MarkLayer = new VectorLayer({ source: MarkSource })
-
 const modify = new Modify({
   hitDetection: MarkLayer,
   source: MarkSource,
@@ -132,7 +156,7 @@ onMounted(() => {
 
   map.on("dblclick", (event) => {
     console.log(event.coordinate);
-    let new_feature = new Feature(new Point(event.coordinate));
+    let new_feature = GetNewFeature(event.coordinate);
     MarkSource.addFeature(new_feature);
   })
 
