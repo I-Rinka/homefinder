@@ -43,7 +43,7 @@ import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import Overlay from "ol/Overlay";
 import { GetBlockClusterArray, GetRegionClusterArray } from "./Map/cluster";
-import { LineString, Polygon } from "ol/geom";
+import { Circle, LineString, Polygon } from "ol/geom";
 import SunChartAdaptor from "./Vis/SunChartAdaptor.vue"
 import SunChart from "./Vis/SunChart.vue"
 import * as d3 from "d3";
@@ -94,15 +94,17 @@ mysvg.src = 'data:image/svg+xml,' + encodeURIComponent(svg);
 function GetNewFeature(coordinate) {
   let style = new Style({
     image: new Icon({
-      anchor: [0.5, 1],
+      anchor: [0.5, 0.8],
       anchorXUnits: 'fraction',
       anchorYUnits: 'fraction',
       img: mysvg,
-      imgSize: [40, 40]
-    })
+      imgSize: [40, 40],
+    }),
+    stroke: new Stroke({ width: 20 }),
   });
+
   let new_feature = new Feature({
-    geometry: new Point(coordinate), style: style
+    geometry: new Point(coordinate),
   });
   new_feature.setStyle(style);
   return new_feature;
@@ -111,8 +113,10 @@ function GetNewFeature(coordinate) {
 const MarkSource = new VectorSource();
 const MarkLayer = new VectorLayer({ source: MarkSource })
 const modify = new Modify({
-  hitDetection: MarkLayer,
   source: MarkSource,
+  snapToPointer: true,
+  pixelTolerance: 30,
+  style: new Style(),
 });
 modify.on(['modifystart', 'modifyend'], function (evt) {
   document.getElementById('map').style.cursor = evt.type === 'modifystart' ? 'grabbing' : 'pointer';
@@ -148,14 +152,12 @@ onMounted(() => {
   // hover
   map.on("pointermove", (event) => {
     let features = map.getFeaturesAtPixel(event.pixel)[0];
-
     if (features) {
       map.getTargetElement().style.cursor = features.get('features') ? "pointer" : "";
     }
   });
 
   map.on("dblclick", (event) => {
-    console.log(event.coordinate);
     let new_feature = GetNewFeature(event.coordinate);
     MarkSource.addFeature(new_feature);
   })
