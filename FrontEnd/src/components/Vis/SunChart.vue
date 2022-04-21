@@ -5,7 +5,7 @@
             <circle class="arc" cx="0" cy="0" fill="none" :stroke="color_array[1]" stroke-width="15"
                 stroke-linecap="round" :style="{
                     r: radius, strokeDashoffset: `${GetDash(end, radius)}`, strokeDasharray: `${GetDash(0, radius)}`,
-                    transform: `rotate(${GetRotation(end, 45)}deg)`
+                    transform: `rotate(${GetRotation(end, GetOrientation([116.06000975863789, 39.73071710290948], [116.49163115248814, 40.173677867295204]))}deg)`
                 }" />
             <!-- <circle cx="50%" cy="50%" r="100" fill="none" stroke="blue" stroke-width="15" stroke-dashoffset="200" -->
             <!-- stroke-dasharray="300" transform="rotate(-90 60 60)" stroke-linecap="round" /> -->

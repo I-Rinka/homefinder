@@ -13,14 +13,6 @@
       <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
       </el-slider>
     </div>
-    <div style="height: 8vh">
-      <!-- <el-button @click="GetData">GetData</el-button> -->
-      <!-- <el-button @click="AddOverlay">Add Ticks</el-button> -->
-      <!-- <el-button @click="RemoveOverlay">Remove Ticks</el-button> -->
-      <el-button @click="GetOnScreenFeatures">Get Features</el-button>
-      <el-button @click="GetViewPort">Get View Port</el-button>
-      <time-line></time-line>
-    </div>
     <sun-chart></sun-chart>
     <div>
       <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"
@@ -29,19 +21,6 @@
         feature.getGeometry().getCoordinates()
       }}</div> -->
     </div>
-
-    <el-card id="popUp" v-show="data.popOver.length > 0"
-      style="background-color: white; height: 30vh; overflow: scroll; overflow-x:hidden">
-      <template #header>
-        <div>Selected Blocks</div>
-        <span>{{ data.popOverCoord }}</span>
-      </template>
-      <div v-for="block in data.popOver" :key="block">
-        <el-checkbox>
-          {{ block }}
-        </el-checkbox>
-      </div>
-    </el-card>
 
   </div>
 </template>
@@ -103,31 +82,6 @@ const data = reactive({
   features: []
 });
 
-// for test
-
-function AddOverlay() {
-  // let currentExtent = map.getView().calculateExtent(map.getSize());
-  // for (let i = 0; i < data.blocks.length; i++) {
-  //   const element = data.blocks[i];
-  //   if (containsXY(currentExtent, element["lng"], element["lat"])) {
-  //     const overlay = new Overlay({
-  //       id: element["block"],
-  //       position: [element["lng"], element["lat"]],
-  //       element: document.getElementById(element["block"]),
-  //       insertFirst: true,
-  //     });
-  //     map.addOverlay(overlay);
-  //   }
-  // }
-}
-
-function RemoveOverlay() {
-  // 不能边遍历变删，需要缓存到数组一下
-}
-
-function GetViewPort() {
-  console.log(map.getView().calculateExtent(map.getSize()));
-}
 
 // -------------------------- Useful functions ---------------------------
 
@@ -146,46 +100,9 @@ const map = new Map({
 });
 map.getView().on("change", ChangeView);
 
-let overLay = null;
 onMounted(() => {
   map.setTarget("map");
   AddPoint();
-
-  map.on("click", (event) => {
-    let features = map.getFeaturesAtPixel(event.pixel);
-    let clickFeature = features[0];
-
-    if (overLay != null) {
-      overLay.getElement().style.visibility = "hidden";
-    }
-
-    if (clickFeature) {
-      features = clickFeature.get("features");
-      // not a cluster
-      if (!features) {
-        return
-      }
-      let new_popOver = features.map((feature) => feature.get("block"));
-      data.popOver = new_popOver;
-      data.popOverCoord = clickFeature.getGeometry().getCoordinates();
-
-      let rm = null;
-      if (overLay != null) {
-        rm = overLay.getElement().parentElement;
-        overLay = null;
-      }
-      overLay = new Overlay({
-        element: document.getElementById("popUp"),
-      });
-      overLay.getElement().style.visibility = "visible";
-      overLay.setPosition(event.coordinate);
-      if (rm != null) {
-        rm.remove();
-      }
-      map.addOverlay(overLay);
-
-    }
-  });
 
   // hover
   map.on("pointermove", (event) => {
