@@ -3,7 +3,7 @@
         <div style="font-size:1px">
             <!-- {{ props.feature.getGeometry().getCoordinates()[0].toFixed(3) }} {{ ' , ' }}
             {{ props.feature.getGeometry().getCoordinates()[1].toFixed(3) }} -->
-            <!-- <sun-chart></sun-chart> -->
+            <sun-chart></sun-chart>
         </div>
     </div>
 </template>
