@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { reactive, ref } from "@vue/reactivity";
 import { computed, onMounted, watch } from "@vue/runtime-core";
+import { GetDistance as QueryDistance } from "../../database/baiduquery";
 import * as d3 from "d3";
 
 const props = defineProps<{
@@ -35,6 +36,7 @@ let angle = end;
 const user_marks = computed(() =>
     props.marks.sort((a: any, b: any) => a.get('weight') - b.get('weight')).map(
         (feature: any, index: number) => {
+            let angle = GetAngle(feature);
             return {
                 id: index,
                 radius: (index + 2) * 14,
@@ -52,10 +54,6 @@ onMounted(() => {
     console.log(props.marks);
 });
 
-function PrintData() {
-    console.log(props.marks);
-}
-
 function GetDash(angle: number, radius: number): number {
     return (Math.PI * radius * (360 - angle)) / 180.0;
 }
@@ -65,12 +63,19 @@ function GetRotation(end: number, orientation: number): number {
 }
 
 
-// function GetDistance(feature: any) {
-//     return Math.sqrt(
-//         Math.pow(props.myCoordinates[0] - MarksAdaptor(feature).coordinates[0], 2) +
-//         Math.pow(props.myCoordinates[1] - MarksAdaptor(feature).coordinates[1], 2)
-//     );
-// }
+function GetDistance(feature: any) {
+    // console.log(QueryDistance(props.myCoordinates, feature.getGeometry().getCoordinates()))
+    return Math.sqrt(
+        Math.pow(props.myCoordinates[0] * 100 - feature.getGeometry().getCoordinates()[0] * 100, 2) +
+        Math.pow(props.myCoordinates[1] * 100 - feature.getGeometry().getCoordinates()[1] * 100, 2)
+    );
+}
+
+function GetAngle(feature: any) {
+    let angle = 5 / GetDistance(feature) * 360;
+    angle = angle > 360 ? 360 : angle;
+    return angle;
+}
 
 function GetOrientation(
     my_coordinates: [number, number],

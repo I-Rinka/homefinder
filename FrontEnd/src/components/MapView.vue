@@ -31,7 +31,7 @@ import Map from "ol/Map";
 import View from "ol/View";
 import { beijingLayer } from "./Map/vectorlayer";
 import { fromLonLat, useGeographic } from "ol/proj";
-import { onMounted } from "@vue/runtime-core";
+import { computed, onMounted } from "@vue/runtime-core";
 import { mapboxlayer } from "./Map/mapboxlayer";
 import Point from "ol/geom/Point";
 import VectorSource from "ol/source/Vector";
@@ -127,14 +127,13 @@ function GetNewMarkFeature(coordinate) {
   let new_feature = new Feature({
     geometry: new Point(coordinate),
     color: color,
-    weight: -color_nu
+    weight: 1
   });
   new_feature.setStyle(style);
   data.marks.push(new_feature);
 
   return new_feature;
 }
-
 const MarkSource = new VectorSource();
 const MarkLayer = new VectorLayer({ source: MarkSource });
 const modify = new Modify({
@@ -143,7 +142,12 @@ const modify = new Modify({
   pixelTolerance: 30,
   style: new Style(),
 });
-modify.on(["modifystart", "modifyend"], function (evt) {
+modify.on(["modifystart"], function (evt) {
+  document.getElementById("map").style.cursor =
+    evt.type === "modifystart" ? "grabbing" : "pointer";
+});
+modify.on(["modifyend"], function (evt) {
+  data.marks = MarkSource.getFeatures()
   document.getElementById("map").style.cursor =
     evt.type === "modifystart" ? "grabbing" : "pointer";
 });
