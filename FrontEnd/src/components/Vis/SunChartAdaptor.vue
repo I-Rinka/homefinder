@@ -1,12 +1,9 @@
 <template>
   <div>
-      <!-- 向子传递必须要proxy -->
+    <!-- 向子传递必须要proxy -->
     <div :id="props.feature.getGeometry().getCoordinates().toString()">
-      <sun-chart
-        :myCoordinates="props.feature.getGeometry().getCoordinates()"
-        :marks="props.markArray"
-      ></sun-chart>
-     
+      <sun-chart :myCoordinates="props.feature.getGeometry().getCoordinates()" :marks="props.markArray" :color="'red'"
+        :text="'+86.8w'"></sun-chart>
     </div>
   </div>
 </template>
@@ -28,7 +25,7 @@ const props = defineProps({
   markArray: Array,
 });
 
-
+let contained_feature = [];
 let overlay = null;
 onMounted(() => {
   if (props.map && props.feature) {
@@ -40,6 +37,8 @@ onMounted(() => {
       positioning: "center-center",
     });
     props.map.addOverlay(overlay);
+    contained_feature = toRaw(props.feature.get("features")).map(feature => { return { block: feature.get('block'), sub_region: feature.get('sub_region'), region: feature.get('region') } })
+    console.log(contained_feature)
   }
 });
 
@@ -51,7 +50,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
-.ol-overlay-container{
-    pointer-events: none !important;
+.ol-overlay-container {
+  pointer-events: none !important;
 }
 </style>

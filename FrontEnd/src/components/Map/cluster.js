@@ -115,6 +115,7 @@ export function GetCluster(blocks) {
 
     NormalCluster = new VectorLayer({
       source: cluster,
+      style: new Style()
     });
     return NormalCluster;
   }
