@@ -125,9 +125,10 @@ function GetNewMarkFeature(coordinate) {
   });
 
   let new_feature = new Feature({
+    type: 'UserMark',
     geometry: new Point(coordinate),
     color: color,
-    weight: 1
+    weight: 10 - color_nu
   });
   new_feature.setStyle(style);
   data.marks.push(new_feature);
@@ -191,17 +192,38 @@ onMounted(() => {
 
   // hover
   map.on("pointermove", (event) => {
-    let features = map.getFeaturesAtPixel(event.pixel)[0];
-    if (features) {
-      map.getTargetElement().style.cursor = features.get("features")
+    let features = map.getFeaturesAtPixel(event.pixel);
+    let feature = features[0]
+    if (feature) {
+      // cluster point
+      map.getTargetElement().style.cursor = feature.get("features")
         ? "pointer"
         : "";
+
+      // user mark
+      map.getTargetElement().style.cursor = feature.get("type") === "UserMark"
+        ? "pointer"
+        : "";
+
     }
   });
 
   map.on("dblclick", (event) => {
-    let new_feature = GetNewMarkFeature(event.coordinate);
-    MarkSource.addFeature(new_feature);
+    let features = map.getFeaturesAtPixel(event.pixel);
+    let feature = features[0]
+    if (feature) {
+      // user mark
+      if (feature.get("type") === "UserMark") {
+        MarkSource.removeFeature(feature);
+
+        // refresh
+        data.marks = MarkSource.getFeatures()
+      }
+      else {
+        let new_feature = GetNewMarkFeature(event.coordinate);
+        MarkSource.addFeature(new_feature);
+      }
+    }
   });
 });
 
