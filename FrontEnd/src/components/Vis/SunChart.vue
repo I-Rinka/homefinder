@@ -1,6 +1,6 @@
 <template>
-    <div style="pointer-events: none">
-        <svg viewBox="-500 -500 1000 1000" width="800" height="800" xmlns="http://www.w3.org/2000/svg">
+    <div class="sun-chart" style="pointer-events: none">
+        <svg :viewBox="view_box" width="600" height="600" xmlns="http://www.w3.org/2000/svg">
             <circle v-for="mark in user_marks" :key="mark.id" class="arc" cx="0" cy="0" fill="none" :stroke="mark.color"
                 :r="mark.radius" stroke-linecap="round" :style="{
                     strokeWidth: `${mark.stroke_width}`,
@@ -33,6 +33,17 @@ let angle = end;
     angle
 */
 
+let view_box = computed(() => {
+    if (props.marks.length <= 5) {
+        return "-500 -500 1000 1000"
+    }
+    else {
+        let p = (props.marks.length - 5) * 100 + 1000
+        let n = -((props.marks.length - 5) * 50 + 500)
+        return `${n} ${n} ${p} ${p}`
+    }
+})
+
 const user_marks = computed(() =>
     props.marks.sort((a: any, b: any) => a.get('weight') - b.get('weight')).map(
         (feature: any, index: number) => {
@@ -50,10 +61,6 @@ const user_marks = computed(() =>
 
 )
 
-onMounted(() => {
-    console.log(props.marks);
-});
-
 function GetDash(angle: number, radius: number): number {
     return (Math.PI * radius * (360 - angle)) / 180.0;
 }
@@ -64,7 +71,6 @@ function GetRotation(end: number, orientation: number): number {
 
 
 function GetDistance(feature: any) {
-    // console.log(QueryDistance(props.myCoordinates, feature.getGeometry().getCoordinates()))
     return Math.sqrt(
         Math.pow(props.myCoordinates[0] * 100 - feature.getGeometry().getCoordinates()[0] * 100, 2) +
         Math.pow(props.myCoordinates[1] * 100 - feature.getGeometry().getCoordinates()[1] * 100, 2)
@@ -87,14 +93,12 @@ function GetOrientation(
     ];
     // first quartile
     if (normalized_coord[0] >= 0 && normalized_coord[1] >= 0) {
-        console.log("first");
         return (
             (Math.atan2(normalized_coord[1], normalized_coord[0]) * 180) / Math.PI
         );
     }
     // second quartile
     else if (normalized_coord[0] < 0 && normalized_coord[1] >= 0) {
-        console.log("second");
         return (
             180 -
             (Math.atan2(normalized_coord[1], -normalized_coord[0]) * 180) / Math.PI
@@ -102,7 +106,6 @@ function GetOrientation(
     }
     // third quartile
     else if (normalized_coord[0] < 0 && normalized_coord[1] < 0) {
-        console.log("third");
         return (
             180 +
             (Math.atan2(-normalized_coord[1], -normalized_coord[0]) * 180) / Math.PI
@@ -110,7 +113,6 @@ function GetOrientation(
     }
     // forth quartile
     else if (normalized_coord[0] >= 0 && normalized_coord[1] < 0) {
-        console.log("forth");
         return (
             360 -
             (Math.atan2(-normalized_coord[1], normalized_coord[0]) * 180) / Math.PI
@@ -123,5 +125,9 @@ function GetOrientation(
 <style lang="less" scoped>
 .arc {
     transition: 0.5s;
+}
+
+.sun-chart {
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
 }
 </style>

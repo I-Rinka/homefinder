@@ -29,10 +29,6 @@ const props = defineProps({
 });
 
 
-function PrintData() {
-  console.log(toRaw(props.markArray));
-}
-
 let overlay = null;
 onMounted(() => {
   if (props.map && props.feature) {

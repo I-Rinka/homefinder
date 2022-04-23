@@ -84,6 +84,7 @@ import {
 } from "ol/interaction";
 import { shiftKeyOnly } from "ol/events/condition";
 import PointerInteraction from "ol/interaction/Pointer";
+import { remove } from "ol/array";
 // the configuration
 const config = {
   zoom: 10,
@@ -234,18 +235,19 @@ onMounted(() => {
   map.on("dblclick", (event) => {
     let features = map.getFeaturesAtPixel(event.pixel);
     let feature = features[0]
+    let remove_mark = false;
     if (feature) {
       // user mark
       if (feature.get("type") === "UserMark") {
         MarkSource.removeFeature(feature);
-
+        remove_mark = true;
         // refresh
         data.marks = MarkSource.getFeatures()
       }
-      else {
-        let new_feature = GetNewMarkFeature(event.coordinate);
-        MarkSource.addFeature(new_feature);
-      }
+    }
+    if (!remove_mark) {
+      let new_feature = GetNewMarkFeature(event.coordinate);
+      MarkSource.addFeature(new_feature);
     }
   });
 });
@@ -395,7 +397,6 @@ function GetOnScreenFeatures() {
       data.features.push(feature);
     }
   }
-  // console.log(discard_feature)
 }
 </script>
 
