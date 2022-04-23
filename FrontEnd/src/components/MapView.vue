@@ -22,9 +22,10 @@
     <!-- <sun-chart></sun-chart> -->
     <div>
       <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"
-        :map="map" :feature="feature" :markArray="data.marks"></sun-chart-adaptor>
+        :map="map" :feature="feature" :markArray="data.marks" :basePrice="data.base_price"></sun-chart-adaptor>
     </div>
 
+    <el-button @click="GetBasePrice">Get Base Price</el-button>
   </div>
 </template>
 
@@ -34,7 +35,7 @@ import { computed, onMounted } from "@vue/runtime-core";
 import { LocationFilled } from "@element-plus/icons-vue";
 import * as d3 from "d3";
 
-import { GetCurrentRecord, GetBlocks, GetRegions } from "../database/query.js";
+import { GetCurrentRecord, GetBlocks, GetRegions, GetBlocksAvgPrice } from "../database/query.js";
 import { mapboxlayer } from "./Map/mapbox_layer";
 import { beijingLayer } from "./Map/vector_layer";
 import {
@@ -87,6 +88,7 @@ const data = reactive({
   current_view: true,
   features: [],
   marks: [],
+  base_price: 0
 });
 
 const view_choice = computed({
@@ -104,7 +106,9 @@ const view_choice = computed({
   }
 })
 
-
+function GetBasePrice() {
+  GetBlocksAvgPrice(['*']).then(res => data.base_price = res.unit_price)
+}
 
 // -------------------------- Useful functions ---------------------------
 
@@ -289,7 +293,11 @@ function ChangeView() {
 
 function GetOnScreenFeatures() {
   let currentExtent = map.getView().calculateExtent(map.getSize());
-
+  // console.log(currentExtent);
+  currentExtent[0] -= 0.08;
+  currentExtent[1] -= 0.08;
+  currentExtent[2] += 0.08;
+  currentExtent[3] += 0.08;
   let features_dic = {};
 
   GetRegionClusterArray().forEach((layer) => {

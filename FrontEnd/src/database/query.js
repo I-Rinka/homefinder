@@ -14,16 +14,13 @@ export async function GetCurrentRecord() {
 }
 
 export async function GetBlocksAvgPrice(blocks) {
-    let query_url = url + "avgprice/?";
-    for (let i = 0; i < blocks.length; i++) {
-        const block_name = blocks[i];
-        query_url += 'blocks=';
-        query_url += block_name;
-        query_url += '&';
-    }
-    console.log(query_url)
-    // encodeURI(query_url)
-    let res = await axios.get(encodeURI(query_url));
+    let query_url = url + "avgprice/";
+    let res = await axios.post(query_url, blocks)
+    // let res = await axios({
+    //     method: 'POST',
+    //     url: query_url,
+    //     data: { blocks: blocks }
+    // })
     let resObj = res.data;
     return resObj[0];
 }

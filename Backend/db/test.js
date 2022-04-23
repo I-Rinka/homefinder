@@ -135,6 +135,21 @@ db.sales_records.aggregate([
     },
     {
         $group: {
+            _id: null,
+            unit_price: { $avg: "$unit_price" },
+            deal_price: { $avg: "$deal_price" },
+        },
+    },
+])
+
+db.sales_records.aggregate([
+    {
+        $match: {
+            'block': { $in: ['高原街4号院', '飞腾家园', '永顺西里'] }
+        }
+    },
+    {
+        $group: {
             _id: "$block",
             block: { $first: "$block" },
             year: { $max: "$year" },
@@ -287,3 +302,106 @@ db.sales_records.aggregate([
     }
 ])
 
+            // {
+            //     $lookup:
+            //     {
+            //         from: "sales_records",
+            //         let: { blk: "$block", yer: "$year" },
+            //         pipeline: [{
+            //             $match: {
+            //                 'block': { $in: block_set }
+            //             }
+            //         },
+            //         {
+            //             $match:
+            //             {
+            //                 $expr:
+            //                 {
+            //                     $and:
+            //                         [
+            //                             { $eq: ["$block", "$$blk"] },
+            //                             { $eq: ["$year", "$$yer"] },
+            //                         ]
+            //                 }
+            //             }
+            //         }
+            //         ],
+            //         as: 'wantToUnwind'
+            //     },
+            // },
+            // {
+            //     $unwind: "$wantToUnwind"
+            // },
+            // {
+            //     $project: {
+            //         block: "$wantToUnwind.block",
+            //         year: "$wantToUnwind.year",
+            //         month: "$wantToUnwind.month",
+            //     }
+            // },
+            // {
+            //     $group: {
+            //         _id: "$block",
+            //         block: { $first: "$block" },
+            //         year: { $max: "$year" },
+            //         month: { $max: "$month" },
+            //     },
+            // },
+            // {
+            //     $lookup:
+            //     {
+            //         from: "sales_records",
+            //         let: { blk: "$block", yer: "$year", mth: "$month" },
+            //         pipeline: [{
+            //             $match: {
+            //                 'block': { $in: block_set }
+            //             }
+            //         },
+            //         {
+            //             $match:
+            //             {
+            //                 $expr:
+            //                 {
+            //                     $and:
+            //                         [
+            //                             { $eq: ["$block", "$$blk"] },
+            //                             { $eq: ["$year", "$$yer"] },
+            //                             { $eq: ["$month", "$$mth"] },
+            //                         ]
+            //                 }
+            //             }
+            //         }
+            //         ],
+            //         as: 'wantToUnwind'
+            //     },
+            // },
+            // {
+            //     $unwind: "$wantToUnwind"
+            // },
+            // {
+            //     $project: {
+            //         // block: "$wantToUnwind.block",
+            //         // area: "$wantToUnwind.area",
+            //         // direction: "$wantToUnwind.direction",
+            //         // decoration: "$wantToUnwind.decoration",
+            //         // year: "$wantToUnwind.year",
+            //         // month: "$wantToUnwind.month",
+            //         deal_price: "$wantToUnwind.deal_price",
+            //         // position: "$wantToUnwind.posiiton",
+            //         unit_price: "$wantToUnwind.unit_price",
+            //         // region: "$wantToUnwind.region",
+            //         // sub_region: "$wantToUnwind.sub_region",
+            //         // room: "$wantToUnwind.room",
+            //         // hall: "$wantToUnwind.hall",
+            //         // block_height: "$wantToUnwind.block_height",
+            //         // built_year: "$wantToUnwind.built_year",
+            //         // type: "$wantToUnwind.type",
+            //     }
+            // },
+            // {
+            //     $group: {
+            //         _id: null,
+            //         unit_price: { $avg: "$unit_price" },
+            //         deal_price: { $avg: "$deal_price" },
+            //     },
+            // },

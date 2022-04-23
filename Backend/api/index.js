@@ -6,4 +6,4 @@ export const api = Express.Router();
 api.get('/selecthouse', selectHouse);
 api.get('/selectrecord', selectRecords);
 api.get('/currentrecord', getNewestRecords);
-api.get('/avgprice', getAvgPrice);
+api.post('/avgprice', getAvgPrice);

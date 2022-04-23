@@ -115,14 +115,8 @@ export function getNewestRecords(req, res) {
 }
 
 export function getAvgPrice(req, res) {
-    let block_set = [];
-    if (typeof req.query.blocks === 'string') {
-        block_set.push(req.query.blocks)
-    }
-    else {
-        block_set = req.query.blocks;
-    }
-    console.log(block_set);
+
+    let block_set = req.body;
     let error = 1;
     MongoClient.connect(url, (err, db) => {
         if (err) {
@@ -130,131 +124,50 @@ export function getAvgPrice(req, res) {
             res.send(error);
         }
         let dbo = db.db("homefinder");
-        dbo.collection("sales_records").aggregate([
-            {
-                $match: {
-                    'block': { $in: block_set }
-                }
-            },
-            {
-                $group: {
-                    _id: "$block",
-                    block: { $first: "$block" },
-                    year: { $max: "$year" },
-                },
-            },
-            {
-                $lookup:
+        if (block_set[0] === "*") {
+            dbo.collection("sales_records").aggregate([
                 {
-                    from: "sales_records",
-                    let: { blk: "$block", yer: "$year" },
-                    pipeline: [{
-                        $match: {
-                            'block': { $in: block_set }
-                        }
+                    $group: {
+                        _id: null,
+                        unit_price: { $avg: "$unit_price" },
+                        deal_price: { $avg: "$deal_price" },
                     },
-                    {
-                        $match:
-                        {
-                            $expr:
-                            {
-                                $and:
-                                    [
-                                        { $eq: ["$block", "$$blk"] },
-                                        { $eq: ["$year", "$$yer"] },
-                                    ]
-                            }
-                        }
-                    }
-                    ],
-                    as: 'wantToUnwind'
                 },
-            },
-            {
-                $unwind: "$wantToUnwind"
-            },
-            {
-                $project: {
-                    block: "$wantToUnwind.block",
-                    year: "$wantToUnwind.year",
-                    month: "$wantToUnwind.month",
+            ]).toArray((err, result) => {
+                if (err) {
+                    error = 3;
+                    console.log(err);
+                } else {
+                    error = 0;
+                    res.send(result)
                 }
-            },
-            {
-                $group: {
-                    _id: "$block",
-                    block: { $first: "$block" },
-                    year: { $max: "$year" },
-                    month: { $max: "$month" },
-                },
-            },
-            {
-                $lookup:
+                db.close();
+            });
+        }
+        else {
+            dbo.collection("sales_records").aggregate([
                 {
-                    from: "sales_records",
-                    let: { blk: "$block", yer: "$year", mth: "$month" },
-                    pipeline: [{
-                        $match: {
-                            'block': { $in: block_set }
-                        }
-                    },
-                    {
-                        $match:
-                        {
-                            $expr:
-                            {
-                                $and:
-                                    [
-                                        { $eq: ["$block", "$$blk"] },
-                                        { $eq: ["$year", "$$yer"] },
-                                        { $eq: ["$month", "$$mth"] },
-                                    ]
-                            }
-                        }
+                    $match: {
+                        'block': { $in: block_set }
                     }
-                    ],
-                    as: 'wantToUnwind'
                 },
-            },
-            {
-                $unwind: "$wantToUnwind"
-            },
-            {
-                $project: {
-                    // block: "$wantToUnwind.block",
-                    // area: "$wantToUnwind.area",
-                    // direction: "$wantToUnwind.direction",
-                    // decoration: "$wantToUnwind.decoration",
-                    // year: "$wantToUnwind.year",
-                    // month: "$wantToUnwind.month",
-                    deal_price: "$wantToUnwind.deal_price",
-                    // position: "$wantToUnwind.posiiton",
-                    unit_price: "$wantToUnwind.unit_price",
-                    // region: "$wantToUnwind.region",
-                    // sub_region: "$wantToUnwind.sub_region",
-                    // room: "$wantToUnwind.room",
-                    // hall: "$wantToUnwind.hall",
-                    // block_height: "$wantToUnwind.block_height",
-                    // built_year: "$wantToUnwind.built_year",
-                    // type: "$wantToUnwind.type",
+                {
+                    $group: {
+                        _id: null,
+                        unit_price: { $avg: "$unit_price" },
+                        deal_price: { $avg: "$deal_price" },
+                    },
+                },
+            ]).toArray((err, result) => {
+                if (err) {
+                    error = 3;
+                    console.log(err);
+                } else {
+                    error = 0;
+                    res.send(result)
                 }
-            },
-            {
-                $group: {
-                    _id: null,
-                    unit_price: { $avg: "$unit_price" },
-                    deal_price: { $avg: "$deal_price" },
-                },
-            },
-        ]).toArray((err, result) => {
-            if (err) {
-                error = 3;
-                console.log(err);
-            } else {
-                error = 0;
-                res.send(result)
-            }
-            db.close();
-        });
+                db.close();
+            });
+        }
     });
 }
