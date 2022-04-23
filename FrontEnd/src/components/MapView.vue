@@ -30,61 +30,42 @@
 
 <script setup>
 import { reactive, toRaw } from "@vue/reactivity";
-import monotoneChainConvexHull from "monotone-chain-convex-hull";
-import { GetCurrentRecord, GetBlocks, GetRegions } from "../database/query.js";
-import { LocationFilled } from "@element-plus/icons-vue";
-import TimeLine from "./TimeLine.vue";
-import Map from "ol/Map";
-import View from "ol/View";
-import { beijingLayer } from "./Map/vectorlayer";
-import { fromLonLat, useGeographic } from "ol/proj";
 import { computed, onMounted } from "@vue/runtime-core";
-import { mapboxlayer } from "./Map/mapboxlayer";
-import Point from "ol/geom/Point";
-import VectorSource from "ol/source/Vector";
-import Cluster from "ol/source/Cluster";
-import Feature from "ol/Feature";
-import VectorLayer from "ol/layer/Vector";
-import { Fill, Icon, Stroke, Style, Text } from "ol/style";
-import CircleStyle from "ol/style/Circle";
-import Overlay from "ol/Overlay";
+import { LocationFilled } from "@element-plus/icons-vue";
+import * as d3 from "d3";
+
+import { GetCurrentRecord, GetBlocks, GetRegions } from "../database/query.js";
+import { mapboxlayer } from "./Map/mapbox_layer";
+import { beijingLayer } from "./Map/vector_layer";
 import {
   GetBlockClusterArray,
   GetCluster,
   GetRegionClusterArray,
 } from "./Map/cluster";
-import { Circle, LineString, Polygon } from "ol/geom";
+import { GetNewMarkFeature, MarkSource, MarkLayer, UserMarkModify } from "./Map/user_mark"
+
+import TimeLine from "./TimeLine.vue";
 import SunChartAdaptor from "./Vis/SunChartAdaptor.vue";
 import SunChart from "./Vis/SunChart.vue";
-import * as d3 from "d3";
 
+import Map from "ol/Map";
+import View from "ol/View";
+import { useGeographic } from "ol/proj";
 import {
-  createEmpty,
-  extend,
-  getWidth,
-  containsXY,
-  containsExtent,
-  containsCoordinate,
-} from "ol/extent";
-import {
-  DragRotateAndZoom,
   PinchZoom,
   DragBox,
-  defaults,
   DragRotate,
-  DragZoom,
   KeyboardPan,
   PinchRotate,
   KeyboardZoom,
   DragPan,
   MouseWheelZoom,
-  Translate,
   Select,
-  Modify,
 } from "ol/interaction";
 import { shiftKeyOnly } from "ol/events/condition";
 import PointerInteraction from "ol/interaction/Pointer";
-import { remove } from "ol/array";
+
+
 // the configuration
 const config = {
   zoom: 10,
@@ -126,62 +107,6 @@ const view_choice = computed({
   }
 })
 
-// add marks
-let color_array = d3.schemeSet1;
-let color_nu = 0;
-
-function GetNewMarkFeature(coordinate) {
-  let color = color_array[color_nu];
-  let svg = `<svg t="1650527293382" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"  width="40" height="40" fill="${color}"><path d="M553.0112 991.06133333a51.2 51.2 0 0 1-82.0224 0C259.3792 707.77173333 153.6 503.94453333 153.6 379.73333333a358.4 358.4 0 1 1 716.8 0c0 124.16-105.7792 327.9872-317.3888 611.328zM512 533.33333333a153.6 153.6 0 1 0 0-307.2 153.6 153.6 0 0 0 0 307.2z" p-id="11077"></path></svg>`;
-
-  let mysvg = new Image();
-  color_nu = (color_nu + 1) % color_array.length;
-  mysvg.src = "data:image/svg+xml," + encodeURIComponent(svg);
-  let style = new Style({
-    image: new Icon({
-      anchor: [0.5, 0.8],
-      anchorXUnits: "fraction",
-      anchorYUnits: "fraction",
-      img: mysvg,
-      imgSize: [40, 40],
-    }),
-    stroke: new Stroke({ width: 20 }),
-  });
-
-  let new_feature = new Feature({
-    type: 'UserMark',
-    geometry: new Point(coordinate),
-    color: color,
-    weight: 10 - color_nu
-  });
-  new_feature.setStyle(style);
-  data.marks.push(new_feature);
-
-  return new_feature;
-}
-const MarkSource = new VectorSource();
-const MarkLayer = new VectorLayer({ source: MarkSource });
-const modify = new Modify({
-  source: MarkSource,
-  snapToPointer: true,
-  pixelTolerance: 30,
-  style: new Style(),
-});
-modify.on(["modifystart"], function (evt) {
-  document.getElementById("map").style.cursor =
-    evt.type === "modifystart" ? "grabbing" : "pointer";
-});
-modify.on(["modifyend"], function (evt) {
-  data.marks = MarkSource.getFeatures()
-  document.getElementById("map").style.cursor =
-    evt.type === "modifystart" ? "grabbing" : "pointer";
-});
-const overlaySource = modify.getOverlay().getSource();
-overlaySource.on(["addfeature", "removefeature"], function (evt) {
-  document.getElementById("map").style.cursor =
-    evt.type === "addfeature" ? "pointer" : "";
-});
-
 // -------------------------- Useful functions ---------------------------
 
 // The Openlayers
@@ -205,7 +130,7 @@ const map = new Map({
     new KeyboardPan(),
     new KeyboardZoom(),
     new MouseWheelZoom(),
-    modify,
+    UserMarkModify,
   ],
 });
 map.getView().on("change", ChangeView);
@@ -247,6 +172,7 @@ onMounted(() => {
     }
     if (!remove_mark) {
       let new_feature = GetNewMarkFeature(event.coordinate);
+      data.marks.push(new_feature);
       MarkSource.addFeature(new_feature);
     }
   });
