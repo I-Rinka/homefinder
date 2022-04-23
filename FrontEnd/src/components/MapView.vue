@@ -178,6 +178,22 @@ onMounted(() => {
   });
 });
 
+UserMarkModify.on(["modifystart"], function (evt) {
+    document.getElementById("map").style.cursor =
+        evt.type === "modifystart" ? "grabbing" : "pointer";
+});
+UserMarkModify.on(["modifyend"], function (evt) {
+    data.marks = MarkSource.getFeatures()
+    document.getElementById("map").style.cursor =
+        evt.type === "modifystart" ? "grabbing" : "pointer";
+});
+const overlaySource = UserMarkModify.getOverlay().getSource();
+overlaySource.on(["addfeature", "removefeature"], function (evt) {
+    document.getElementById("map").style.cursor =
+        evt.type === "addfeature" ? "pointer" : "";
+});
+
+
 function AddPoint() {
   GetBlocks().then((res) => {
     GetBlockClusterArray(res).forEach((layer) => map.addLayer(layer));
@@ -282,7 +298,6 @@ function GetOnScreenFeatures() {
       layer.getSource().forEachFeatureInExtent(currentExtent, (feature) => {
         features_dic[feature.getGeometry().getCoordinates().toString()] =
           feature;
-        // features.push(feature);
       });
     }
   });
@@ -343,6 +358,10 @@ function GetOnScreenFeatures() {
   height: 100%;
   border: solid gray 2px;
   border-radius: 15px;
+}
+
+.user-mark {
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
 }
 
 .ol-layer {
