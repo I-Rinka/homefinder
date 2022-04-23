@@ -175,6 +175,8 @@ function GetOrientation(
 .sun-chart-price {
     pointer-events: all;
     opacity: 0.8;
+    transition: 0.5s;
+
     &:hover {
         cursor: pointer;
     }
@@ -184,6 +186,7 @@ function GetOrientation(
     // pointer-events: all;
     align-self: center;
     color: white;
+    filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.8));
     font-weight: 700;
     transition: 1s;
 }
