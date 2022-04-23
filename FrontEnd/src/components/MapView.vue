@@ -6,34 +6,17 @@
     </div>
 
     <div class="zoom-slider">
-      <el-button
-        @click="ResetPosition"
-        :icon="LocationFilled"
-        style="margin-bottom: 1vh"
-        circle
-      >
+      <el-button @click="ResetPosition" :icon="LocationFilled" style="margin-bottom: 1vh" circle>
       </el-button>
       <!-- @click="ResetPosition"
         @input="SetZoom" -->
-      <el-slider
-        v-model="data.zoom"
-        :step="1"
-        :max="100"
-        :min="0"
-        @input="ChangeZoom"
-        vertical
-      >
+      <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
       </el-slider>
     </div>
     <!-- <sun-chart></sun-chart> -->
     <div>
-      <sun-chart-adaptor
-        v-for="feature in data.features"
-        :key="feature.getGeometry().getCoordinates().toString()"
-        :map="map"
-        :feature="feature"
-        :markArray="data.marks"
-      ></sun-chart-adaptor>
+      <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"
+        :map="map" :feature="feature" :markArray="data.marks"></sun-chart-adaptor>
     </div>
   </div>
 </template>
@@ -123,7 +106,7 @@ const data = reactive({
 let color_array = d3.schemeSet1;
 let color_nu = 0;
 
-function GetNewFeature(coordinate) {
+function GetNewMarkFeature(coordinate) {
   let color = color_array[color_nu];
   let svg = `<svg t="1650527293382" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"  width="40" height="40" fill="${color}"><path d="M553.0112 991.06133333a51.2 51.2 0 0 1-82.0224 0C259.3792 707.77173333 153.6 503.94453333 153.6 379.73333333a358.4 358.4 0 1 1 716.8 0c0 124.16-105.7792 327.9872-317.3888 611.328zM512 533.33333333a153.6 153.6 0 1 0 0-307.2 153.6 153.6 0 0 0 0 307.2z" p-id="11077"></path></svg>`;
 
@@ -144,6 +127,7 @@ function GetNewFeature(coordinate) {
   let new_feature = new Feature({
     geometry: new Point(coordinate),
     color: color,
+    weight: -color_nu
   });
   new_feature.setStyle(style);
   data.marks.push(new_feature);
@@ -212,7 +196,7 @@ onMounted(() => {
   });
 
   map.on("dblclick", (event) => {
-    let new_feature = GetNewFeature(event.coordinate);
+    let new_feature = GetNewMarkFeature(event.coordinate);
     MarkSource.addFeature(new_feature);
   });
 });
@@ -380,7 +364,7 @@ function GetOnScreenFeatures() {
 }
 
 .ol-layer {
-  > canvas {
+  >canvas {
     border-radius: 14px;
   }
 }
@@ -405,7 +389,7 @@ function GetOnScreenFeatures() {
   z-index: 6;
   cursor: default;
 
-  > div {
+  >div {
     height: 20vh;
 
     .el-slider__runway {
