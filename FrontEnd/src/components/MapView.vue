@@ -13,11 +13,18 @@
       <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
       </el-slider>
     </div>
+    <div id="view-choice">
+      <el-radio-group v-model="view_choice" size="">
+        <el-radio-button label="Current View" />
+        <el-radio-button label="History View" />
+      </el-radio-group>
+    </div>
     <!-- <sun-chart></sun-chart> -->
     <div>
       <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"
         :map="map" :feature="feature" :markArray="data.marks"></sun-chart-adaptor>
     </div>
+
   </div>
 </template>
 
@@ -100,7 +107,23 @@ const data = reactive({
   popOverCoord: "",
   features: [],
   marks: [],
+  current_view: true,
 });
+
+const view_choice = computed({
+  get() {
+    return data.current_view ? "Current View" : "History View"
+  },
+  set(value) {
+    if (value === "Current View") {
+      data.current_view = true;
+    }
+    else {
+      data.current_view = false;
+    }
+    ChangeView();
+  }
+})
 
 // add marks
 let color_array = d3.schemeSet1;
@@ -289,9 +312,8 @@ function ChangeZoom(value) {
   }
 }
 
-let current_view = true;
 function ChangeClusterView(zoom) {
-  if (current_view) {
+  if (data.current_view) {
     GetCluster().setVisible(true);
     GetRegionClusterArray().forEach((layer) => layer.setVisible(false));
     GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
@@ -380,6 +402,13 @@ function GetOnScreenFeatures() {
 <style lang="less">
 #MapView {
   height: 58vh;
+}
+
+#view-choice {
+  position: absolute;
+  right: 2vw;
+  top: 50vh;
+  filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.5));
 }
 
 .map {
