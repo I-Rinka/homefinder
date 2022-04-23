@@ -16,15 +16,24 @@
 import { reactive, ref } from "@vue/reactivity";
 import { computed, onMounted, watch } from "@vue/runtime-core";
 import { GetDistance as QueryDistance } from "../../database/baiduquery";
-import * as d3 from "d3";
 
 const props = defineProps<{
     myCoordinates: [number, number];
     marks: Array<any>;
 }>();
 
-let end = 280;
-let angle = end;
+let view_box = computed(() => {
+    if (props.marks.length <= 3) {
+        return "-500 -500 1000 1000"
+    }
+    else {
+        let p = (props.marks.length - 3) * 200 + 1000
+        let n = -((props.marks.length - 3) * 100 + 500)
+        return `${n} ${n} ${p} ${p}`
+    }
+})
+
+
 /* 
     radius
     color
@@ -33,16 +42,6 @@ let angle = end;
     angle
 */
 
-let view_box = computed(() => {
-    if (props.marks.length <= 5) {
-        return "-500 -500 1000 1000"
-    }
-    else {
-        let p = (props.marks.length - 5) * 100 + 1000
-        let n = -((props.marks.length - 5) * 50 + 500)
-        return `${n} ${n} ${p} ${p}`
-    }
-})
 
 const user_marks = computed(() =>
     props.marks.sort((a: any, b: any) => a.get('weight') - b.get('weight')).map(
@@ -50,9 +49,9 @@ const user_marks = computed(() =>
             let angle = GetAngle(feature);
             return {
                 id: index,
-                radius: (index + 2) * 14,
+                radius: (index + 2) * 12,
                 color: feature.get("color"),
-                stroke_width: 15,
+                stroke_width: 12,
                 orientation: GetRotation(angle, GetOrientation(props.myCoordinates, feature.getGeometry().getCoordinates())),
                 angle: angle, // todo: calculate distance
             }

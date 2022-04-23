@@ -84,12 +84,9 @@ const data = reactive({
   zoom: Math.floor(
     ((config.zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
   ),
-  blocks: [],
-  popOver: [],
-  popOverCoord: "",
+  current_view: true,
   features: [],
   marks: [],
-  current_view: true,
 });
 
 const view_choice = computed({
@@ -106,6 +103,8 @@ const view_choice = computed({
     ChangeView();
   }
 })
+
+
 
 // -------------------------- Useful functions ---------------------------
 
@@ -179,18 +178,18 @@ onMounted(() => {
 });
 
 UserMarkModify.on(["modifystart"], function (evt) {
-    document.getElementById("map").style.cursor =
-        evt.type === "modifystart" ? "grabbing" : "pointer";
+  document.getElementById("map").style.cursor =
+    evt.type === "modifystart" ? "grabbing" : "pointer";
 });
 UserMarkModify.on(["modifyend"], function (evt) {
-    data.marks = MarkSource.getFeatures()
-    document.getElementById("map").style.cursor =
-        evt.type === "modifystart" ? "grabbing" : "pointer";
+  data.marks = MarkSource.getFeatures()
+  document.getElementById("map").style.cursor =
+    evt.type === "modifystart" ? "grabbing" : "pointer";
 });
 const overlaySource = UserMarkModify.getOverlay().getSource();
 overlaySource.on(["addfeature", "removefeature"], function (evt) {
-    document.getElementById("map").style.cursor =
-        evt.type === "addfeature" ? "pointer" : "";
+  document.getElementById("map").style.cursor =
+    evt.type === "addfeature" ? "pointer" : "";
 });
 
 
