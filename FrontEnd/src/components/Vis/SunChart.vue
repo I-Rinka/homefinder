@@ -69,7 +69,6 @@ function ClickMiddle() {
 
 const user_marks = computed(() => {
     if (props.open_corona === false) {
-        console.log(props.open_corona)
         return [];
     }
     return props.marks.sort((a: any, b: any) => a.get('weight') - b.get('weight')).map(

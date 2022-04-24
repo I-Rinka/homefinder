@@ -176,7 +176,7 @@ onMounted(() => {
         data.marks = MarkSource.getFeatures()
       }
     }
-    if (!remove_mark) {
+    if (!remove_mark&&data.selling_view) {
       let new_feature = GetNewMarkFeature(event.coordinate);
       data.marks.push(new_feature);
       MarkSource.addFeature(new_feature);
