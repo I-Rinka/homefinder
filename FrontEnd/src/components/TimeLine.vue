@@ -3,13 +3,17 @@
         <div class="runway">
             <div class="time-scale">
                 <div class="year" v-for="year in data.time_series" :key="year.year">
-                    <div class="first-month">
-                        <span class="year-text">
-                            {{ year.year }}
-                        </span>
-                    </div>
                     <template v-for="month, index in year.month" :key="month.toString() + year.toString()">
-                        <div v-if="index != 0" class="month"></div>
+                        <div v-if="index != 0" class="month">
+                            <div class="month-scale"></div>
+                        </div>
+                        <div v-else class="month">
+                            <div class="first-month-scale">
+                                <span class="year-text">
+                                    {{ year.year }}
+                                </span>
+                            </div>
+                        </div>
                     </template>
                 </div>
             </div>
@@ -87,29 +91,38 @@ onMounted(() => {
 
 .month {
     display: inline-block;
-    width: 2px;
-    height: 50%;
-    margin-left: 27px;
+    height: 100%;
+    // margin-left: 27px;
     position: relative;
-    bottom: -22%;
-    background-color: rgb(128, 128, 128);
-    transition: 0.3s;
+    width: 27px;
 
     &:hover {
-        width: 5px;
-        margin-left: 24px;
-        height: 80%;
+        .month-scale {
+            height: 70%;
+            width: 4px;
+        }
+
     }
 }
 
-.first-month {
+.month-scale {
+    position: relative;
+    display: inline-block;
+    height: 50%;
+    width: 2px;
+    background-color: rgb(128, 128, 128);
+    transition: 0.3s;
+    top: 20%;
+}
+
+.first-month-scale {
     position: relative;
     display: inline-block;
     width: 3px;
-    height: 85%;
-    bottom: -17%;
-    margin-left: 27px;
+    height: 80%;
     background-color: rgb(128, 128, 128);
+    transition: 0.3s;
+    top: 20%;
 }
 
 .year {
