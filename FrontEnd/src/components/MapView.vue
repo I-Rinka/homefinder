@@ -15,14 +15,15 @@
     </div>
     <div id="view-choice">
       <el-radio-group v-model="view_choice" size="">
-        <el-radio-button label="Current View" />
+        <el-radio-button label="Selling View" />
         <el-radio-button label="History View" />
       </el-radio-group>
     </div>
     <!-- <sun-chart></sun-chart> -->
     <div>
       <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"
-        :map="map" :feature="feature" :markArray="data.marks" :basePrice="data.base_price"></sun-chart-adaptor>
+        :map="map" :feature="feature" :markArray="data.marks" :basePrice="data.base_price"
+        :open_corona="data.selling_view"></sun-chart-adaptor>
     </div>
 
     <el-button @click="GetBasePrice">Get Base Price</el-button>
@@ -85,7 +86,7 @@ const data = reactive({
   zoom: Math.floor(
     ((config.zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
   ),
-  current_view: true,
+  selling_view: true,
   features: [],
   marks: [],
   base_price: 0
@@ -93,14 +94,14 @@ const data = reactive({
 
 const view_choice = computed({
   get() {
-    return data.current_view ? "Current View" : "History View"
+    return data.selling_view ? "Selling View" : "History View"
   },
   set(value) {
-    if (value === "Current View") {
-      data.current_view = true;
+    if (value === "History View") {
+      data.selling_view = false;
     }
     else {
-      data.current_view = false;
+      data.selling_view = true;
     }
     ChangeView();
   }
@@ -199,39 +200,13 @@ overlaySource.on(["addfeature", "removefeature"], function (evt) {
 
 function AddPoint() {
   GetBlocks().then((res) => {
-    // GetBlockClusterArray(res).forEach((layer) => map.addLayer(layer));
-    // GetRegionClusterArray(res).forEach((layer) => map.addLayer(layer));
     map.addLayer(GetCluster(res));
-    // Make It refresh the dom on screen
-    // GetRegionClusterArray().forEach((layer) =>
-    //   layer.on("change", AllRegionClusterLoadOK)
-    // );
-    // GetBlockClusterArray().forEach((layer) =>
-    //   layer.on("change", AllBlockClusterLoadOK)
-    // );
     GetCluster().on("change", () => GetOnScreenFeatures());
 
     ChangeClusterView(data.zoom);
   });
 }
 
-// Because we have multiple layers, so we should use these function to minimize the fire times.
-let region_start = 0;
-function AllRegionClusterLoadOK() {
-  region_start++;
-  if (region_start === GetRegionClusterArray().length - 1) {
-    region_start = 0;
-    GetOnScreenFeatures();
-  }
-}
-let block_start = 0;
-function AllBlockClusterLoadOK() {
-  block_start++;
-  if (block_start === GetRegionClusterArray().length - 1) {
-    block_start = 0;
-    GetOnScreenFeatures();
-  }
-}
 
 function ResetPosition() {
   map.getView().animate({
@@ -260,21 +235,10 @@ function ChangeZoom(value) {
 }
 
 function ChangeClusterView(zoom) {
-  if (data.current_view) {
-    // GetCluster().setVisible(true);
-    // GetRegionClusterArray().forEach((layer) => layer.setVisible(false));
-    // GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
+  if (data.selling_view) {
+    MarkLayer.setVisible(true);
   } else {
-    // GetCluster().setVisible(false);
-
-
-    // if (zoom > 60) {
-    //   GetRegionClusterArray().forEach((layer) => layer.setVisible(false));
-    //   GetBlockClusterArray().forEach((layer) => layer.setVisible(true));
-    // } else {
-    //   GetRegionClusterArray().forEach((layer) => layer.setVisible(true));
-    //   GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
-    // }
+    MarkLayer.setVisible(false);
   }
 }
 
