@@ -1,7 +1,6 @@
 <template>
     <div class="sun-chart" style="pointer-events: none">
         <svg :viewBox="view_box" width="600" height="600" xmlns="http://www.w3.org/2000/svg">
-            <circle class="sun-chart-price" :r="price_r" cx="0" cy="0" :fill="color" @click="ClickMiddle" />
             <circle v-for="mark in user_marks" :key="mark.id" class="arc" cx="0" cy="0" fill="none" :stroke="mark.color"
                 :r="mark.radius" stroke-linecap="round" :style="{
                     strokeWidth: `${mark.stroke_width}`,
@@ -9,6 +8,7 @@
                     strokeDasharray: `${GetDash(0, mark.radius)}`,
                     transform: `rotate(${mark.orientation}deg)`,
                 }" />
+            <circle class="sun-chart-price" :r="price_r" cx="0" cy="0" :fill="color" @click="ClickMiddle" />
         </svg>
         <div class="sun-chart-text-container">
             <div class="sun-chart-text" :style="{ fontSize: `${price_text_size}px` }">
@@ -23,15 +23,18 @@ import { reactive, ref } from "@vue/reactivity";
 import { computed, onMounted, watch } from "@vue/runtime-core";
 import { GetDistance as QueryDistance } from "../../database/baiduquery";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     myCoordinates: [number, number];
     marks: Array<any>;
     color: string;
     text: string;
-}>();
+    open_corona?: boolean
+}>(), {
+    open_corona: true
+});
 
 let view_box = computed(() => {
-    if (props.marks.length <= 3) {
+    if (user_marks.value.length <= 3) {
         return "-500 -500 1000 1000"
     }
     else {
@@ -42,11 +45,11 @@ let view_box = computed(() => {
 })
 
 let price_r = computed(() => {
-    if (props.marks.length == 0) {
+    if (props.marks.length == 0 || (props.open_corona != undefined && props.open_corona === false)) {
         return 50
     }
     else if (props.marks.length) {
-        return 28
+        return 29
     }
 })
 
@@ -55,7 +58,7 @@ let price_text_size = computed(() => {
         return 15
     }
     else if (props.marks.length) {
-        return 2
+        return 3 
     }
 })
 
@@ -64,8 +67,12 @@ function ClickMiddle() {
 }
 
 
-const user_marks = computed(() =>
-    props.marks.sort((a: any, b: any) => a.get('weight') - b.get('weight')).map(
+const user_marks = computed(() => {
+    if (props.open_corona === false) {
+        console.log(props.open_corona)
+        return [];
+    }
+    return props.marks.sort((a: any, b: any) => a.get('weight') - b.get('weight')).map(
         (feature: any, index: number) => {
             let angle = GetAngle(feature);
             return {
@@ -78,7 +85,7 @@ const user_marks = computed(() =>
             }
         }
     )
-
+}
 )
 
 /* 
@@ -175,7 +182,7 @@ function GetOrientation(
 .sun-chart-price {
     pointer-events: all;
     opacity: 0.8;
-    transition: 0.5s;
+    transition: 1s;
 
     &:hover {
         cursor: pointer;

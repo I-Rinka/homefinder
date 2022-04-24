@@ -3,8 +3,7 @@
     <!-- 向子传递必须要proxy -->
     <div :id="props.feature.getGeometry().getCoordinates().toString()">
       <sun-chart :myCoordinates="props.feature.getGeometry().getCoordinates()" :marks="props.markArray"
-        :color="sun_chart_color" :text="computed_price"></sun-chart>
-      <!-- <el-button style="pointer-events: all;" @click="GetAvgPrice">Get Avg Price</el-button> -->
+        :color="sun_chart_color" :text="computed_price" :open_corona="open_corona"></sun-chart>
     </div>
   </div>
 </template>
@@ -29,7 +28,13 @@ const props = defineProps({
   feature: Object,
   markArray: Array,
   basePrice: Number,
-});
+  open_corona: {
+    type: Boolean,
+    default: true,
+    required: false
+  },
+})
+
 const unit_price = ref(-1);
 
 let contained_blocks = [];
@@ -58,13 +63,16 @@ let computed_price = computed(() => {
 let interlop_function = d3.interpolateRgbBasis(['#d73027', '#f46d43', '#fdae61', '#fee08b', '#d9ef8b', '#a6d96a', '#66bd63', '#1a9850'])
 let sun_chart_color = computed(() => {
   if (props.basePrice && props.basePrice > 0) {
+    if (unit_price.value <= 0) {
+      return 'rgba(200,200,200,0.5)'
+    }
     return interlop_function(1 - ((unit_price.value - props.basePrice) / 10000 + 0.5))
   }
   else {
     if (unit_price.value <= 0) {
-      return 'rgba(0,0,0,0)'
+      return 'rgba(200,200,200,0.5)'
     }
-    return interlop_function(1 - unit_price.value / 10000)
+    return interlop_function(1 - unit_price.value / 50000)
   }
 })
 onBeforeMount(() => {
@@ -84,7 +92,6 @@ onMounted(() => {
       positioning: "center-center",
     });
     props.map.addOverlay(overlay);
-    // console.log(contained_blocks)
   }
 });
 
@@ -101,6 +108,9 @@ function GetAvgPrice() {
 }
 
 function ProcessUnitPrice(unit_price) {
+  if (props.open_corona == true && props.markArray.length > 0) {
+    return (unit_price / 10000).toFixed(2) + 'w'
+  }
   return (unit_price / 10000).toFixed(3) + 'w'
 }
 

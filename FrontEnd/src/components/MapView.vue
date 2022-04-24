@@ -199,16 +199,16 @@ overlaySource.on(["addfeature", "removefeature"], function (evt) {
 
 function AddPoint() {
   GetBlocks().then((res) => {
-    GetBlockClusterArray(res).forEach((layer) => map.addLayer(layer));
-    GetRegionClusterArray(res).forEach((layer) => map.addLayer(layer));
+    // GetBlockClusterArray(res).forEach((layer) => map.addLayer(layer));
+    // GetRegionClusterArray(res).forEach((layer) => map.addLayer(layer));
     map.addLayer(GetCluster(res));
     // Make It refresh the dom on screen
-    GetRegionClusterArray().forEach((layer) =>
-      layer.on("change", AllRegionClusterLoadOK)
-    );
-    GetBlockClusterArray().forEach((layer) =>
-      layer.on("change", AllBlockClusterLoadOK)
-    );
+    // GetRegionClusterArray().forEach((layer) =>
+    //   layer.on("change", AllRegionClusterLoadOK)
+    // );
+    // GetBlockClusterArray().forEach((layer) =>
+    //   layer.on("change", AllBlockClusterLoadOK)
+    // );
     GetCluster().on("change", () => GetOnScreenFeatures());
 
     ChangeClusterView(data.zoom);
@@ -261,18 +261,20 @@ function ChangeZoom(value) {
 
 function ChangeClusterView(zoom) {
   if (data.current_view) {
-    GetCluster().setVisible(true);
-    GetRegionClusterArray().forEach((layer) => layer.setVisible(false));
-    GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
+    // GetCluster().setVisible(true);
+    // GetRegionClusterArray().forEach((layer) => layer.setVisible(false));
+    // GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
   } else {
-    GetCluster().setVisible(false);
-    if (zoom > 60) {
-      GetRegionClusterArray().forEach((layer) => layer.setVisible(false));
-      GetBlockClusterArray().forEach((layer) => layer.setVisible(true));
-    } else {
-      GetRegionClusterArray().forEach((layer) => layer.setVisible(true));
-      GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
-    }
+    // GetCluster().setVisible(false);
+
+
+    // if (zoom > 60) {
+    //   GetRegionClusterArray().forEach((layer) => layer.setVisible(false));
+    //   GetBlockClusterArray().forEach((layer) => layer.setVisible(true));
+    // } else {
+    //   GetRegionClusterArray().forEach((layer) => layer.setVisible(true));
+    //   GetBlockClusterArray().forEach((layer) => layer.setVisible(false));
+    // }
   }
 }
 
