@@ -80,94 +80,93 @@ export function selectRecords(req, res) {
 export function getNewestRecords(req, res) {
     console.log("enter")
     let error = 1;
-    MongoClient.connect(url, (err, db) => {
-        if (err) {
-            error = 2;
-            res.send(error);
-        }
-        let dbo = db.db("homefinder");
-        dbo.collection("sales_records").aggregate([
-            {
-                $group: {
-                    _id: "$block",
-                    block: { $first: "$block" },
-                    year: { $max: "$year" },
-                    month: { $max: "$year", $max: "$month" },
-                },
-            },
-            {
-                $project: {
-                    _id: 0
-                }
-            }
-        ]).toArray((err, result) => {
+    try {
+        MongoClient.connect(url, (err, db) => {
             if (err) {
-                error = 3;
-                console.log(err);
-            } else {
-                console.log("res:", result);
-                error = 0;
-                res.send(result)
+                error = 2;
+                res.send(error);
             }
-            db.close();
+            let dbo = db.db("homefinder");
+            dbo.collection("newest_records").find().toArray((err, result) => {
+                if (err) {
+                    error = 3;
+                    console.log(err);
+                } else {
+                    console.log("res:", result);
+                    error = 0;
+                    res.send(result)
+                }
+                db.close();
+            });
         });
-    });
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 export function getAvgPrice(req, res) {
 
     let block_set = req.body;
     let error = 1;
-    MongoClient.connect(url, (err, db) => {
-        if (err) {
-            error = 2;
-            res.send(error);
-        }
-        let dbo = db.db("homefinder");
-        if (block_set[0] === "*") {
-            dbo.collection("sales_records").aggregate([
-                {
-                    $group: {
-                        _id: null,
-                        unit_price: { $avg: "$unit_price" },
-                        deal_price: { $avg: "$deal_price" },
-                    },
-                },
-            ]).toArray((err, result) => {
-                if (err) {
-                    error = 3;
-                    console.log(err);
-                } else {
-                    error = 0;
-                    res.send(result)
+    try {
+        MongoClient.connect(url, (err, db) => {
+            if (err) {
+                error = 2;
+                res.status(404);
+            }
+            try {
+                let dbo = db.db("homefinder");
+
+                if (block_set[0] === "*") {
+                    dbo.collection("newest_records").aggregate([
+                        {
+                            $group: {
+                                _id: null,
+                                unit_price: { $avg: "$unit_price" },
+                                deal_price: { $avg: "$deal_price" },
+                            },
+                        },
+                    ]).toArray((err, result) => {
+                        if (err) {
+                            error = 3;
+                            console.log(err);
+                            res.status(404);
+                        } else {
+                            error = 0;
+                            res.send(result)
+                        }
+                        db.close();
+                    });
                 }
-                db.close();
-            });
-        }
-        else {
-            dbo.collection("sales_records").aggregate([
-                {
-                    $match: {
-                        'block': { $in: block_set }
-                    }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        unit_price: { $avg: "$unit_price" },
-                        deal_price: { $avg: "$deal_price" },
-                    },
-                },
-            ]).toArray((err, result) => {
-                if (err) {
-                    error = 3;
-                    console.log(err);
-                } else {
-                    error = 0;
-                    res.send(result)
+                else {
+                    dbo.collection("newest_records").aggregate([
+                        {
+                            $match: {
+                                'block': { $in: block_set }
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: null,
+                                unit_price: { $avg: "$unit_price" },
+                                deal_price: { $avg: "$deal_price" },
+                            },
+                        },
+                    ]).toArray((err, result) => {
+                        if (err) {
+                            res.status(404);
+                        } else {
+                            error = 0;
+                            res.send(result)
+                        }
+                        db.close();
+                    });
                 }
-                db.close();
-            });
-        }
-    });
+            } catch (error) {
+
+            }
+        });
+    } catch (error) {
+        console.log(error)
+    }
 }

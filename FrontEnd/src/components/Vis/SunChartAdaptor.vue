@@ -75,12 +75,6 @@ let sun_chart_color = computed(() => {
     return interlop_function(1 - unit_price.value / 50000)
   }
 })
-onBeforeMount(() => {
-  if (props.map && props.feature) {
-    contained_blocks = toRaw(props.feature.get("features")).map(feature => { return { block: feature.get('block'), sub_region: feature.get('sub_region'), region: feature.get('region') } })
-    GetAvgPrice();
-  }
-})
 
 onMounted(() => {
   if (props.map && props.feature) {
@@ -92,6 +86,8 @@ onMounted(() => {
       positioning: "center-center",
     });
     props.map.addOverlay(overlay);
+    contained_blocks = toRaw(props.feature.get("features")).map(feature => { return { block: feature.get('block'), sub_region: feature.get('sub_region'), region: feature.get('region') } })
+    GetAvgPrice();
   }
 });
 
