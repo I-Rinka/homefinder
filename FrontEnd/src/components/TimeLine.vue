@@ -1,17 +1,21 @@
 <template>
     <div class="timeline">
         <div class="runway">
-            <slider-button></slider-button>
+            <slider-button
+                :style="{ right: `${slider_pos}px`}">
+            </slider-button>
         </div>
     </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "@vue/runtime-core";
-import  SliderButton from "./TimeLine/SliderButton.vue";
+import SliderButton from "./TimeLine/SliderButton.vue";
 
 
 let pressed = false;
+let slider_pos = ref(0);
+let slider_scale = ref(1);
 
 onMounted(() => {
     let runway = document.getElementsByClassName("runway");
@@ -20,7 +24,8 @@ onMounted(() => {
 
         element.addEventListener('mousemove', (e) => {
             if (pressed) {
-                xOffset.value = e.clientX - 12
+                slider_pos.value =
+                    element.clientWidth - e.clientX;
             }
         })
         element.addEventListener('pointerdown', (e) => {
