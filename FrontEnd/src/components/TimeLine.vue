@@ -1,7 +1,10 @@
 <template>
     <div class="timeline">
         <div class="runway">
-            <div class="button" :style="{ left: `${xOffset}px` }"></div>
+            <div class="button-frame" :style="{ left: `${xOffset}px` }">
+                <div class="button">
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -51,22 +54,30 @@ onMounted(() => {
     width: 100%;
     margin-bottom: 0px;
     position: relative;
-    background-color: rgb(125, 125, 125);
+    // background-color: rgb(125, 125, 125);
 }
 
 .runway {
     position: absolute;
-    height: 60%;
-    top: 30%;
+    height: 50%;
+    top: 40%;
     width: 100%;
     background-color: ghostwhite;
 }
 
-.button {
-    position: inherit;
+.button-frame {
+    filter: drop-shadow(0.5px 0.5px 2px rgba(0, 0, 0, 0.5));
     cursor: -webkit-grabbing;
+    position: inherit;
+    top: -25%;
+    height: 125%;
+    width: 12px;
+}
+
+.button {
     height: 100%;
-    width: 6px;
-    background-color: red;
+    width: 100%;
+    clip-path: polygon(0 0, 100% 0, 70% 30%, 70% 100%, 30% 100%, 30% 30%, 0 0);
+    background-color: rgb(200, 26, 10);
 }
 </style>

@@ -302,13 +302,14 @@ function GetOnScreenFeatures() {
 
 <style lang="less">
 #MapView {
-  height: 55vh;
+  position: relative;
+  height: 50vh;
 }
 
 #view-choice {
   position: absolute;
-  right: 1.5vw;
-  top: 51.5vh;
+  right: 1%;
+  bottom: 2%;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
 }
 
@@ -349,10 +350,10 @@ function GetOnScreenFeatures() {
 .zoom-slider {
   display: inline;
   position: absolute;
-  top: 15vh;
-  height: 15vh;
+  top: 30%;
+  height: 30%;
+  left: 1%;
   filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.5));
-  left: 1.5vw;
   z-index: 6;
   cursor: default;
 
