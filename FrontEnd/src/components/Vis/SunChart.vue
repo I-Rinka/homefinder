@@ -54,11 +54,11 @@ let price_r = computed(() => {
 })
 
 let price_text_size = computed(() => {
-    if (props.marks.length == 0) {
+    if (props.marks.length == 0 || (props.open_corona != undefined && props.open_corona === false)) {
         return 15
     }
     else if (props.marks.length) {
-        return 3 
+        return 3
     }
 })
 
