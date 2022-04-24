@@ -8,8 +8,10 @@ import WeightView from "./components/WeightView.vue";
 
 <template>
   <!-- <map-view></map-view> -->
-  <map-view></map-view>
-  <weight-view></weight-view>
+  <div>
+    <map-view></map-view>
+    <weight-view></weight-view>
+  </div>
 </template>
 
 <style>
@@ -19,5 +21,10 @@ import WeightView from "./components/WeightView.vue";
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+
+body {
+  height: 100vh;
+  overflow: hidden;
 }
 </style>

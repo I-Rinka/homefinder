@@ -26,8 +26,11 @@
         :open_corona="data.selling_view"></sun-chart-adaptor>
     </div>
 
-    <el-button @click="GetBasePrice">Get Base Price</el-button>
+
+    <!-- <el-button @click="GetBasePrice">Get Base Price</el-button> -->
   </div>
+  <time-line v-show="!data.selling_view"></time-line>
+  <time-line v-show="data.selling_view"></time-line>
 </template>
 
 <script setup>
@@ -40,9 +43,7 @@ import { GetCurrentRecord, GetBlocks, GetRegions, GetBlocksAvgPrice } from "../d
 import { mapboxlayer } from "./Map/mapbox_layer";
 import { beijingLayer } from "./Map/vector_layer";
 import {
-  GetBlockClusterArray,
   GetCluster,
-  GetRegionClusterArray,
 } from "./Map/cluster";
 import { GetNewMarkFeature, MarkSource, MarkLayer, UserMarkModify } from "./Map/user_mark"
 
@@ -66,6 +67,7 @@ import {
 } from "ol/interaction";
 import { shiftKeyOnly } from "ol/events/condition";
 import PointerInteraction from "ol/interaction/Pointer";
+import { viewport } from "@popperjs/core";
 
 
 // the configuration
@@ -258,30 +260,14 @@ function ChangeView() {
 }
 
 function GetOnScreenFeatures() {
-  let currentExtent = map.getView().calculateExtent(map.getSize());
-  // console.log(currentExtent);
-  currentExtent[0] -= 0.08;
-  currentExtent[1] -= 0.08;
-  currentExtent[2] += 0.08;
-  currentExtent[3] += 0.08;
+  let view_port = [map.getSize()[0], map.getSize()[1]];
+  view_port[0] *= 2;
+  view_port[1] *= 2;
+
+  let currentExtent = map.getView().calculateExtent(view_port);
+
   let features_dic = {};
 
-  GetRegionClusterArray().forEach((layer) => {
-    if (layer.getVisible()) {
-      layer.getSource().forEachFeatureInExtent(currentExtent, (feature) => {
-        features_dic[feature.getGeometry().getCoordinates().toString()] =
-          feature;
-      });
-    }
-  });
-  GetBlockClusterArray().forEach((layer) => {
-    if (layer.getVisible()) {
-      layer.getSource().forEachFeatureInExtent(currentExtent, (feature) => {
-        features_dic[feature.getGeometry().getCoordinates().toString()] =
-          feature;
-      });
-    }
-  });
   if (GetCluster().getVisible()) {
     GetCluster()
       .getSource()
@@ -316,14 +302,14 @@ function GetOnScreenFeatures() {
 
 <style lang="less">
 #MapView {
-  height: 58vh;
+  height: 55vh;
 }
 
 #view-choice {
   position: absolute;
-  right: 2vw;
-  top: 50vh;
-  filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.5));
+  right: 1.5vw;
+  top: 51.5vh;
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
 }
 
 .map {
@@ -348,9 +334,8 @@ function GetOnScreenFeatures() {
 }
 
 .map-frame {
-  width: 98%;
-  height: 90%;
-  margin: 1%;
+  width: 99.8%;
+  height: 99.8%;
 }
 
 .zoom-slider {
@@ -359,7 +344,7 @@ function GetOnScreenFeatures() {
   top: 15vh;
   height: 15vh;
   filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.5));
-  left: 3vw;
+  left: 1.5vw;
   z-index: 6;
   cursor: default;
 

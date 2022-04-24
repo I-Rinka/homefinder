@@ -10,8 +10,10 @@ export default {
 
 <style lang="less" scoped>
 .timeline {
-    height: 100%;
+    height: 5vh;
     width: 100%;
-    background-color: gray;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background-color: rgb(125, 125, 125);
 }
 </style>
