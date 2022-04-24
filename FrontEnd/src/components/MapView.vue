@@ -30,7 +30,7 @@
     <!-- <el-button @click="GetBasePrice">Get Base Price</el-button> -->
   </div>
   <time-line v-show="!data.selling_view"></time-line>
-  <time-line v-show="data.selling_view"></time-line>
+  <div v-show="data.selling_view" class="user-marks-order"></div>
 </template>
 
 <script setup>
@@ -176,7 +176,7 @@ onMounted(() => {
         data.marks = MarkSource.getFeatures()
       }
     }
-    if (!remove_mark&&data.selling_view) {
+    if (!remove_mark && data.selling_view) {
       let new_feature = GetNewMarkFeature(event.coordinate);
       data.marks.push(new_feature);
       MarkSource.addFeature(new_feature);
@@ -321,6 +321,14 @@ function GetOnScreenFeatures() {
 
 .user-mark {
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+}
+
+.user-marks-order {
+  height: 7vh;
+  width: 100%;
+  margin-bottom: 0px;
+  position: relative;
+  background-color: rgba(255, 167, 60, 0.242);
 }
 
 .ol-layer {

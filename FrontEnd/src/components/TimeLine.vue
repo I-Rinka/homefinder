@@ -3,7 +3,6 @@
         <div class="runway">
             <div class="button" :style="{ left: `${xOffset}px` }"></div>
         </div>
-
     </div>
 </template>
 
