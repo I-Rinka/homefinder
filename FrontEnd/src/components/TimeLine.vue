@@ -39,10 +39,11 @@
         </div>
       </div>
 
-      <slider-button :style="{ left: `${slider_pos}px` }"> </slider-button>
+      <slider-button :style="{ left: `${data.slider_position}px` }">
+      </slider-button>
     </div>
     <div class="timeline-label">Time Line</div>
-    {{ ym }}
+    {{ GetYearMonth() }}
   </div>
 </template>
 
@@ -60,10 +61,11 @@ import {
 import SliderButton from "./TimeLine/SliderButton.vue";
 
 let pressed = false;
-let slider_pos = ref(0);
 
 const data = reactive({
   time_series: [],
+  slider_position: 0,
+  scroll_position: 0,
 });
 
 function MapMonth(month) {
@@ -130,7 +132,7 @@ onMounted(() => {
         if (timeoutTrottler == null) {
           timeoutTrottler = setTimeout(() => {
             timeoutTrottler = null;
-            slider_pos.value = pos_value;
+            data.slider_position = pos_value;
           }, 5);
         }
       }
@@ -143,11 +145,11 @@ onMounted(() => {
     });
     element.addEventListener("dblclick", (e) => {
       pos_value = e.clientX - left_offset;
-      slider_pos.value = pos_value;
+      data.slider_position = pos_value;
     });
   }
 
-  slider_pos.value =
+  data.slider_position =
     document.getElementsByClassName("time-scale")[0].clientWidth -
     left_offset +
     8;
@@ -156,23 +158,19 @@ onMounted(() => {
   document
     .getElementsByClassName("time-scale")[0]
     .addEventListener("scroll", (e) => {
-      test.value = document
+      data.scroll_position = document
         .getElementsByClassName("time-scale")
         .item(0).scrollLeft;
     });
 });
-let test = ref(0);
-// watch(() => slider_pos.value, (new_val) => console.log(GetYearMonth(new_val)));
-function GetYearMonth(slider_pos) {
-  console.log("change");
+
+function GetYearMonth() {
   try {
     let unit_width = document
       .getElementsByClassName("year")
       .item(0).clientWidth;
-    let length =
-      test.value +
-      //   document.getElementsByClassName("time-scale").item(0).scrollLeft +
-      slider_pos;
+    let length = data.scroll_position + data.slider_position;
+
     let ind = Math.floor(length / unit_width);
     let month_width = document
       .getElementsByClassName("month")
@@ -186,8 +184,6 @@ function GetYearMonth(slider_pos) {
     return { year: null, month: null };
   }
 }
-
-let ym = computed(() => GetYearMonth(slider_pos.value));
 </script>
 
 <style lang="less">
