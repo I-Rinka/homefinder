@@ -310,14 +310,14 @@ function GetOnScreenFeatures() {
   position: absolute;
   right: 1%;
   bottom: 2%;
-  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .map {
   width: 100%;
   height: 100%;
-  border: solid gray 2px;
-  border-radius: 15px;
+  border: solid gray 1px;
+  border-radius: 10px;
 }
 
 .user-mark {
@@ -334,12 +334,12 @@ function GetOnScreenFeatures() {
 
 .ol-layer {
   >canvas {
-    border-radius: 14px;
+    border-radius: 11px;
   }
 }
 
 .ol-viewport {
-  border-radius: 10px;
+  border-radius: 5px;
 }
 
 .map-frame {
@@ -353,7 +353,7 @@ function GetOnScreenFeatures() {
   top: 30%;
   height: 30%;
   left: 1%;
-  filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
   z-index: 6;
   cursor: default;
 

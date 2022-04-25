@@ -81,20 +81,24 @@ onMounted(() => {
 .runway {
     position: absolute;
     height: 50%;
+    min-height: 32px;
     top: 40%;
     width: 100%;
     background-color: rgb(234, 234, 234);
     overflow-y: visible;
-    border: solid gray 2px;
-    border-radius: 15px;
+    border: solid gray 1px;
+    border-radius: 10px;
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .month {
     display: inline-block;
     height: 100%;
-    // margin-left: 27px;
     position: relative;
-    width: 27px;
+    width: 23px;
 
     &:hover {
         .month-scale {
@@ -106,39 +110,59 @@ onMounted(() => {
 }
 
 .month-scale {
-    position: relative;
+    position: absolute;
     display: inline-block;
-    height: 50%;
-    width: 2px;
+    height: 40%;
+    width: 2.5px;
+    left: 0;
+    bottom: -3%;
     background-color: rgb(128, 128, 128);
     transition: 0.3s;
-    top: 20%;
+    border: solid 0.5px rgb(255, 255, 255);
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    filter: drop-shadow(0px 0px 0.5px rgba(0, 0, 0, 0.5));
 }
 
 .first-month-scale {
-    position: relative;
+    position: absolute;
     display: inline-block;
+    height: 83%;
     width: 3px;
-    height: 80%;
-    background-color: rgb(128, 128, 128);
+    left: 0;
+    bottom: -3%;
     transition: 0.3s;
-    top: 20%;
+    background-color: rgb(128, 128, 128);
+    border: solid 0.5px rgb(255, 255, 255);
+    border-top-left-radius: 1.5px;
+    border-top-right-radius: 1.5px;
+    filter: drop-shadow(0px 0px 0.5px rgba(0, 0, 0, 0.5));
 }
 
 .year {
     position: relative;
-    display: inline;
+    display: inline-block;
     height: 100%;
-    width: 240px;
 
+    &:hover {
+        background-color: whitesmoke;
+
+        .first-month-scale {
+            transform: scale(1.2, 1.2) translateY(-10%);
+        }
+
+    }
 }
 
 .year-text {
     writing-mode: vertical-rl;
     text-orientation: mixed;
-    color: rgb(128, 128, 128);
-    font-weight: 500;
-    font-size: 1px;
+    color: rgba(70, 70, 70, 0.5);
+    font-weight: bolder;
+    transform: scale(0.8, 0.8);
+    font-size: 10px;
+    user-select: none;
+    margin-top: -1px;
 }
 
 .time-scale {

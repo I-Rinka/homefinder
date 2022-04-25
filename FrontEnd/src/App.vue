@@ -23,8 +23,4 @@ import WeightView from "./components/WeightView.vue";
   color: #2c3e50;
 }
 
-body {
-  height: 100vh;
-  overflow: hidden;
-}
 </style>

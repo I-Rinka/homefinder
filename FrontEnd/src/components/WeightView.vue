@@ -14,7 +14,8 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
 #weight-view {
-  height: 40vh;
+  margin-top: 20px;
+  height: 35vh;
   background-color: rgb(234, 234, 234);
 }
 </style>
