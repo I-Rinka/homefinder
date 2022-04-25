@@ -1,6 +1,6 @@
 <template>
     <div class="timeline">
-        <div class="runway">
+        <div class="timeline-runway">
             <div class="time-scale">
                 <div class="year" v-for="year in data.time_series" :key="year.year">
                     <template v-for="month, index in year.month" :key="month.toString() + year.toString()">
@@ -29,14 +29,17 @@
                 </div>
             </div>
 
-            <slider-button :style="{ right: `${slider_pos}px` }">
+            <slider-button :style="{ left: `${slider_pos}px` }">
             </slider-button>
+        </div>
+        <div class="timeline-label">
+            Time Line
         </div>
     </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "@vue/runtime-core";
+import { onBeforeMount, onMounted, onUpdated, reactive, ref } from "@vue/runtime-core";
 import SliderButton from "./TimeLine/SliderButton.vue";
 
 
@@ -77,30 +80,12 @@ function MapMonth(month) {
             return "Month";
     }
 }
+let timeoutTrottler = null;
+let pos_value = 0;
 
-onMounted(() => {
-    let runway = document.getElementsByClassName("runway");
-    for (let i = 0; i < runway.length; i++) {
-        const element = runway[i];
+let left_offset = 15;
 
-        element.addEventListener('mousemove', (e) => {
-            if (pressed) {
-                slider_pos.value =
-                    element.clientWidth - e.clientX;
-            }
-        })
-        element.addEventListener('pointerdown', (e) => {
-            pressed = true;
-        })
-        element.addEventListener('pointerup', (e) => {
-            pressed = false;
-        })
-
-        element.addEventListener('pointerleave', (e) => {
-            pressed = false;
-        })
-    }
-
+onBeforeMount(() => {
     for (let i = 2012; i <= 2020; i++) {
         let month = []
         for (let j = 1; j <= 12; j++) {
@@ -110,6 +95,46 @@ onMounted(() => {
     }
 })
 
+onMounted(() => {
+    let runway = document.getElementsByClassName("timeline-runway");
+    for (let i = 0; i < runway.length; i++) {
+        const element = runway[i];
+        console.log(element.clientWidth);
+        element.addEventListener('mousemove', (e) => {
+            pos_value = e.clientX - left_offset;
+
+            pos_value = pos_value < 0 ? -5 : pos_value;
+            let right_most = document.getElementsByClassName("time-scale")[0].clientWidth - left_offset + 8;
+            pos_value = pos_value > right_most ? right_most : pos_value;
+
+            if (pressed) {
+                if (timeoutTrottler == null) {
+                    timeoutTrottler = setTimeout(() => {
+                        timeoutTrottler = null;
+                        slider_pos.value = pos_value;
+                    }, 5)
+                }
+            }
+        })
+        element.addEventListener('pointerdown', (e) => {
+            pressed = true;
+        })
+        element.addEventListener('pointerup', (e) => {
+            pressed = false;
+        })
+        element.addEventListener('dblclick', (e) => {
+            pos_value = e.clientX - left_offset;
+            slider_pos.value = pos_value;
+        })
+    }
+
+    slider_pos.value = document.getElementsByClassName("time-scale")[0].clientWidth - left_offset + 8;
+    document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
+})
+
+onUpdated(() => {
+
+})
 </script>
 
 <style lang="less">
@@ -118,14 +143,15 @@ onMounted(() => {
     width: 100%;
     margin-bottom: 0px;
     position: relative;
+    user-select: none;
 }
 
-.runway {
+.timeline-runway {
     position: absolute;
     height: 50%;
     min-height: 32px;
     top: 40%;
-    width: 100%;
+    width: 99.8%;
     background: linear-gradient(0deg, rgb(230, 230, 230), whitesmoke);
     overflow-y: visible;
     border: solid gray 1px;
@@ -141,6 +167,7 @@ onMounted(() => {
     height: 100%;
     position: relative;
     width: 23px;
+    cursor: pointer;
 
     &:hover {
         .month-scale {
@@ -230,5 +257,14 @@ onMounted(() => {
 .el-popper.is-customized .el-popper__arrow::before {
     background: linear-gradient(45deg, rgb(240, 240, 240), #ffffff);
     right: 0;
+}
+
+.timeline-label {
+    position: absolute;
+    top: 8%;
+    color: gray;
+    font-weight: bolder;
+    font-size: 1.5vh;
+    left: 1vw;
 }
 </style>

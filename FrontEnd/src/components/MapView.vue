@@ -29,7 +29,7 @@
 
     <!-- <el-button @click="GetBasePrice">Get Base Price</el-button> -->
   </div>
-  <time-line v-show="!data.selling_view"></time-line>
+  <time-line :style="{ visibility: (data.selling_view) ? 'hidden' : 'visible' }"></time-line>
   <div v-show="data.selling_view" class="user-marks-order"></div>
 </template>
 
@@ -327,9 +327,10 @@ function GetOnScreenFeatures() {
 .user-marks-order {
   height: 7vh;
   width: 100%;
-  margin-bottom: 0px;
-  position: relative;
-  background-color: rgba(255, 167, 60, 0.242);
+  cursor: pointer;
+  position: absolute;
+  top: 52vh;
+  background-color: rgb(255, 207, 149);
 }
 
 .ol-layer {
