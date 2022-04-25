@@ -409,6 +409,7 @@ function GetOnScreenFeatures() {
   &:hover {
     height: 5vh;
     top: -1vh;
+    width: 150%;
   }
 }
 
