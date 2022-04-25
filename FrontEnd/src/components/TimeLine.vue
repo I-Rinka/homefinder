@@ -39,8 +39,7 @@
         </div>
       </div>
 
-      <slider-button :style="{ left: `${data.slider_position}px` }">
-      </slider-button>
+      <slider-button :style="{ left: `${slider}px` }"> </slider-button>
     </div>
     <div class="timeline-label">Time Line</div>
     {{ GetYearMonth() }}
@@ -50,7 +49,6 @@
 <script setup>
 import {
   computed,
-  getCurrentInstance,
   onBeforeMount,
   onMounted,
   onUpdated,
@@ -64,8 +62,19 @@ let pressed = false;
 
 const data = reactive({
   time_series: [],
-  slider_position: 0,
   scroll_position: 0,
+  slider_position: 0,
+  position: 0,
+  runway_limit: [0, 1000],
+});
+
+let slider = computed({
+  get() {
+    return data.position;
+  },
+  set(clientX) {
+    data.position = clientX - left_offset;
+  },
 });
 
 function MapMonth(month) {
@@ -114,45 +123,30 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
-  let runway = document.getElementsByClassName("timeline-runway");
-  for (let i = 0; i < runway.length; i++) {
-    const element = runway[i];
-    console.log(element.clientWidth);
-    element.addEventListener("mousemove", (e) => {
-      pos_value = e.clientX - left_offset;
+  let runway = document.getElementsByClassName("timeline-runway")[0];
 
-      pos_value = pos_value < 0 ? -5 : pos_value;
-      let right_most =
-        document.getElementsByClassName("time-scale")[0].clientWidth -
-        left_offset +
-        8;
-      pos_value = pos_value > right_most ? right_most : pos_value;
-
-      if (pressed) {
-        if (timeoutTrottler == null) {
-          timeoutTrottler = setTimeout(() => {
-            timeoutTrottler = null;
-            data.slider_position = pos_value;
-          }, 5);
-        }
+  runway.addEventListener("mousemove", (e) => {
+    if (pressed) {
+      if (timeoutTrottler == null) {
+        timeoutTrottler = setTimeout(() => {
+          timeoutTrottler = null;
+          slider.value = e.clientX;
+        }, 5);
       }
-    });
-    element.addEventListener("pointerdown", (e) => {
-      pressed = true;
-    });
-    element.addEventListener("pointerup", (e) => {
-      pressed = false;
-    });
-    element.addEventListener("dblclick", (e) => {
-      pos_value = e.clientX - left_offset;
-      data.slider_position = pos_value;
-    });
-  }
+    }
+  });
+  runway.addEventListener("pointerdown", (e) => {
+    pressed = true;
+  });
+  runway.addEventListener("pointerup", (e) => {
+    pressed = false;
+  });
+  runway.addEventListener("dblclick", (e) => {
+    pos_value = e.clientX - left_offset;
+    data.slider_position = pos_value;
+  });
 
-  data.slider_position =
-    document.getElementsByClassName("time-scale")[0].clientWidth -
-    left_offset +
-    8;
+  slider.value = document.getElementsByClassName("time-scale")[0].clientWidth;
   document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
 
   document
@@ -298,6 +292,9 @@ function GetYearMonth() {
   /* Set padding to ensure the height is 32px */
   padding: 6px 12px;
   background: linear-gradient(90deg, rgb(230, 230, 230), rgb(255, 255, 255));
+  span {
+    user-select: none;
+  }
 }
 
 .el-popper.is-customized .el-popper__arrow::before {
