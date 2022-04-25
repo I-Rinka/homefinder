@@ -50,7 +50,18 @@
     :style="{ visibility: data.selling_view ? 'hidden' : 'visible' }"
     @changeCurrent="ChangeCurrentTime"
   ></time-line>
-  <div v-show="data.selling_view" class="user-marks-order"></div>
+  <div v-show="data.selling_view" class="user-marks-order">
+    <div class="user-mark-label">Interesed Locations</div>
+    <div class="user-mark-guidance" v-if="data.marks.length == 0">
+      Double click the Map to add interested points
+    </div>
+    <div
+      class="user-mark-color-strip"
+      v-for="(mark, index) in data.marks"
+      :key="mark"
+      :style="{ backgroundColor: mark.get('color') }"
+    ></div>
+  </div>
 </template>
 
 <script setup>
@@ -352,11 +363,62 @@ function GetOnScreenFeatures() {
 
 .user-marks-order {
   height: 7vh;
-  width: 100%;
-  cursor: pointer;
+  width: 99%;
   position: absolute;
   top: 52vh;
-  background-color: rgb(255, 207, 149);
+  background-color: rgb(255, 255, 255);
+  display: flex;
+  transition-duration: 0.5s;
+}
+
+.user-mark-label {
+  position: absolute;
+  top: -8%;
+  color: gray;
+  font-weight: bolder;
+  font-size: 1.5vh;
+  left: 1vw;
+}
+.user-mark-guidance {
+  user-select: none;
+  position: relative;
+  top: 2vh;
+  color: gray;
+  font-weight: normal;
+  font-size: 1.5vh;
+  left: 0vw;
+  padding: 2px;
+  width: 100%;
+  height: 2vh;
+  background-color: rgb(203, 203, 203);
+  border-radius: 5px;
+}
+
+.user-mark-color-strip {
+  cursor: pointer;
+  position: relative;
+  top: 2vh;
+  bottom: 0;
+  height: 2vh;
+  transition-duration: 0.5s;
+  width: 100%;
+  animation: enter 0.5s;
+  margin: 2px;
+  border-radius: 5px;
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+  &:hover {
+    height: 5vh;
+    top: -1vh;
+  }
+}
+
+@keyframes enter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 .ol-layer {
