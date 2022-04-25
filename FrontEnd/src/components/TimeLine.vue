@@ -35,11 +35,12 @@
         <div class="timeline-label">
             Time Line
         </div>
+        {{ ym }}
     </div>
 </template>
 
 <script setup>
-import { onBeforeMount, onMounted, onUpdated, reactive, ref } from "@vue/runtime-core";
+import { computed, onBeforeMount, onMounted, onUpdated, reactive, ref, watch } from "@vue/runtime-core";
 import SliderButton from "./TimeLine/SliderButton.vue";
 
 
@@ -132,9 +133,24 @@ onMounted(() => {
     document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
 })
 
-onUpdated(() => {
+// watch(() => slider_pos.value, (new_val) => console.log(GetYearMonth(new_val)));
 
-})
+function GetYearMonth(slider_pos) {
+    try {
+        let unit_width = document.getElementsByClassName("year").item(0).clientWidth;
+        let length = document.getElementsByClassName("time-scale").item(0).scrollLeft + slider_pos;
+        let ind = Math.floor(length / unit_width)
+        let month_width = document.getElementsByClassName("month").item(0).clientWidth;
+        let l_month = Math.floor(length % unit_width / month_width);
+        return { year: data.time_series[ind].year, month: data.time_series[ind].month[l_month] }
+    } catch (error) {
+
+        return { year: null, month: null }
+    }
+}
+
+let ym = computed(() => GetYearMonth(slider_pos.value))
+
 </script>
 
 <style lang="less">
