@@ -4,7 +4,16 @@
             <div class="time-scale">
                 <div class="year" v-for="year in data.time_series" :key="year.year">
                     <template v-for="month, index in year.month" :key="month.toString() + year.toString()">
-                        <el-tooltip :content="MapMonth(month)" placement="top" effect="light">
+                        <el-tooltip :content="MapMonth(month)" :popper-options="{
+                            modifiers: [
+                                {
+                                    name: 'offset',
+                                    options: {
+                                        offset: [0, 0]
+                                    },
+                                }
+                            ],
+                        }" placement="top" effect="customized" :hide-after="0" popper-class="popper">
                             <div v-if="index != 0" class="month">
                                 <div class="month-scale"></div>
                             </div>
@@ -103,7 +112,7 @@ onMounted(() => {
 
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .timeline {
     height: 7vh;
     width: 100%;
@@ -117,7 +126,7 @@ onMounted(() => {
     min-height: 32px;
     top: 40%;
     width: 100%;
-    background-color: rgb(234, 234, 234);
+    background: linear-gradient(0deg, rgb(230, 230, 230), whitesmoke);
     overflow-y: visible;
     border: solid gray 1px;
     border-radius: 10px;
@@ -205,5 +214,21 @@ onMounted(() => {
     overflow-x: scroll;
     overflow-y: hidden;
     border-radius: 10px;
+}
+
+.popper {
+    filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.3));
+
+}
+
+.el-popper.is-customized {
+    /* Set padding to ensure the height is 32px */
+    padding: 6px 12px;
+    background: linear-gradient(90deg, rgb(230, 230, 230), rgb(255, 255, 255));
+}
+
+.el-popper.is-customized .el-popper__arrow::before {
+    background: linear-gradient(45deg, rgb(240, 240, 240), #ffffff);
+    right: 0;
 }
 </style>

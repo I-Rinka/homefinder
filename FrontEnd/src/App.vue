@@ -23,4 +23,9 @@ import WeightView from "./components/WeightView.vue";
   color: #2c3e50;
 }
 
+:root {
+  --el-color-primary: #487cc6;
+  --el-border-color: grey;
+  --el-border-color-light: grey;
+}
 </style>
