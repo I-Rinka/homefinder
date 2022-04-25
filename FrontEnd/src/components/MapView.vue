@@ -6,11 +6,23 @@
     </div>
 
     <div class="zoom-slider">
-      <el-button @click="ResetPosition" :icon="LocationFilled" style="margin-bottom: 1vh" circle>
+      <el-button
+        @click="ResetPosition"
+        :icon="LocationFilled"
+        style="margin-bottom: 1vh"
+        circle
+      >
       </el-button>
       <!-- @click="ResetPosition"
         @input="SetZoom" -->
-      <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
+      <el-slider
+        v-model="data.zoom"
+        :step="1"
+        :max="100"
+        :min="0"
+        @input="ChangeZoom"
+        vertical
+      >
       </el-slider>
     </div>
     <div id="view-choice">
@@ -21,15 +33,23 @@
     </div>
     <!-- <sun-chart></sun-chart> -->
     <div>
-      <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"
-        :map="map" :feature="feature" :markArray="data.marks" :basePrice="data.base_price"
-        :open_corona="data.selling_view"></sun-chart-adaptor>
+      <sun-chart-adaptor
+        v-for="feature in data.features"
+        :key="feature.getGeometry().getCoordinates().toString()"
+        :map="map"
+        :feature="feature"
+        :markArray="data.marks"
+        :basePrice="data.base_price"
+        :open_corona="data.selling_view"
+      ></sun-chart-adaptor>
     </div>
-
 
     <!-- <el-button @click="GetBasePrice">Get Base Price</el-button> -->
   </div>
-  <time-line :style="{ visibility: (data.selling_view) ? 'hidden' : 'visible' }"></time-line>
+  <time-line
+    :style="{ visibility: data.selling_view ? 'hidden' : 'visible' }"
+    @changeCurrent="ChangeCurrentTime"
+  ></time-line>
   <div v-show="data.selling_view" class="user-marks-order"></div>
 </template>
 
@@ -39,13 +59,21 @@ import { computed, onMounted } from "@vue/runtime-core";
 import { LocationFilled } from "@element-plus/icons-vue";
 import * as d3 from "d3";
 
-import { GetCurrentRecord, GetBlocks, GetRegions, GetBlocksAvgPrice } from "../database/query.js";
+import {
+  GetCurrentRecord,
+  GetBlocks,
+  GetRegions,
+  GetBlocksAvgPrice,
+} from "../database/query.js";
 import { mapboxlayer } from "./Map/mapbox_layer";
 import { beijingLayer } from "./Map/vector_layer";
+import { GetCluster } from "./Map/cluster";
 import {
-  GetCluster,
-} from "./Map/cluster";
-import { GetNewMarkFeature, MarkSource, MarkLayer, UserMarkModify } from "./Map/user_mark"
+  GetNewMarkFeature,
+  MarkSource,
+  MarkLayer,
+  UserMarkModify,
+} from "./Map/user_mark";
 
 import TimeLine from "./TimeLine.vue";
 import SunChartAdaptor from "./Vis/SunChartAdaptor.vue";
@@ -69,7 +97,6 @@ import { shiftKeyOnly } from "ol/events/condition";
 import PointerInteraction from "ol/interaction/Pointer";
 import { viewport } from "@popperjs/core";
 
-
 // the configuration
 const config = {
   zoom: 10,
@@ -91,26 +118,29 @@ const data = reactive({
   selling_view: true,
   features: [],
   marks: [],
-  base_price: 0
+  base_price: 0,
 });
 
 const view_choice = computed({
   get() {
-    return data.selling_view ? "Selling View" : "History View"
+    return data.selling_view ? "Selling View" : "History View";
   },
   set(value) {
     if (value === "History View") {
       data.selling_view = false;
-    }
-    else {
+    } else {
       data.selling_view = true;
     }
     ChangeView();
-  }
-})
+  },
+});
 
 function GetBasePrice() {
-  GetBlocksAvgPrice(['*']).then(res => data.base_price = res.unit_price)
+  GetBlocksAvgPrice(["*"]).then((res) => (data.base_price = res.unit_price));
+}
+
+function ChangeCurrentTime(data) {
+  console.log(data);
 }
 
 // -------------------------- Useful functions ---------------------------
@@ -148,7 +178,7 @@ onMounted(() => {
   // hover
   map.on("pointermove", (event) => {
     let features = map.getFeaturesAtPixel(event.pixel);
-    let feature = features[0]
+    let feature = features[0];
     if (feature) {
       // cluster point
       map.getTargetElement().style.cursor = feature.get("features")
@@ -156,16 +186,14 @@ onMounted(() => {
         : "";
 
       // user mark
-      map.getTargetElement().style.cursor = feature.get("type") === "UserMark"
-        ? "pointer"
-        : "";
-
+      map.getTargetElement().style.cursor =
+        feature.get("type") === "UserMark" ? "pointer" : "";
     }
   });
 
   map.on("dblclick", (event) => {
     let features = map.getFeaturesAtPixel(event.pixel);
-    let feature = features[0]
+    let feature = features[0];
     let remove_mark = false;
     if (feature) {
       // user mark
@@ -173,7 +201,7 @@ onMounted(() => {
         MarkSource.removeFeature(feature);
         remove_mark = true;
         // refresh
-        data.marks = MarkSource.getFeatures()
+        data.marks = MarkSource.getFeatures();
       }
     }
     if (!remove_mark && data.selling_view) {
@@ -189,7 +217,7 @@ UserMarkModify.on(["modifystart"], function (evt) {
     evt.type === "modifystart" ? "grabbing" : "pointer";
 });
 UserMarkModify.on(["modifyend"], function (evt) {
-  data.marks = MarkSource.getFeatures()
+  data.marks = MarkSource.getFeatures();
   document.getElementById("map").style.cursor =
     evt.type === "modifystart" ? "grabbing" : "pointer";
 });
@@ -199,7 +227,6 @@ overlaySource.on(["addfeature", "removefeature"], function (evt) {
     evt.type === "addfeature" ? "pointer" : "";
 });
 
-
 function AddPoint() {
   GetBlocks().then((res) => {
     map.addLayer(GetCluster(res));
@@ -208,7 +235,6 @@ function AddPoint() {
     ChangeClusterView(data.zoom);
   });
 }
-
 
 function ResetPosition() {
   map.getView().animate({
@@ -334,7 +360,7 @@ function GetOnScreenFeatures() {
 }
 
 .ol-layer {
-  >canvas {
+  > canvas {
     border-radius: 11px;
   }
 }
@@ -358,7 +384,7 @@ function GetOnScreenFeatures() {
   cursor: default;
   filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
 
-  >div {
+  > div {
     height: 20vh;
 
     .el-slider__runway {

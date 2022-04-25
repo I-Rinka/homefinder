@@ -54,7 +54,6 @@
       </slider-button>
     </div>
     <div class="timeline-label">Time Line</div>
-    {{ TimeLineYear + "," + TimeLineMonth }}
   </div>
 </template>
 
@@ -67,6 +66,7 @@ import {
   watch,
 } from "@vue/runtime-core";
 import SliderButton from "./TimeLine/SliderButton.vue";
+import { MapMonth } from "./TimeLine/date";
 
 const emits = defineEmits(["changeCurrent"]);
 const data = reactive({
@@ -96,6 +96,7 @@ let slider = computed({
   },
 });
 
+// Add Time Series before mounted
 onBeforeMount(() => {
   for (let i = 2012; i <= 2020; i++) {
     let month = [];
@@ -106,27 +107,7 @@ onBeforeMount(() => {
   }
 });
 
-let slider_move_timeout = null;
-function MoveSlider(e) {
-  if (data.slider_pressed) {
-    if (slider_move_timeout == null) {
-      slider_move_timeout = setTimeout(() => {
-        slider_move_timeout = null;
-        slider.value = e.clientX;
-      }, 5);
-    }
-  }
-}
-function TranslateSlider(e) {
-  slider.value = e.clientX;
-}
-
-function MoveTimeScale(e) {
-  data.scroll_position = document
-    .getElementsByClassName("time-scale")
-    .item(0).scrollLeft;
-}
-
+// some default configuration
 onMounted(() => {
   // modify slider right limit
   data.runway_limit[1] = slider.value =
@@ -143,6 +124,28 @@ onMounted(() => {
   // scroll timeline to right most
   document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
 });
+
+let slider_move_timeout = null;
+function MoveSlider(e) {
+  if (data.slider_pressed) {
+    if (slider_move_timeout == null) {
+      slider_move_timeout = setTimeout(() => {
+        slider_move_timeout = null;
+        slider.value = e.clientX;
+      }, 5);
+    }
+  }
+}
+
+function TranslateSlider(e) {
+  slider.value = e.clientX;
+}
+
+function MoveTimeScale(e) {
+  data.scroll_position = document
+    .getElementsByClassName("time-scale")
+    .item(0).scrollLeft;
+}
 
 const TimeLineMonth = computed(() => {
   try {
@@ -162,6 +165,7 @@ const TimeLineMonth = computed(() => {
     return NaN;
   }
 });
+
 const TimeLineYear = computed(() => {
   try {
     let scale_length = data.scroll_position + slider.value;
@@ -180,40 +184,9 @@ const TimeLineYear = computed(() => {
 watch(
   () => TimeLineMonth.value,
   (new_val) => {
-    emits("changeCurrent", { year: TimeLineYear, month: new_val });
+    emits("changeCurrent", { year: TimeLineYear.value, month: new_val });
   }
 );
-
-function MapMonth(month) {
-  switch (month) {
-    case 1:
-      return "Jan.";
-    case 2:
-      return "Feb.";
-    case 3:
-      return "Mar.";
-    case 4:
-      return "Apr.";
-    case 5:
-      return "May.";
-    case 6:
-      return "Jun.";
-    case 7:
-      return "Jul.";
-    case 8:
-      return "Aug.";
-    case 9:
-      return "Sep.";
-    case 10:
-      return "Oct.";
-    case 11:
-      return "Nov.";
-    case 12:
-      return "Dec.";
-    default:
-      return "Month";
-  }
-}
 </script>
 
 <style lang="less">
