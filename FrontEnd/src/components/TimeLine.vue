@@ -5,7 +5,11 @@
     @pointerleave="data.slider_pressed = false"
   >
     <div class="timeline-runway">
-      <div class="time-scale" @scroll="MoveTimeScale" @dblclick="TranslateSlider">
+      <div
+        class="time-scale"
+        @scroll="MoveTimeScale"
+        @dblclick="TranslateSlider"
+      >
         <div class="year" v-for="year in data.time_series" :key="year.year">
           <template
             v-for="(month, index) in year.month"
@@ -50,7 +54,7 @@
       </slider-button>
     </div>
     <div class="timeline-label">Time Line</div>
-    {{ GetYearMonth() }}
+    {{ TimeLineYear + "," + TimeLineMonth }}
   </div>
 </template>
 
@@ -59,13 +63,12 @@ import {
   computed,
   onBeforeMount,
   onMounted,
-  onUpdated,
   reactive,
-  ref,
   watch,
 } from "@vue/runtime-core";
 import SliderButton from "./TimeLine/SliderButton.vue";
 
+const emits = defineEmits(["changeCurrent"]);
 const data = reactive({
   time_series: [],
   scroll_position: 0,
@@ -73,6 +76,7 @@ const data = reactive({
   slider_pressed: false,
   position: 0,
   runway_limit: [0, 1000],
+  previous_year_month: null,
 });
 
 let slider_pointer_left_offset = 15;
@@ -140,26 +144,45 @@ onMounted(() => {
   document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
 });
 
-function GetYearMonth() {
+const TimeLineMonth = computed(() => {
   try {
-    let unit_width = document
+    let scale_length = data.scroll_position + slider.value;
+    let year_width = document
       .getElementsByClassName("year")
       .item(0).clientWidth;
-    let length = data.scroll_position + data.slider_position;
+    let year_index = Math.floor(scale_length / year_width);
 
-    let ind = Math.floor(length / unit_width);
     let month_width = document
       .getElementsByClassName("month")
       .item(0).clientWidth;
-    let l_month = Math.floor((length % unit_width) / month_width);
-    return {
-      year: data.time_series[ind].year,
-      month: data.time_series[ind].month[l_month],
-    };
+    let month_index = Math.floor((scale_length % year_width) / month_width);
+
+    return data.time_series[year_index].month[month_index];
   } catch (error) {
-    return { year: null, month: null };
+    return NaN;
   }
-}
+});
+const TimeLineYear = computed(() => {
+  try {
+    let scale_length = data.scroll_position + slider.value;
+    let year_width = document
+      .getElementsByClassName("year")
+      .item(0).clientWidth;
+    let year_index = Math.floor(scale_length / year_width);
+
+    return data.time_series[year_index].year;
+  } catch (error) {
+    return NaN;
+  }
+});
+
+// emit change events to parent
+watch(
+  () => TimeLineMonth.value,
+  (new_val) => {
+    emits("changeCurrent", { year: TimeLineYear, month: new_val });
+  }
+);
 
 function MapMonth(month) {
   switch (month) {
@@ -304,6 +327,7 @@ function MapMonth(month) {
 .el-popper.is-customized {
   /* Set padding to ensure the height is 32px */
   padding: 6px 12px;
+  pointer-events: none;
   background: linear-gradient(90deg, rgb(230, 230, 230), rgb(255, 255, 255));
   span {
     user-select: none;
