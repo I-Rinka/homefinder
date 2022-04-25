@@ -4,16 +4,18 @@
             <div class="time-scale">
                 <div class="year" v-for="year in data.time_series" :key="year.year">
                     <template v-for="month, index in year.month" :key="month.toString() + year.toString()">
-                        <div v-if="index != 0" class="month">
-                            <div class="month-scale"></div>
-                        </div>
-                        <div v-else class="month">
-                            <div class="first-month-scale">
-                                <span class="year-text">
-                                    {{ year.year }}
-                                </span>
+                        <el-tooltip :content="MapMonth(month)" placement="top" effect="light">
+                            <div v-if="index != 0" class="month">
+                                <div class="month-scale"></div>
                             </div>
-                        </div>
+                            <div v-else class="month">
+                                <div class="first-month-scale">
+                                    <span class="year-text">
+                                        {{ year.year }}
+                                    </span>
+                                </div>
+                            </div>
+                        </el-tooltip>
                     </template>
                 </div>
             </div>
@@ -35,6 +37,37 @@ let slider_pos = ref(0);
 const data = reactive({
     time_series: []
 })
+
+function MapMonth(month) {
+    switch (month) {
+        case 1:
+            return 'Jan.';
+        case 2:
+            return 'Feb.';
+        case 3:
+            return "Mar.";
+        case 4:
+            return "Apr.";
+        case 5:
+            return "May.";
+        case 6:
+            return "Jun.";
+        case 7:
+            return "Jul.";
+        case 8:
+            return "Aug.";
+        case 9:
+            return "Sep.";
+        case 10:
+            return "Oct.";
+        case 11:
+            return "Nov.";
+        case 12:
+            return "Dec.";
+        default:
+            return "Month";
+    }
+}
 
 onMounted(() => {
     let runway = document.getElementsByClassName("runway");
@@ -148,7 +181,7 @@ onMounted(() => {
         background-color: whitesmoke;
 
         .first-month-scale {
-            transform: scale(1.2, 1.2) translateY(-10%);
+            transform: scale(1.2, 1.2) translateY(-5%);
         }
 
     }
@@ -171,6 +204,6 @@ onMounted(() => {
     white-space: nowrap;
     overflow-x: scroll;
     overflow-y: hidden;
-    border-radius: 15px;
+    border-radius: 10px;
 }
 </style>

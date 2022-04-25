@@ -353,9 +353,9 @@ function GetOnScreenFeatures() {
   top: 30%;
   height: 30%;
   left: 1%;
-  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
   z-index: 6;
   cursor: default;
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
 
   >div {
     height: 20vh;
