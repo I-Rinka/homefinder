@@ -1,7 +1,11 @@
 <template>
-  <div class="timeline">
+  <div
+    class="timeline"
+    @mousemove="MoveSlider"
+    @pointerleave="data.slider_pressed = false"
+  >
     <div class="timeline-runway">
-      <div class="time-scale">
+      <div class="time-scale" @scroll="MoveTimeScale" @dblclick="TranslateSlider">
         <div class="year" v-for="year in data.time_series" :key="year.year">
           <template
             v-for="(month, index) in year.month"
@@ -38,8 +42,12 @@
           </template>
         </div>
       </div>
-
-      <slider-button :style="{ left: `${slider}px` }"> </slider-button>
+      <slider-button
+        @pointerdown="data.slider_pressed = true"
+        @pointerup="data.slider_pressed = false"
+        :style="{ left: `${slider}px` }"
+      >
+      </slider-button>
     </div>
     <div class="timeline-label">Time Line</div>
     {{ GetYearMonth() }}
@@ -58,24 +66,100 @@ import {
 } from "@vue/runtime-core";
 import SliderButton from "./TimeLine/SliderButton.vue";
 
-let pressed = false;
-
 const data = reactive({
   time_series: [],
   scroll_position: 0,
   slider_position: 0,
+  slider_pressed: false,
   position: 0,
   runway_limit: [0, 1000],
 });
 
+let slider_pointer_left_offset = 15;
 let slider = computed({
   get() {
+    let pos = data.position;
+    pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
+    pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
+    data.position = pos;
     return data.position;
   },
   set(clientX) {
-    data.position = clientX - left_offset;
+    let pos = clientX - slider_pointer_left_offset;
+    pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
+    pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
+    data.position = pos;
   },
 });
+
+onBeforeMount(() => {
+  for (let i = 2012; i <= 2020; i++) {
+    let month = [];
+    for (let j = 1; j <= 12; j++) {
+      month.push(j);
+    }
+    data.time_series.push({ year: i, month: month });
+  }
+});
+
+let slider_move_timeout = null;
+function MoveSlider(e) {
+  if (data.slider_pressed) {
+    if (slider_move_timeout == null) {
+      slider_move_timeout = setTimeout(() => {
+        slider_move_timeout = null;
+        slider.value = e.clientX;
+      }, 5);
+    }
+  }
+}
+function TranslateSlider(e) {
+  slider.value = e.clientX;
+}
+
+function MoveTimeScale(e) {
+  data.scroll_position = document
+    .getElementsByClassName("time-scale")
+    .item(0).scrollLeft;
+}
+
+onMounted(() => {
+  // modify slider right limit
+  data.runway_limit[1] = slider.value =
+    document.getElementsByClassName("time-scale")[0].clientWidth -
+    slider_pointer_left_offset;
+  window.addEventListener("resize", function (e) {
+    data.runway_limit[1] = slider.value =
+      document.getElementsByClassName("time-scale")[0].clientWidth -
+      slider_pointer_left_offset;
+  });
+
+  // move slider to right most
+  slider.value = 100000000;
+  // scroll timeline to right most
+  document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
+});
+
+function GetYearMonth() {
+  try {
+    let unit_width = document
+      .getElementsByClassName("year")
+      .item(0).clientWidth;
+    let length = data.scroll_position + data.slider_position;
+
+    let ind = Math.floor(length / unit_width);
+    let month_width = document
+      .getElementsByClassName("month")
+      .item(0).clientWidth;
+    let l_month = Math.floor((length % unit_width) / month_width);
+    return {
+      year: data.time_series[ind].year,
+      month: data.time_series[ind].month[l_month],
+    };
+  } catch (error) {
+    return { year: null, month: null };
+  }
+}
 
 function MapMonth(month) {
   switch (month) {
@@ -105,77 +189,6 @@ function MapMonth(month) {
       return "Dec.";
     default:
       return "Month";
-  }
-}
-let timeoutTrottler = null;
-let pos_value = 0;
-
-let left_offset = 15;
-
-onBeforeMount(() => {
-  for (let i = 2012; i <= 2020; i++) {
-    let month = [];
-    for (let j = 1; j <= 12; j++) {
-      month.push(j);
-    }
-    data.time_series.push({ year: i, month: month });
-  }
-});
-
-onMounted(() => {
-  let runway = document.getElementsByClassName("timeline-runway")[0];
-
-  runway.addEventListener("mousemove", (e) => {
-    if (pressed) {
-      if (timeoutTrottler == null) {
-        timeoutTrottler = setTimeout(() => {
-          timeoutTrottler = null;
-          slider.value = e.clientX;
-        }, 5);
-      }
-    }
-  });
-  runway.addEventListener("pointerdown", (e) => {
-    pressed = true;
-  });
-  runway.addEventListener("pointerup", (e) => {
-    pressed = false;
-  });
-  runway.addEventListener("dblclick", (e) => {
-    pos_value = e.clientX - left_offset;
-    data.slider_position = pos_value;
-  });
-
-  slider.value = document.getElementsByClassName("time-scale")[0].clientWidth;
-  document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
-
-  document
-    .getElementsByClassName("time-scale")[0]
-    .addEventListener("scroll", (e) => {
-      data.scroll_position = document
-        .getElementsByClassName("time-scale")
-        .item(0).scrollLeft;
-    });
-});
-
-function GetYearMonth() {
-  try {
-    let unit_width = document
-      .getElementsByClassName("year")
-      .item(0).clientWidth;
-    let length = data.scroll_position + data.slider_position;
-
-    let ind = Math.floor(length / unit_width);
-    let month_width = document
-      .getElementsByClassName("month")
-      .item(0).clientWidth;
-    let l_month = Math.floor((length % unit_width) / month_width);
-    return {
-      year: data.time_series[ind].year,
-      month: data.time_series[ind].month[l_month],
-    };
-  } catch (error) {
-    return { year: null, month: null };
   }
 }
 </script>
