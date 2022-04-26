@@ -56,10 +56,9 @@ const props = defineProps({
 
 const unit_price = ref(-1);
 
-const data = reactive({
-  current_avg: -1,
-  history_avg: {},
-});
+const data = {
+  history_cache: {},
+};
 
 const ol_data = {
   contained_blocks: [],
@@ -132,7 +131,7 @@ onBeforeUnmount(() => {
 
 async function RequestPrice(year, month) {
   let token = year + "," + month;
-  console.log("request",token);
+  console.log("request", token);
 
   // the newest price
   if (year == 2020 && month == 12) {
@@ -150,17 +149,21 @@ async function RequestPrice(year, month) {
 
 async function GetTimeAvgPrice(year, month) {
   let token = year + "," + month;
-  if (!data.history_avg.hasOwnProperty(token)) {
+  if (!data.history_cache.hasOwnProperty(token)) {
+    data.history_cache[token] = -1;
     let res = await RequestPrice(year, month);
     if (res) {
-      data.history_avg[token] = res.unit_price;
-      unit_price.value = res.unit_price;
-    } else {
-      data.history_avg[token] = -1;
+      data.history_cache[token] = res.unit_price;
+      if (
+        props.current_time.year === year &&
+        props.current_time.month === month
+      ) {
+        unit_price.value = res.unit_price;
+      }
     }
   } else {
-    if (data.history_avg[token] != -1) {
-      unit_price.value = data.history_avg[token];
+    if (data.history_cache[token] != -1) {
+      unit_price.value = data.history_cache[token];
     }
   }
 }
@@ -170,12 +173,12 @@ async function CachePrice(year, month, offset) {
     let [n_year, n_month] = CaculateTimeOffset(year, month, -i);
     if (n_year >= 2012 && n_year < 2021) {
       let token = n_year + "," + n_month;
-      if (!data.history_avg.hasOwnProperty(token)) {
+      if (!data.history_cache.hasOwnProperty(token)) {
         let res = await RequestPrice(year, month);
         if (res) {
-          data.history_avg[token] = res.unit_price;
+          data.history_cache[token] = res.unit_price;
         } else {
-          data.history_avg[token] = -1;
+          data.history_cache[token] = -1;
         }
       }
     }
