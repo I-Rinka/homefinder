@@ -166,20 +166,21 @@ async function GetTimeAvgPrice(year, month) {
       unit_price.value = data.history_cache[token];
     }
   }
+  CachePrice(year, month, 12);
 }
 
 async function CachePrice(year, month, offset) {
-  for (let i = 1; i <= offset; i++) {
+  for (let i = -offset; i <= offset; i++) {
     let [n_year, n_month] = CaculateTimeOffset(year, month, -i);
     if (n_year >= 2012 && n_year < 2021) {
       let token = n_year + "," + n_month;
       if (!data.history_cache.hasOwnProperty(token)) {
-        let res = await RequestPrice(year, month);
-        if (res) {
-          data.history_cache[token] = res.unit_price;
-        } else {
-          data.history_cache[token] = -1;
-        }
+        data.history_cache[token] = -1;
+        RequestPrice(n_year, n_month).then((res) => {
+          if (res) {
+            data.history_cache[token] = res.unit_price;
+          }
+        });
       }
     }
   }
