@@ -16,11 +16,18 @@ export async function GetCurrentRecord() {
 export async function GetBlocksAvgPrice(blocks) {
     let query_url = url + "avgprice/";
     let res = await axios.post(query_url, blocks)
-    // let res = await axios({
-    //     method: 'POST',
-    //     url: query_url,
-    //     data: { blocks: blocks }
-    // })
+    let resObj = res.data;
+    return resObj[0];
+}
+
+export async function GetBlocksAvgPriceYearMonth(blocks, year, month) {
+    let query_url = url + "avgprice/";
+    let res = await axios.post(query_url, blocks, {
+        params: {
+            year,
+            month
+        }
+    })
     let resObj = res.data;
     return resObj[0];
 }

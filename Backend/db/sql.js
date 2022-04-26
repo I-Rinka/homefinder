@@ -13,25 +13,21 @@ export function selectHouse(req, res) {
         lng2 = lng1;
     }
 
-    let error = 1;
     lat1 = parseFloat(lat1);
     lat2 = parseFloat(lat2);
     lng1 = parseFloat(lng1);
     lng2 = parseFloat(lng2);
     MongoClient.connect(url, (err, db) => {
         if (err) {
-            error = 2;
-            res.send(error);
+            console.log(err);
         }
         let dbo = db.db("homefinder");
         let query = { lat: { $lte: lat1, $gte: lat2 }, lng: { $gte: lng1, $lte: lng2 } };
         let result_handler = (err, result) => {
             if (err) {
-                error = 3;
                 console.log(err);
             } else {
                 console.log("res:", result);
-                error = 0;
                 res.send(result)
             }
             db.close();
@@ -56,19 +52,15 @@ export function selectRecords(req, res) {
     req.query.month ? query.month = parseInt(req.query.month) : undefined;
 
     console.log(query);
-    let error = 1;
     MongoClient.connect(url, (err, db) => {
         if (err) {
-            error = 2;
-            res.send(error);
+            console.log(err);
         }
         let dbo = db.db("homefinder");
         dbo.collection("sales_records").find(query).toArray((err, result) => {
             if (err) {
-                error = 3;
                 console.log(err);
             } else {
-                error = 0;
                 res.send(result)
             }
             db.close();
@@ -79,21 +71,17 @@ export function selectRecords(req, res) {
 
 export function getNewestRecords(req, res) {
     console.log("enter")
-    let error = 1;
     try {
         MongoClient.connect(url, (err, db) => {
             if (err) {
-                error = 2;
-                res.send(error);
+                res.send(err);
             }
             let dbo = db.db("homefinder");
             dbo.collection("newest_records").find().toArray((err, result) => {
                 if (err) {
-                    error = 3;
                     console.log(err);
                 } else {
                     console.log("res:", result);
-                    error = 0;
                     res.send(result)
                 }
                 db.close();
@@ -105,20 +93,24 @@ export function getNewestRecords(req, res) {
 }
 
 export function getAvgPrice(req, res) {
-
     let block_set = req.body;
-    let error = 1;
-    try {
-        MongoClient.connect(url, (err, db) => {
-            if (err) {
-                error = 2;
-                res.status(404);
-            }
-            try {
-                let dbo = db.db("homefinder");
+    if (req.query.month && req.query.year) {
+        try {
+            MongoClient.connect(url, (err, db) => {
+                if (err) {
+                    res.status(404);
+                }
+                try {
+                    let dbo = db.db("homefinder");
+                    let match_query = {
+                        $match: { 'block': { $in: block_set }, 'year': parseInt(req.query.year), 'month': parseInt(req.query.month) }
+                    }
+                    if (block_set[0] === "*") {
+                        delete match_query.$match.block;
+                    }
 
-                if (block_set[0] === "*") {
-                    dbo.collection("newest_records").aggregate([
+                    dbo.collection("sales_records").aggregate([
+                        match_query,
                         {
                             $group: {
                                 _id: null,
@@ -128,45 +120,79 @@ export function getAvgPrice(req, res) {
                         },
                     ]).toArray((err, result) => {
                         if (err) {
-                            error = 3;
                             console.log(err);
                             res.status(404);
                         } else {
-                            error = 0;
                             res.send(result)
                         }
                         db.close();
                     });
-                }
-                else {
-                    dbo.collection("newest_records").aggregate([
-                        {
-                            $match: {
-                                'block': { $in: block_set }
-                            }
-                        },
-                        {
-                            $group: {
-                                _id: null,
-                                unit_price: { $avg: "$unit_price" },
-                                deal_price: { $avg: "$deal_price" },
-                            },
-                        },
-                    ]).toArray((err, result) => {
-                        if (err) {
-                            res.status(404);
-                        } else {
-                            error = 0;
-                            res.send(result)
-                        }
-                        db.close();
-                    });
-                }
-            } catch (error) {
+                } catch (error) {
 
-            }
-        });
-    } catch (error) {
-        console.log(error)
+                }
+            });
+        } catch (error) {
+            console.log(error)
+        }
+
+    }
+    else {
+        try {
+            MongoClient.connect(url, (err, db) => {
+                if (err) {
+                    res.status(404);
+                }
+                try {
+                    let dbo = db.db("homefinder");
+
+                    if (block_set[0] === "*") {
+                        dbo.collection("newest_records").aggregate([
+                            {
+                                $group: {
+                                    _id: null,
+                                    unit_price: { $avg: "$unit_price" },
+                                    deal_price: { $avg: "$deal_price" },
+                                },
+                            },
+                        ]).toArray((err, result) => {
+                            if (err) {
+                                console.log(err);
+                                res.status(404);
+                            } else {
+                                res.send(result)
+                            }
+                            db.close();
+                        });
+                    }
+                    else {
+                        dbo.collection("newest_records").aggregate([
+                            {
+                                $match: {
+                                    'block': { $in: block_set }
+                                }
+                            },
+                            {
+                                $group: {
+                                    _id: null,
+                                    unit_price: { $avg: "$unit_price" },
+                                    deal_price: { $avg: "$deal_price" },
+                                },
+                            },
+                        ]).toArray((err, result) => {
+                            if (err) {
+                                res.status(404);
+                            } else {
+                                res.send(result)
+                            }
+                            db.close();
+                        });
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            });
+        } catch (error) {
+            console.log(error)
+        }
     }
 }

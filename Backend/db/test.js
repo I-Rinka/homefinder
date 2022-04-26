@@ -130,7 +130,7 @@ db.sales_records.aggregate([
 db.sales_records.aggregate([
     {
         $match: {
-            'block': { $in: ['高原街4号院', '飞腾家园', '永顺西里'] }
+            'year': 2020, 'month': 3
         }
     },
     {

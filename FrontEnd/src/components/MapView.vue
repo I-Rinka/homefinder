@@ -6,23 +6,11 @@
     </div>
 
     <div class="zoom-slider">
-      <el-button
-        @click="ResetPosition"
-        :icon="LocationFilled"
-        style="margin-bottom: 1vh"
-        circle
-      >
+      <el-button @click="ResetPosition" :icon="LocationFilled" style="margin-bottom: 1vh" circle>
       </el-button>
       <!-- @click="ResetPosition"
         @input="SetZoom" -->
-      <el-slider
-        v-model="data.zoom"
-        :step="1"
-        :max="100"
-        :min="0"
-        @input="ChangeZoom"
-        vertical
-      >
+      <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
       </el-slider>
     </div>
     <div id="view-choice">
@@ -33,34 +21,22 @@
     </div>
     <!-- <sun-chart></sun-chart> -->
     <div>
-      <sun-chart-adaptor
-        v-for="feature in data.features"
-        :key="feature.getGeometry().getCoordinates().toString()"
-        :map="map"
-        :feature="feature"
-        :markArray="data.marks"
-        :basePrice="data.base_price"
-        :open_corona="data.selling_view"
-      ></sun-chart-adaptor>
+      <sun-chart-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()"
+        :map="map" :feature="feature" :markArray="data.marks" :basePrice="data.base_price"
+        :open_corona="data.selling_view"></sun-chart-adaptor>
     </div>
 
     <!-- <el-button @click="GetBasePrice">Get Base Price</el-button> -->
   </div>
-  <time-line
-    :style="{ visibility: data.selling_view ? 'hidden' : 'visible' }"
-    @changeCurrent="ChangeCurrentTime"
-  ></time-line>
+  <time-line :style="{ visibility: data.selling_view ? 'hidden' : 'visible' }" @changeCurrent="ChangeCurrentTime">
+  </time-line>
   <div v-show="data.selling_view" class="user-marks-order">
     <div class="user-mark-label">Interested Locations</div>
     <div class="user-mark-guidance" v-if="data.marks.length == 0">
       Double click the Map to add interested points
     </div>
-    <div
-      class="user-mark-color-strip"
-      v-for="(mark, index) in data.marks"
-      :key="mark"
-      :style="{ backgroundColor: mark.get('color') }"
-    ></div>
+    <div class="user-mark-color-strip" v-for="(mark, index) in data.marks" :key="mark"
+      :style="{ backgroundColor: mark.get('color') }"></div>
   </div>
 </template>
 
@@ -75,6 +51,7 @@ import {
   GetBlocks,
   GetRegions,
   GetBlocksAvgPrice,
+  GetBlocksAvgPriceYearMonth
 } from "../database/query.js";
 import { mapboxlayer } from "./Map/mapbox_layer";
 import { beijingLayer } from "./Map/vector_layer";
@@ -151,7 +128,9 @@ function GetBasePrice() {
 }
 
 function ChangeCurrentTime(data) {
-  console.log(data);
+  GetBlocksAvgPriceYearMonth(['*'],
+    data.year, data.month
+  ).then(res => console.log(res))
 }
 
 // -------------------------- Useful functions ---------------------------
@@ -379,6 +358,7 @@ function GetOnScreenFeatures() {
   font-size: 1.5vh;
   left: 1vw;
 }
+
 .user-mark-guidance {
   user-select: none;
   position: relative;
@@ -407,6 +387,7 @@ function GetOnScreenFeatures() {
   margin: 2px;
   border-radius: 5px;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+
   &:hover {
     height: 3vh;
     top: 1vh;
@@ -419,6 +400,7 @@ function GetOnScreenFeatures() {
     // opacity: 0;
     // width: 0;
   }
+
   to {
     // opacity: 100%;
     // width: 100%;
@@ -426,7 +408,7 @@ function GetOnScreenFeatures() {
 }
 
 .ol-layer {
-  > canvas {
+  >canvas {
     border-radius: 11px;
   }
 }
@@ -450,7 +432,7 @@ function GetOnScreenFeatures() {
   cursor: default;
   filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
 
-  > div {
+  >div {
     height: 20vh;
 
     .el-slider__runway {
