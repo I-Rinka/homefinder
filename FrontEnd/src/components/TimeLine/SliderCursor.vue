@@ -1,16 +1,25 @@
 <template>
     <div class="button-frame">
-        <div class="button" :style="{ backgroundColor: props.color }">
+        <div class="button" :style="{ backgroundColor: props.color, transform: pressed }">
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref } from "@vue/reactivity";
+import { computed } from "@vue/runtime-core";
+
+const pressed = computed(() => (props.press) ? 'scale(1.1, 1.1)' : 'scale(1, 1)');
+
 const props = defineProps({
     color: {
         type: String,
         default: "rgb(200, 26, 10)",
+        required: false
+    },
+    press: {
+        type: Boolean,
+        default: false,
         required: false
     }
 })
@@ -25,11 +34,12 @@ const props = defineProps({
     height: 125%;
     width: 12px;
     transition: 0.1s;
+
     &:hover {
         filter: drop-shadow(0.5px 0.5px 3px rgba(0, 0, 0, 0.5));
 
         .button {
-            transform: scale(1.1, 1.1);
+            transform: scale(1.1, 1.1) !important;
         }
     }
 }

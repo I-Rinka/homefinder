@@ -29,11 +29,16 @@
                     </template>
                 </div>
             </div>
-            <el-tooltip :content="'hello'" placement="top" effect="customized" :hide-after="0" popper-class="popper"
-                :visible="data.curor_tooltip_visibility">
-                <slider-button @pointerdown="PressCursor" :style="{ left: `${slider}px` }">
-                </slider-button>
+            <slider-cursor @pointerdown="PressCursor" :style="{ left: `${slider}px` }" :press="data.slider_pressed"
+                :color="data.slider_color">
+            </slider-cursor>
+
+            <!-- Tooltip when moving the slider cursor -->
+            <el-tooltip :content="MapMonth(TimeLineMonth) + TimeLineYear" placement="top" effect="customized"
+                popper-class="popper" :visible="data.curor_tooltip_visibility" :virtual-ref="data.tooltip_ref"
+                virtual-triggering>
             </el-tooltip>
+
         </div>
         <div class="timeline-label">Time Line</div>
     </div>
@@ -45,9 +50,10 @@ import {
     onBeforeMount,
     onMounted,
     reactive,
+    ref,
     watch,
 } from "@vue/runtime-core";
-import SliderButton from "./TimeLine/SliderButton.vue";
+import SliderCursor from "./TimeLine/SliderCursor.vue";
 import { MapMonth } from "./TimeLine/date";
 
 /*
@@ -63,10 +69,12 @@ const data = reactive({
     scroll_position: 0,
     slider_position: 0,
     slider_pressed: false,
+    slider_color: "rgb(200, 26, 10)",
     position: 0,
     runway_limit: [0, 1000],
     previous_year_month: null,
     curor_tooltip_visibility: false,
+    tooltip_ref: null,
 });
 
 let slider_pointer_left_offset = 15;
@@ -122,7 +130,13 @@ function MoveSlider(e) {
             slider_move_timeout = setTimeout(() => {
                 slider_move_timeout = null;
                 slider.value = e.clientX;
-            }, 5);
+                // really wried, since the tooltip only moves when select a new getBoundingClientRect
+                data.tooltip_ref = {
+                    getBoundingClientRect() {
+                        return document.getElementsByClassName("button-frame")[0].getBoundingClientRect();
+                    },
+                }
+            }, 10);
         }
     }
 }
@@ -139,12 +153,14 @@ function MoveTimeScale(e) {
 
 function PressCursor() {
     data.slider_pressed = true;
+    data.slider_color = "rgb(255, 50, 20)";
     window.addEventListener("mousemove", MoveSlider);
     window.addEventListener("mouseup", ReleaseCursor);
     data.curor_tooltip_visibility = true;
 }
 function ReleaseCursor() {
-    data.slider_pressed = true;
+    data.slider_pressed = false;
+    data.slider_color = "rgb(200, 26, 10)";
     window.removeEventListener("mousemove", MoveSlider);
     window.removeEventListener("mouseup", ReleaseCursor);
     data.curor_tooltip_visibility = false;
