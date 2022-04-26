@@ -51,7 +51,7 @@
     @changeCurrent="ChangeCurrentTime"
   ></time-line>
   <div v-show="data.selling_view" class="user-marks-order">
-    <div class="user-mark-label">Interesed Locations</div>
+    <div class="user-mark-label">Interested Locations</div>
     <div class="user-mark-guidance" v-if="data.marks.length == 0">
       Double click the Map to add interested points
     </div>
