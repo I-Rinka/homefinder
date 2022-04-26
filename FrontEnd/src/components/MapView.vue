@@ -32,17 +32,17 @@
       </el-radio-group>
     </div>
     <div>
-      <sun-chart-adaptor
+      <vis-adaptor
         v-for="feature in data.features"
         :key="feature.getGeometry().getCoordinates().toString()"
         :map="map"
         :feature="feature"
-        :markArray="data.marks"
+        :markArray="data.user_marks"
         :basePrice="data.base_price"
         :open_corona="data.selling_view"
         :current_mode="data.selling_view"
         :current_time="data.current_time"
-      ></sun-chart-adaptor>
+      ></vis-adaptor>
     </div>
   </div>
   <time-line
@@ -52,15 +52,33 @@
   </time-line>
   <div v-show="data.selling_view" class="user-marks-order">
     <div class="user-mark-label">Interested Locations</div>
-    <div class="user-mark-guidance" v-if="data.marks.length == 0">
+    <div class="user-mark-guidance" v-if="data.user_marks.length == 0">
       Double click the Map to add interested points
     </div>
     <div
       class="user-mark-color-strip"
-      v-for="(mark, index) in data.marks"
+      v-for="(mark, index) in data.user_marks_strip"
       :key="mark"
-      :style="{ backgroundColor: mark.get('color') }"
-    ></div>
+      :style="{ backgroundColor: mark.color }"
+    >
+      <div
+        style="
+          border-radius: 10px;
+          height: 15px;
+          width: 15px;
+          font-size: 10px;
+          font-weight: bold;
+          color: white;
+          border: solid white 2px;
+          transform: scale(0.5, 0.5);
+          position: relative;
+          top: -2px;
+          left: 2px;
+        "
+      >
+        {{ index + 1 }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -88,7 +106,7 @@ import {
 } from "./Map/user_mark";
 
 import TimeLine from "./TimeLine.vue";
-import SunChartAdaptor from "./Vis/SunChartAdaptor.vue";
+import VisAdaptor from "./Vis/VisAdaptor.vue";
 import SunChart from "./Vis/SunChart.vue";
 
 import Map from "ol/Map";
@@ -129,7 +147,8 @@ const data = reactive({
   ),
   selling_view: true,
   features: [],
-  marks: [],
+  user_marks: [],
+  user_marks_strip: [],
   base_price: 0,
   current_time: { year: 0, month: 0 },
 });
@@ -214,23 +233,49 @@ onMounted(() => {
         MarkSource.removeFeature(feature);
         remove_mark = true;
         // refresh
-        data.marks = MarkSource.getFeatures();
+        ChangeUserMarks();
       }
     }
     if (!remove_mark && data.selling_view) {
       let new_feature = GetNewMarkFeature(event.coordinate);
-      data.marks.push(new_feature);
+      data.user_marks.push(new_feature);
+      data.user_marks_strip.push(new UserStrip(new_feature));
       MarkSource.addFeature(new_feature);
     }
   });
 });
+
+function UserStrip(feature) {
+  this.ol_uid = feature.ol_uid;
+  this.color = feature.get("color");
+  this.weight = feature.get("weight");
+}
+
+function ChangeUserMarks() {
+  let features = MarkSource.getFeatures();
+
+  if (features.length < data.user_marks_strip.length) {
+    // remove
+    let dic = {};
+    for (let i = 0; i < features.length; i++) {
+      dic[features[i].ol_uid] = i;
+    }
+    for (let i = 0; i < data.user_marks_strip.length; i++) {
+      const element = toRaw(data.user_marks_strip[i]);
+      if (!dic.hasOwnProperty(element.ol_uid)) {
+        data.user_marks_strip.splice(i, 1);
+      }
+    }
+  }
+  data.user_marks = features;
+}
 
 UserMarkModify.on(["modifystart"], function (evt) {
   document.getElementById("map").style.cursor =
     evt.type === "modifystart" ? "grabbing" : "pointer";
 });
 UserMarkModify.on(["modifyend"], function (evt) {
-  data.marks = MarkSource.getFeatures();
+  ChangeUserMarks();
   document.getElementById("map").style.cursor =
     evt.type === "modifystart" ? "grabbing" : "pointer";
 });
@@ -343,6 +388,7 @@ function GetOnScreenFeatures() {
 #MapView {
   position: relative;
   height: 50vh;
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
 }
 
 #view-choice {
@@ -407,6 +453,7 @@ function GetOnScreenFeatures() {
   transition-duration: 0.5s;
   width: 100%;
   animation: enter 0.5s;
+  animation-iteration-count: 1;
   margin: 2px;
   border-radius: 5px;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
@@ -421,12 +468,12 @@ function GetOnScreenFeatures() {
 @keyframes enter {
   from {
     // opacity: 0;
-    // width: 0;
+    width: 0;
   }
 
   to {
     // opacity: 100%;
-    // width: 100%;
+    width: 100%;
   }
 }
 
