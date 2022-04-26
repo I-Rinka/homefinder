@@ -392,6 +392,7 @@ function GetOnScreenFeatures() {
   height: 2vh;
   background-color: rgb(203, 203, 203);
   border-radius: 5px;
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
 }
 
 .user-mark-color-strip {
@@ -399,7 +400,7 @@ function GetOnScreenFeatures() {
   position: relative;
   top: 2vh;
   bottom: 0;
-  height: 2vh;
+  height: 1.5vh;
   transition-duration: 0.5s;
   width: 100%;
   animation: enter 0.5s;
@@ -407,18 +408,20 @@ function GetOnScreenFeatures() {
   border-radius: 5px;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
   &:hover {
-    height: 5vh;
-    top: -1vh;
+    height: 3vh;
+    top: 1vh;
     width: 150%;
   }
 }
 
 @keyframes enter {
   from {
-    width: 0;
+    // opacity: 0;
+    // width: 0;
   }
   to {
-    width: 100%;
+    // opacity: 100%;
+    // width: 100%;
   }
 }
 
