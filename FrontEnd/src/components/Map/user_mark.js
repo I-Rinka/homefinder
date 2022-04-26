@@ -8,7 +8,7 @@ import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 import * as d3 from "d3";
 import { Modify } from "ol/interaction";
 // add marks
-let color_array = d3.schemeSet1;
+let color_array = d3.schemeTableau10;
 let color_nu = 0;
 
 export function GetNewMarkFeature(coordinate) {
