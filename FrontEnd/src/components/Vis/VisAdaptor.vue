@@ -3,11 +3,11 @@
     <!-- 向子传递必须要proxy -->
     <div :id="props.feature.getGeometry().getCoordinates().toString()">
       <sun-chart
+        v-show="props.price_mode"
         :myCoordinates="props.feature.getGeometry().getCoordinates()"
         :marks="props.markArray"
         :color="sun_chart_color"
         :text="computed_price"
-        :open_corona="open_corona"
       ></sun-chart>
     </div>
   </div>
@@ -42,7 +42,7 @@ const props = defineProps({
     default: true,
     required: false,
   },
-  current_mode: {
+  price_mode: {
     type: Boolean,
     default: true,
     required: false,
@@ -61,13 +61,16 @@ const data = reactive({
   history_avg: {},
 });
 
+const ol_data = {
+  contained_blocks: [],
+  overlay: null,
+};
+
 watch(
-  () => props.current_mode,
+  () => props.price_mode,
   (new_val) => {
     if (new_val) {
-      console.log("current mode");
     } else {
-      console.log("history mode");
     }
   }
 );
@@ -75,14 +78,11 @@ watch(
 watch(
   () => props.current_time,
   (new_val) => {
-    if (!props.current_mode) {
+    if (props.price_mode) {
       GetTimeAvgPrice(new_val.year, new_val.month);
     }
   }
 );
-
-let contained_blocks = [];
-let overlay = null;
 
 let computed_price = computed(() => {
   if (unit_price.value > 0) {
@@ -100,6 +100,104 @@ let computed_price = computed(() => {
     return "";
   }
 });
+
+onMounted(() => {
+  if (props.map && props.feature) {
+    ol_data.overlay = new Overlay({
+      element: document.getElementById(
+        props.feature.getGeometry().getCoordinates().toString()
+      ),
+      position: props.feature.getGeometry().getCoordinates(),
+      positioning: "center-center",
+    });
+    props.map.addOverlay(ol_data.overlay);
+    ol_data.contained_blocks = toRaw(props.feature.get("features")).map(
+      (feature) => {
+        return {
+          block: feature.get("block"),
+          sub_region: feature.get("sub_region"),
+          region: feature.get("region"),
+        };
+      }
+    );
+    GetTimeAvgPrice(2020, 12);
+  }
+});
+
+onBeforeUnmount(() => {
+  if (props.map && props.feature) {
+    props.map.removeOverlay(ol_data.overlay);
+  }
+});
+
+async function RequestPrice(year, month) {
+  let token = year + "," + month;
+  console.log("request",token);
+
+  // the newest price
+  if (year == 2020 && month == 12) {
+    return await GetBlocksAvgPrice(
+      ol_data.contained_blocks.map((record) => record.block)
+    );
+  } else {
+    return await GetBlocksAvgPriceYearMonth(
+      ol_data.contained_blocks.map((record) => record.block),
+      year,
+      month
+    );
+  }
+}
+
+async function GetTimeAvgPrice(year, month) {
+  let token = year + "," + month;
+  if (!data.history_avg.hasOwnProperty(token)) {
+    let res = await RequestPrice(year, month);
+    if (res) {
+      data.history_avg[token] = res.unit_price;
+      unit_price.value = res.unit_price;
+    } else {
+      data.history_avg[token] = -1;
+    }
+  } else {
+    if (data.history_avg[token] != -1) {
+      unit_price.value = data.history_avg[token];
+    }
+  }
+}
+
+async function CachePrice(year, month, offset) {
+  for (let i = 1; i <= offset; i++) {
+    let [n_year, n_month] = CaculateTimeOffset(year, month, -i);
+    if (n_year >= 2012 && n_year < 2021) {
+      let token = n_year + "," + n_month;
+      if (!data.history_avg.hasOwnProperty(token)) {
+        let res = await RequestPrice(year, month);
+        if (res) {
+          data.history_avg[token] = res.unit_price;
+        } else {
+          data.history_avg[token] = -1;
+        }
+      }
+    }
+  }
+}
+
+function CaculateTimeOffset(year, month, offset) {
+  let n_month = month + offset;
+  let n_year = year + Math.floor((n_month - 1) / 12);
+  n_month = ((n_month - 1) % 12) + 1;
+  if (n_month <= 0) {
+    n_month += 12;
+  }
+  return [n_year, n_month];
+}
+
+function ProcessUnitPrice(unit_price) {
+  if (props.open_corona == true && props.markArray.length > 0) {
+    return (unit_price / 10000).toFixed(2) + "w";
+  }
+  return (unit_price / 10000).toFixed(3) + "w";
+}
 
 let interlop_function = d3.interpolateRgbBasis([
   "#d73027",
@@ -126,69 +224,6 @@ let sun_chart_color = computed(() => {
     return interlop_function(1 - unit_price.value / 50000);
   }
 });
-
-onMounted(() => {
-  if (props.map && props.feature) {
-    overlay = new Overlay({
-      element: document.getElementById(
-        props.feature.getGeometry().getCoordinates().toString()
-      ),
-      position: props.feature.getGeometry().getCoordinates(),
-      positioning: "center-center",
-    });
-    props.map.addOverlay(overlay);
-    contained_blocks = toRaw(props.feature.get("features")).map((feature) => {
-      return {
-        block: feature.get("block"),
-        sub_region: feature.get("sub_region"),
-        region: feature.get("region"),
-      };
-    });
-    GetAvgPrice();
-  }
-});
-
-onBeforeUnmount(() => {
-  if (props.map && props.feature) {
-    props.map.removeOverlay(overlay);
-  }
-});
-
-async function GetAvgPrice() {
-  if (data.current_avg == -1) {
-    let res = await GetBlocksAvgPrice(
-      contained_blocks.map((record) => record.block)
-    );
-    unit_price.value = res.unit_price;
-    data.current_avg = res.unit_price;
-  } else {
-    unit_price.value = data.current_avg;
-  }
-}
-
-async function GetTimeAvgPrice(year, month) {
-  let token = year + "," + month;
-  if (!data.history_avg.hasOwnProperty(token)) {
-    let res = await GetBlocksAvgPriceYearMonth(
-      contained_blocks.map((record) => record.block),
-      year,
-      month
-    );
-    if (res) {
-      unit_price.value = res.unit_price;
-    }
-    data.history_avg[token] = unit_price.value;
-  } else {
-    unit_price.value = data.history_avg[token];
-  }
-}
-
-function ProcessUnitPrice(unit_price) {
-  if (props.open_corona == true && props.markArray.length > 0) {
-    return (unit_price / 10000).toFixed(2) + "w";
-  }
-  return (unit_price / 10000).toFixed(3) + "w";
-}
 </script>
 
 <style>

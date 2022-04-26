@@ -27,8 +27,8 @@
     </div>
     <div id="view-choice">
       <el-radio-group v-model="view_choice" size="">
-        <el-radio-button label="Selling View" />
-        <el-radio-button label="History View" />
+        <el-radio-button label="Price View" />
+        <el-radio-button label="Trend View" />
       </el-radio-group>
     </div>
     <div>
@@ -39,18 +39,14 @@
         :feature="feature"
         :markArray="data.user_marks"
         :basePrice="data.base_price"
-        :open_corona="data.selling_view"
-        :current_mode="data.selling_view"
+        :price_mode="data.price_view"
         :current_time="data.current_time"
       ></vis-adaptor>
     </div>
   </div>
-  <time-line
-    :style="{ visibility: data.selling_view ? 'hidden' : 'visible' }"
-    @changeCurrent="ChangeCurrentTime"
-  >
-  </time-line>
-  <div v-show="data.selling_view" class="user-marks-order">
+  <!-- :style="{ visibility: data.selling_view ? 'hidden' : 'visible' }" -->
+  <time-line @changeCurrent="ChangeCurrentTime"> </time-line>
+  <!-- <div v-show="data.selling_view" class="user-marks-order">
     <div class="user-mark-label">Interested Locations</div>
     <div class="user-mark-guidance" v-if="data.user_marks.length == 0">
       Double click the Map to add interested points
@@ -79,7 +75,7 @@
         {{ index + 1 }}
       </div>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
@@ -145,7 +141,7 @@ const data = reactive({
   zoom: Math.floor(
     ((config.zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
   ),
-  selling_view: true,
+  price_view: true,
   features: [],
   user_marks: [],
   user_marks_strip: [],
@@ -155,13 +151,13 @@ const data = reactive({
 
 const view_choice = computed({
   get() {
-    return data.selling_view ? "Selling View" : "History View";
+    return data.price_view ? "Price View" : "Trend View";
   },
   set(value) {
-    if (value === "History View") {
-      data.selling_view = false;
+    if (value === "Trend View") {
+      data.price_view = false;
     } else {
-      data.selling_view = true;
+      data.price_view = true;
     }
     ChangeView();
   },
@@ -236,7 +232,7 @@ onMounted(() => {
         ChangeUserMarks();
       }
     }
-    if (!remove_mark && data.selling_view) {
+    if (!remove_mark && data.price_view) {
       let new_feature = GetNewMarkFeature(event.coordinate);
       data.user_marks.push(new_feature);
       data.user_marks_strip.push(new UserStrip(new_feature));
@@ -321,7 +317,7 @@ function ChangeZoom(value) {
 }
 
 function ChangeClusterView(zoom) {
-  if (data.selling_view) {
+  if (data.price_view) {
     MarkLayer.setVisible(true);
   } else {
     MarkLayer.setVisible(false);
