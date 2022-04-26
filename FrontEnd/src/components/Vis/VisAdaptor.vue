@@ -130,8 +130,8 @@ onBeforeUnmount(() => {
 });
 
 async function RequestPrice(year, month) {
-  let token = year + "," + month;
-  console.log("request", token);
+  // let token = year + "," + month;
+  // console.log("request", token);
 
   // the newest price
   if (year == 2020 && month == 12) {
@@ -179,6 +179,12 @@ async function CachePrice(year, month, offset) {
         RequestPrice(n_year, n_month).then((res) => {
           if (res) {
             data.history_cache[token] = res.unit_price;
+            if (
+              props.current_time.year === n_year &&
+              props.current_time.month === n_month
+            ) {
+              unit_price.value = res.unit_price;
+            }
           }
         });
       }
