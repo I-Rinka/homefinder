@@ -94,7 +94,7 @@ export function getNewestRecords(req, res) {
 
 export function getAvgPrice(req, res) {
     let block_set = req.body;
-    if (req.query.month && req.query.year) {
+    if (req.query.year) {
         try {
             MongoClient.connect(url, (err, db) => {
                 if (err) {
@@ -102,31 +102,67 @@ export function getAvgPrice(req, res) {
                 }
                 try {
                     let dbo = db.db("homefinder");
-                    let match_query = {
-                        $match: { 'block': { $in: block_set }, 'year': parseInt(req.query.year), 'month': parseInt(req.query.month) }
-                    }
-                    if (block_set[0] === "*") {
-                        delete match_query.$match.block;
-                    }
-
-                    dbo.collection("sales_records").aggregate([
-                        match_query,
-                        {
-                            $group: {
-                                _id: null,
-                                unit_price: { $avg: "$unit_price" },
-                                deal_price: { $avg: "$deal_price" },
+                    if (req.query.year === "*") {
+                        dbo.collection("sales_records").aggregate([
+                            {
+                                $match: { 'block': { $in: block_set } }
                             },
-                        },
-                    ]).toArray((err, result) => {
-                        if (err) {
-                            console.log(err);
-                            res.status(404);
-                        } else {
-                            res.send(result)
+                            {
+                                $group: {
+                                    _id: { year: "$year", month: "$month" },
+                                    unit_price: { $avg: "$unit_price" },
+                                    deal_price: { $avg: "$deal_price" },
+                                },
+                            },
+                            {
+                                $project: {
+                                    year: "$_id.year",
+                                    month: "$_id.month",
+                                    unit_price: "$unit_price",
+                                    deal_price: "$deal_price",
+                                }
+                            }, {
+                                $project: {
+                                    _id: 0
+                                }
+                            },
+                        ]).toArray((err, result) => {
+                            if (err) {
+                                console.log(err);
+                                res.status(404);
+                            } else {
+                                res.send(result)
+                            }
+                            db.close();
+                        });
+                    }
+                    else if (req.query.month) {
+                        let match_query = {
+                            $match: { 'block': { $in: block_set }, 'year': parseInt(req.query.year), 'month': parseInt(req.query.month) }
                         }
-                        db.close();
-                    });
+                        if (block_set[0] === "*") {
+                            delete match_query.$match.block;
+
+                            dbo.collection("sales_records").aggregate([
+                                match_query,
+                                {
+                                    $group: {
+                                        _id: null,
+                                        unit_price: { $avg: "$unit_price" },
+                                        deal_price: { $avg: "$deal_price" },
+                                    },
+                                },
+                            ]).toArray((err, result) => {
+                                if (err) {
+                                    console.log(err);
+                                    res.status(404);
+                                } else {
+                                    res.send(result)
+                                }
+                                db.close();
+                            });
+                        }
+                    }
                 } catch (error) {
 
                 }
@@ -144,7 +180,6 @@ export function getAvgPrice(req, res) {
                 }
                 try {
                     let dbo = db.db("homefinder");
-
                     if (block_set[0] === "*") {
                         dbo.collection("newest_records").aggregate([
                             {

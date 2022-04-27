@@ -31,6 +31,22 @@ export async function GetBlocksAvgPriceYearMonth(blocks, year, month) {
     let resObj = res.data;
     return resObj[0];
 }
+export async function GetBlocksAvgPriceAllTime(blocks, controller) {
+    let query_url = url + "avgprice/";
+    try {
+        let res = await axios.post(query_url, blocks, {
+            params: {
+                year: '*',
+            },
+            signal: controller ? controller.signal : undefined
+        })
+        let resObj = res.data;
+
+        return resObj;
+    } catch (error) {
+        throw error;
+    }
+}
 
 export async function GetBlocks() {
     let res = await axios.get("http://localhost:3000/block_data.json")

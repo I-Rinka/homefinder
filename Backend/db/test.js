@@ -18,6 +18,18 @@ db.sales_records.aggregate([
         db.sales_records.find(record)
     )
 });
+db.sales_records.aggregate([
+    {
+        $match: { 'block': { $in: ['高原街4号院', '飞腾家园', '永顺西里'] } }
+    },
+    {
+        $group: {
+            _id: { year: "$year", month: "$month" },
+            unit_price: { $avg: "$unit_price" },
+            deal_price: { $avg: "$deal_price" },
+        },
+    },
+])
 // {
 //     $match: {
 //         'block': { $in: ['高原街4号院', '飞腾家园', '永顺西里'] }

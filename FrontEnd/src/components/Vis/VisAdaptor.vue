@@ -29,6 +29,7 @@ import Overlay from "ol/Overlay";
 import {
   GetBlocksAvgPrice,
   GetBlocksAvgPriceYearMonth,
+  GetBlocksAvgPriceAllTime,
 } from "../../database/query";
 import * as d3 from "d3";
 
@@ -100,6 +101,7 @@ let computed_price = computed(() => {
   }
 });
 
+let request_controller = new AbortController();
 onMounted(() => {
   if (props.map && props.feature) {
     ol_data.overlay = new Overlay({
@@ -119,31 +121,57 @@ onMounted(() => {
         };
       }
     );
-    GetTimeAvgPrice(2020, 12);
+    GetTimeAvgPrice(props.current_time.year, props.current_time.month).then(
+      () => {
+        CachePrice();
+      }
+    );
   }
 });
 
 onBeforeUnmount(() => {
+  request_controller.abort();
   if (props.map && props.feature) {
     props.map.removeOverlay(ol_data.overlay);
   }
 });
 
 async function RequestPrice(year, month) {
-  // let token = year + "," + month;
-  // console.log("request", token);
-
-  // the newest price
+  let token = year + "," + month;
+  console.log("request", token);
   if (year == 2020 && month == 12) {
-    return await GetBlocksAvgPrice(
+    GetBlocksAvgPrice(
       ol_data.contained_blocks.map((record) => record.block)
-    );
+    ).then((res, error) => {
+      if (error) {
+        console.log(error);
+      }
+      if (res) {
+        data.history_cache[token] = res.unit_price;
+        if (
+          props.current_time.year === year &&
+          props.current_time.month === month
+        ) {
+          unit_price.value = res.unit_price;
+        }
+      }
+    });
   } else {
-    return await GetBlocksAvgPriceYearMonth(
+    GetBlocksAvgPriceYearMonth(
       ol_data.contained_blocks.map((record) => record.block),
       year,
       month
-    );
+    ).then((res) => {
+      if (res) {
+        data.history_cache[token] = res.unit_price;
+        if (
+          props.current_time.year === year &&
+          props.current_time.month === month
+        ) {
+          unit_price.value = res.unit_price;
+        }
+      }
+    });
   }
 }
 
@@ -151,45 +179,30 @@ async function GetTimeAvgPrice(year, month) {
   let token = year + "," + month;
   if (!data.history_cache.hasOwnProperty(token)) {
     data.history_cache[token] = -1;
-    let res = await RequestPrice(year, month);
-    if (res) {
-      data.history_cache[token] = res.unit_price;
-      if (
-        props.current_time.year === year &&
-        props.current_time.month === month
-      ) {
-        unit_price.value = res.unit_price;
-      }
-    }
+    RequestPrice(year, month);
   } else {
     if (data.history_cache[token] != -1) {
       unit_price.value = data.history_cache[token];
     }
   }
-  CachePrice(year, month, 12);
 }
 
-async function CachePrice(year, month, offset) {
-  for (let i = -offset; i <= offset; i++) {
-    let [n_year, n_month] = CaculateTimeOffset(year, month, -i);
-    if (n_year >= 2012 && n_year < 2021) {
-      let token = n_year + "," + n_month;
-      if (!data.history_cache.hasOwnProperty(token)) {
-        data.history_cache[token] = -1;
-        RequestPrice(n_year, n_month).then((res) => {
-          if (res) {
-            data.history_cache[token] = res.unit_price;
-            if (
-              props.current_time.year === n_year &&
-              props.current_time.month === n_month
-            ) {
-              unit_price.value = res.unit_price;
-            }
-          }
-        });
+async function CachePrice() {
+  GetBlocksAvgPriceAllTime(
+    ol_data.contained_blocks.map((record) => record.block),
+    request_controller
+  )
+    .then((res) => {
+      for (let i = 0; i < res.length; i++) {
+        const element = res[i];
+        console.log(element);
+        let year = element.year;
+        let month = element.month;
+        let token = year + "," + month;
+        data.history_cache[token] = element.unit_price;
       }
-    }
-  }
+    })
+    .catch((error) => console.log(error.name));
 }
 
 function CaculateTimeOffset(year, month, offset) {
