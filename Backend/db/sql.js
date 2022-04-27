@@ -51,7 +51,6 @@ export function selectRecords(req, res) {
     req.query.year ? query.year = parseInt(req.query.year) : undefined;
     req.query.month ? query.month = parseInt(req.query.month) : undefined;
 
-    console.log(query);
     MongoClient.connect(url, (err, db) => {
         if (err) {
             console.log(err);
@@ -142,17 +141,19 @@ export function getAvgPrice(req, res) {
                         }
                         if (block_set[0] === "*") {
                             delete match_query.$match.block;
+                        }
 
-                            dbo.collection("sales_records").aggregate([
-                                match_query,
-                                {
-                                    $group: {
-                                        _id: null,
-                                        unit_price: { $avg: "$unit_price" },
-                                        deal_price: { $avg: "$deal_price" },
-                                    },
+                        dbo.collection("sales_records").aggregate([
+                            match_query,
+                            {
+                                $group: {
+                                    _id: null,
+                                    unit_price: { $avg: "$unit_price" },
+                                    deal_price: { $avg: "$deal_price" },
                                 },
-                            ]).toArray((err, result) => {
+                            },
+                        ])
+                            .toArray((err, result) => {
                                 if (err) {
                                     console.log(err);
                                     res.status(404);
@@ -161,14 +162,17 @@ export function getAvgPrice(req, res) {
                                 }
                                 db.close();
                             });
-                        }
                     }
                 } catch (error) {
-
+                    res.status(502);
+                    res.send(error);
                 }
             });
         } catch (error) {
             console.log(error)
+            db.close();
+            res.status(502);
+            res.send(error);
         }
 
     }
@@ -223,7 +227,9 @@ export function getAvgPrice(req, res) {
                         });
                     }
                 } catch (error) {
-                    console.log(error);
+                    db.close();
+                    res.status(502);
+                    res.send(error);
                 }
             });
         } catch (error) {
