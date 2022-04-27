@@ -182,7 +182,7 @@ function GetOrientation(
     pointer-events: all;
     opacity: 0.8;
     transition: 1s;
-
+    user-select: none;
     &:hover {
         cursor: pointer;
     }

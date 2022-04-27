@@ -32,7 +32,6 @@ import {
   GetBlocksAvgPriceAllTime,
 } from "../../database/query";
 import * as d3 from "d3";
-import { offset } from "@popperjs/core";
 
 const props = defineProps({
   map: Object,
@@ -141,52 +140,47 @@ onBeforeUnmount(() => {
 async function RequestPrice(year, month) {
   let token = year + "," + month;
   if (year == 2020 && month == 12) {
-    GetBlocksAvgPrice(
-      ol_data.contained_blocks.map((record) => record.block),
-      request_controller
-    )
-      .then((res, error) => {
-        if (error) {
-          console.log(error);
+    try {
+      let res = await GetBlocksAvgPrice(
+        ol_data.contained_blocks.map((record) => record.block),
+        request_controller
+      );
+      if (res) {
+        data.history_cache[token] = res.unit_price;
+        if (
+          props.current_time.year === year &&
+          props.current_time.month === month
+        ) {
+          unit_price.value = res.unit_price;
         }
-        if (res) {
-          data.history_cache[token] = res.unit_price;
-          if (
-            props.current_time.year === year &&
-            props.current_time.month === month
-          ) {
-            unit_price.value = res.unit_price;
-          }
-        }
-      })
-      .catch((error) => {
-        if (error.message !== "canceled") {
-          throw error;
-        }
-      });
+      }
+    } catch (error) {
+      if (error.message !== "canceled") {
+        throw error;
+      }
+    }
   } else {
-    GetBlocksAvgPriceYearMonth(
-      ol_data.contained_blocks.map((record) => record.block),
-      year,
-      month,
-      request_controller
-    )
-      .then((res) => {
-        if (res) {
-          data.history_cache[token] = res.unit_price;
-          if (
-            props.current_time.year === year &&
-            props.current_time.month === month
-          ) {
-            unit_price.value = res.unit_price;
-          }
+    try {
+      let res = await GetBlocksAvgPriceYearMonth(
+        ol_data.contained_blocks.map((record) => record.block),
+        year,
+        month,
+        request_controller
+      );
+      if (res) {
+        data.history_cache[token] = res.unit_price;
+        if (
+          props.current_time.year === year &&
+          props.current_time.month === month
+        ) {
+          unit_price.value = res.unit_price;
         }
-      })
-      .catch((error) => {
-        if (error.message !== "canceled") {
-          throw error;
-        }
-      });
+      }
+    } catch (error) {
+      if (error.message !== "canceled") {
+        throw error;
+      }
+    }
   }
 }
 
@@ -229,13 +223,17 @@ async function CachePrice() {
           [n_year, n_month] = CaculateTimeOffset(2020, 12, i);
           i--;
           let token = n_year + "," + n_month;
-
           if (data.history_cache[token] && data.history_cache[token] != -1) {
             n_price = data.history_cache[token];
-            console.log("n_price", n_price, token);
           } else {
-            // console.log("n_price", n_price);
             data.history_cache[token] = n_price;
+          }
+
+          if (
+            props.current_time.year === n_year &&
+            props.current_time.month === n_month
+          ) {
+            unit_price.value = data.history_cache[token];
           }
         } while (n_year > 2012 || n_month > 1);
       };

@@ -227,7 +227,6 @@ export function getAvgPrice(req, res) {
                         });
                     }
                 } catch (error) {
-                    db.close();
                     res.status(502);
                     res.send(error);
                 }
