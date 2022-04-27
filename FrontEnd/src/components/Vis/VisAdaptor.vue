@@ -32,6 +32,7 @@ import {
   GetBlocksAvgPriceAllTime,
 } from "../../database/query";
 import * as d3 from "d3";
+import { offset } from "@popperjs/core";
 
 const props = defineProps({
   map: Object,
@@ -59,6 +60,7 @@ const unit_price = ref(-1);
 
 const data = {
   history_cache: {},
+  isCached: false,
 };
 
 const ol_data = {
@@ -192,7 +194,9 @@ async function GetTimeAvgPrice(year, month) {
   let token = year + "," + month;
   if (!data.history_cache.hasOwnProperty(token)) {
     data.history_cache[token] = -1;
-    RequestPrice(year, month);
+    if (!data.isCached) {
+      RequestPrice(year, month);
+    }
   } else {
     if (data.history_cache[token] != -1) {
       unit_price.value = data.history_cache[token];
@@ -206,12 +210,42 @@ async function CachePrice() {
     request_controller
   )
     .then((res) => {
+      data.isCached = true;
       for (let i = 0; i < res.length; i++) {
         const element = res[i];
         let year = element.year;
         let month = element.month;
         let token = year + "," + month;
-        data.history_cache[token] = element.unit_price;
+
+        if (year !== 2020 && month != 12) {
+          data.history_cache[token] = element.unit_price;
+        }
+      }
+      let patch_cache = function () {
+        let i = -1;
+        let n_year, n_month;
+        let n_price = data.history_cache["2020,12"];
+        do {
+          [n_year, n_month] = CaculateTimeOffset(2020, 12, i);
+          i--;
+          let token = n_year + "," + n_month;
+
+          if (data.history_cache[token] && data.history_cache[token] != -1) {
+            n_price = data.history_cache[token];
+            console.log("n_price", n_price, token);
+          } else {
+            // console.log("n_price", n_price);
+            data.history_cache[token] = n_price;
+          }
+        } while (n_year > 2012 || n_month > 1);
+      };
+
+      if (!data.history_cache["2020,12"]) {
+        RequestPrice(2020, 12).then(() => {
+          patch_cache();
+        });
+      } else {
+        patch_cache();
       }
     })
     .catch((error) => {
