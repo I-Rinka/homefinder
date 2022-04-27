@@ -13,20 +13,23 @@ export async function GetCurrentRecord() {
     return ans;
 }
 
-export async function GetBlocksAvgPrice(blocks) {
+export async function GetBlocksAvgPrice(blocks, controller) {
     let query_url = url + "avgprice/";
-    let res = await axios.post(query_url, blocks)
+    let res = await axios.post(query_url, blocks, {
+        signal: controller ? controller.signal : undefined
+    })
     let resObj = res.data;
     return resObj[0];
 }
 
-export async function GetBlocksAvgPriceYearMonth(blocks, year, month) {
+export async function GetBlocksAvgPriceYearMonth(blocks, year, month, controller) {
     let query_url = url + "avgprice/";
     let res = await axios.post(query_url, blocks, {
         params: {
             year,
             month
-        }
+        },
+        signal: controller ? controller.signal : undefined
     })
     let resObj = res.data;
     return resObj[0];
