@@ -341,8 +341,8 @@ function ChangeView() {
 
 function GetOnScreenFeatures() {
   let view_port = [map.getSize()[0], map.getSize()[1]];
-  view_port[0] *= 2;
-  view_port[1] *= 2;
+  // view_port[0] *= 2;
+  // view_port[1] *= 2;
 
   let currentExtent = map.getView().calculateExtent(view_port);
 
