@@ -39,6 +39,9 @@
           </template>
         </div>
       </div>
+    </div>
+
+    <div style="position: relative; top: 30px; height: 35px; width: 100%; pointer-events: none;">
       <slider-cursor
         @pointerdown="PressCursor"
         @pointerover="
@@ -158,19 +161,18 @@
         @close="data.multicursor.select_mode = false"
       >
       </slider-cursor>
-
-      <!-- Tooltip when moving the slider cursor -->
-      <el-tooltip
-        :content="MapMonth(TimeLineMonth) + TimeLineYear"
-        placement="top"
-        effect="customized"
-        popper-class="popper"
-        :visible="data.curor_tooltip_visibility"
-        :virtual-ref="data.tooltip_ref"
-        virtual-triggering
-      >
-      </el-tooltip>
     </div>
+    <!-- Tooltip when moving the slider cursor -->
+    <el-tooltip
+      :content="MapMonth(TimeLineMonth) + TimeLineYear"
+      placement="top"
+      effect="customized"
+      popper-class="popper"
+      :visible="data.curor_tooltip_visibility"
+      :virtual-ref="data.tooltip_ref"
+      virtual-triggering
+    >
+    </el-tooltip>
     <div class="timeline-label">Time Line</div>
   </div>
   <el-button @click="data.multicursor.subtractor_mode = true"
@@ -367,8 +369,6 @@ function MoveTimeScale(e) {
     .item(0).scrollLeft;
   let vary = p_scroll - data.scroll_position;
   p_scroll = data.scroll_position;
-  // console.log(data.scroll_position);
-
   data.slider1.SetPosition(
     slider_stuff.SliderPos2ClientX(data.slider1.position) + vary
   );
