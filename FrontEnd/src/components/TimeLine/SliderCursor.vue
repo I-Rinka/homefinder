@@ -2,12 +2,14 @@
   <div class="button-frame">
     <div
       v-if="closable"
-      v-show="!props.press"
+      v-show="!props.pressed"
       class="close-button"
-      @click="CloseButton"
+      @pointerdown="Close"
+      @click="Close"
     >
       <el-icon class="close-icon"><circle-close-filled /></el-icon>
     </div>
+
     <div
       class="button"
       :style="{ backgroundColor: props.color, transform: pressed }"
@@ -44,7 +46,7 @@ const props = defineProps({
   },
 });
 
-function CloseButton() {
+function Close() {
   emits("close");
 }
 </script>
@@ -83,6 +85,7 @@ function CloseButton() {
   height: 20px;
   width: 20px;
   position: absolute;
+  user-select: all;
   cursor: pointer;
   background-color: white;
   transition-delay: 0.5s;

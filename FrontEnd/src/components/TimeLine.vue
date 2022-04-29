@@ -71,6 +71,7 @@
           transition-duration: 0.1s;
           top: 0px;
           opacity: 0.2;
+          cursor: -webkit-grabbing;
         "
         :style="{
           backgroundColor: slider_stuff.GetColor(data.slider1, data.slider1_l),
@@ -97,7 +98,7 @@
         }"
         :pressed="data.slider1_l.pressed"
         :color="data.slider1_l.color"
-        @click="() => (data.multicursor.select_mode = false)"
+        @close="data.multicursor.select_mode = false"
       >
       </slider-cursor>
 
