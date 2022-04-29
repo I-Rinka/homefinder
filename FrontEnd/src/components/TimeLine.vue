@@ -45,7 +45,12 @@
       </div>
       <slider-cursor
         @pointerdown="PressCursor"
-        :style="{ left: `${slider}px` }"
+        @pointerover="RegShiftKey"
+        @pointerleave="UnRegShiftKey"
+        :style="{
+          left: `${slider}px`,
+          cursor: data.pressing_shiftkey ? 'col-resize' : '-webkit-grabbing',
+        }"
         :press="data.slider_pressed"
         :color="data.slider_color"
       >
@@ -97,6 +102,8 @@ const data = reactive({
   previous_year_month: null,
   curor_tooltip_visibility: false,
   tooltip_ref: null,
+
+  pressing_shiftkey: false,
 });
 
 let slider_pointer_left_offset = 15;
@@ -188,6 +195,29 @@ function ReleaseCursor() {
   window.removeEventListener("mousemove", MoveSlider);
   window.removeEventListener("mouseup", ReleaseCursor);
   data.curor_tooltip_visibility = false;
+}
+
+function PressShiftKey(e) {
+  if (e.key === "Shift") {
+    data.pressing_shiftkey = true;
+    console.log(e);
+  }
+}
+function ReleaseShiftKey(e) {
+  if (e.key === "Shift") {
+    data.pressing_shiftkey = false;
+  }
+}
+
+function RegShiftKey() {
+  window.addEventListener("keydown", PressShiftKey);
+  window.addEventListener("keyup", ReleaseShiftKey);
+}
+
+function UnRegShiftKey() {
+  window.removeEventListener("keydown", PressShiftKey);
+  window.removeEventListener("keyup", ReleaseShiftKey);
+  data.pressing_shiftkey = false;
 }
 
 const TimeLineMonth = computed(() => {

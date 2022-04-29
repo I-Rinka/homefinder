@@ -28,7 +28,6 @@ const props = defineProps({
 <style lang="less" scoped>
 .button-frame {
     filter: drop-shadow(0.5px 0.5px 2px rgba(0, 0, 0, 0.5));
-    cursor: -webkit-grabbing;
     position: inherit;
     top: -25%;
     height: 125%;
