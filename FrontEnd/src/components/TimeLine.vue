@@ -97,26 +97,36 @@ const emits = defineEmits(["changeCurrent"]);
 const slider_cursor = {
   pressed: false,
   color: (pressed) => (!pressed ? "rgb(200, 26, 10)" : "rgb(255, 50, 20)"),
-  position: 0,
+  position: ref(0),
   SetPosition: (clientX) => {
+    console.log("???")
     let pos = clientX - slider_pointer_left_offset;
     pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
     pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
-    slider_cursor.position = pos;
+    slider_cursor.position.value = pos;
+
+    console.log(slider_cursor.position);
   },
 };
+
+const tooltip_position = ref({
+  top: 0,
+  left: 0,
+  bottom: 0,
+  right: 0,
+});
 
 const data = reactive({
   time_series: [],
   scroll_position: 0,
-  slider_position: 0,
-  slider_pressed: false,
-  slider_color: "rgb(200, 26, 10)",
-  position: 0,
   runway_limit: [0, 1000],
   previous_year_month: null,
   curor_tooltip_visibility: false,
-  tooltip_ref: null,
+  tooltip_ref: {
+    getBoundingClientRect() {
+      return tooltip_position.value;
+    },
+  },
 
   multicursor: {
     pressing_shiftkey: false,
@@ -128,21 +138,6 @@ const data = reactive({
 });
 
 let slider_pointer_left_offset = 15;
-let slider = computed({
-  get() {
-    let pos = data.position;
-    pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
-    pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
-    data.position = pos;
-    return data.position;
-  },
-  set(clientX) {
-    let pos = clientX - slider_pointer_left_offset;
-    pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
-    pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
-    data.position = pos;
-  },
-});
 
 function SliderPos2ClientX(pos) {
   return pos + slider_pointer_left_offset;
@@ -162,13 +157,22 @@ onBeforeMount(() => {
 // some default configuration
 onMounted(() => {
   // modify slider right limit
-  data.runway_limit[1] = slider.value =
+  data.runway_limit[1] =
     document.getElementsByClassName("time-scale")[0].clientWidth -
     slider_pointer_left_offset;
+
+  tooltip_position.value = document
+    .getElementsByClassName("button-frame")[0]
+    .getBoundingClientRect();
+
   window.addEventListener("resize", function (e) {
-    data.runway_limit[1] = slider.value =
+    data.runway_limit[1] =
       document.getElementsByClassName("time-scale")[0].clientWidth -
       slider_pointer_left_offset;
+
+    tooltip_position.value = document
+      .getElementsByClassName("button-frame")[0]
+      .getBoundingClientRect();
   });
 
   // move slider to right most
@@ -180,10 +184,6 @@ onMounted(() => {
 
 let slider_move_timeout = null;
 function MoveSlider(e) {
-  // if (data.multicursor.select_mode == false) {
-  //   data.multicursor.select_mode = true;
-  // }
-
   if (data.current_slider.pressed) {
     if (slider_move_timeout == null) {
       slider_move_timeout = setTimeout(() => {
@@ -192,13 +192,13 @@ function MoveSlider(e) {
         data.current_slider.SetPosition(e.clientX);
 
         // really wried, since the tooltip only moves when select a new getBoundingClientRect
-        data.tooltip_ref = {
-          getBoundingClientRect() {
-            return document
-              .getElementsByClassName("button-frame")[0]
-              .getBoundingClientRect();
-          },
-        };
+        tooltip_position.value = DOMRect.fromRect({
+          width: 0,
+          height: 0,
+          x: e.clientX,
+          y: tooltip_position.value.y,
+        });
+
       }, 10);
     }
   }
