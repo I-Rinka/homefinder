@@ -54,7 +54,7 @@
             : '-webkit-grabbing',
         }"
         :press="data.slider1.pressed"
-        :color="data.slider1.color(data.slider1.pressed)"
+        :color="data.slider1.color"
       >
       </slider-cursor>
 
@@ -94,24 +94,22 @@ import { MapMonth } from "./TimeLine/date";
 
 const emits = defineEmits(["changeCurrent"]);
 
-const slider_cursor = {
-  pressed: false,
-  color: (pressed) => (!pressed ? "rgb(200, 26, 10)" : "rgb(255, 50, 20)"),
-  position: ref(0),
-  SetPosition: (clientX) => {
-    console.log("???")
-    let pos = clientX - slider_pointer_left_offset;
-    pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
-    pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
-    slider_cursor.position.value = pos;
-
-    console.log(slider_cursor.position);
-  },
-};
+class Slider {
+  constructor(color, pressed_color) {
+    this.pressed = ref(false);
+    this.color = computed(() => (!this.pressed.value ? color : pressed_color));
+    this.position = ref(0);
+    this.SetPosition = (clientX) => {
+      let pos = clientX - slider_pointer_left_offset;
+      pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
+      pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
+      this.position.value = pos;
+    };
+  }
+}
 
 const tooltip_position = ref({
   top: 0,
-  left: 0,
   bottom: 0,
   right: 0,
 });
@@ -133,9 +131,10 @@ const data = reactive({
     select_mode: false,
   },
 
-  slider1: slider_cursor,
-  current_slider: slider_cursor,
+  slider1: new Slider("rgb(200, 26, 10)", "rgb(255, 50, 20)"),
+  current_slider: null,
 });
+data.current_slider = data.slider1;
 
 let slider_pointer_left_offset = 15;
 
@@ -198,14 +197,13 @@ function MoveSlider(e) {
           x: e.clientX,
           y: tooltip_position.value.y,
         });
-
       }, 10);
     }
   }
 }
 
 function TranslateSlider(e) {
-  slider.value = e.clientX;
+  data.current_slider.SetPosition(e.clientX);
 }
 
 function MoveTimeScale(e) {
@@ -230,7 +228,6 @@ function ReleaseCursor() {
 function PressShiftKey(e) {
   if (e.key === "Shift") {
     data.multicursor.pressing_shiftkey = true;
-    console.log(e);
   }
 }
 function ReleaseShiftKey(e) {
@@ -406,6 +403,7 @@ watch(
   padding: 6px 12px;
   pointer-events: none;
   background: linear-gradient(90deg, rgb(230, 230, 230), rgb(255, 255, 255));
+  transition-duration: 0.2s;
 
   span {
     user-select: none;
