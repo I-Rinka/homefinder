@@ -38,130 +38,155 @@
             </el-tooltip>
           </template>
         </div>
+
+        <div
+          style="
+            position: absolute;
+            top: 20px;
+            height: 35px;
+            width: 100%;
+            pointer-events: none;
+          "
+        >
+          <slider-cursor
+            @pointerdown="PressCursor"
+            @pointerover="
+              () => {
+                RegShiftKey();
+                ChangeCursor(data.slider1);
+              }
+            "
+            @pointerleave="UnRegShiftKey"
+            :style="{
+              left: `${data.slider1.position}px`,
+              cursor: data.multicursor.pressing_shiftkey
+                ? 'col-resize'
+                : '-webkit-grabbing',
+            }"
+            style="pointer-events: all; position: absolute"
+            :pressed="data.slider1.pressed"
+            :color="data.slider1.color"
+            :closable="false"
+          >
+          </slider-cursor>
+          <!-- red frame -->
+          <div
+            v-if="data.multicursor.select_mode"
+            style="
+              position: absolute;
+              transition-duration: 0.1s;
+              top: 0px;
+              opacity: 0.2;
+              cursor: -webkit-grabbing;
+            "
+            :style="{
+              backgroundColor: slider_stuff.GetColor(
+                data.slider1,
+                data.slider1_l
+              ),
+              width: `${slider_stuff.GetWidth(data.slider1, data.slider1_l)}px`,
+              height: '100%',
+              left: `${
+                slider_stuff.GetLeft(data.slider1, data.slider1_l) + 6
+              }px`,
+            }"
+          ></div>
+          <slider-cursor
+            v-if="data.multicursor.select_mode"
+            @pointerdown="PressCursor"
+            @pointerover="
+              () => {
+                RegShiftKey();
+                ChangeCursor(data.slider1_l);
+              }
+            "
+            @pointerleave="UnRegShiftKey"
+            :style="{
+              left: `${data.slider1_l.position}px`,
+              cursor: data.multicursor.pressing_shiftkey
+                ? 'col-resize'
+                : '-webkit-grabbing',
+            }"
+            style="pointer-events: all; position: absolute"
+            :pressed="data.slider1_l.pressed"
+            :color="data.slider1_l.color"
+            @close="data.multicursor.select_mode = false"
+          >
+          </slider-cursor>
+
+          <!-- Subtractor cursor -->
+          <slider-cursor
+            v-if="data.multicursor.subtractor_mode"
+            @pointerdown="PressCursor"
+            @pointerover="
+              () => {
+                RegShiftKey();
+                ChangeCursor(data.slider2);
+              }
+            "
+            @pointerleave="UnRegShiftKey"
+            :style="{
+              left: `${data.slider2.position}px`,
+              cursor: data.multicursor.pressing_shiftkey
+                ? 'col-resize'
+                : '-webkit-grabbing',
+            }"
+            style="pointer-events: all; position: absolute"
+            :pressed="data.slider2.pressed"
+            :color="data.slider2.color"
+            @close="data.multicursor.select_mode = false"
+          >
+          </slider-cursor>
+          <!-- blue frame -->
+          <div
+            v-if="data.multicursor.select_mode"
+            style="
+              position: absolute;
+              transition-duration: 0.1s;
+              top: 0px;
+              opacity: 0.2;
+              cursor: -webkit-grabbing;
+            "
+            :style="{
+              backgroundColor: slider_stuff.GetColor(
+                data.slider2,
+                data.slider2_l
+              ),
+              width: `${slider_stuff.GetWidth(data.slider2, data.slider2_l)}px`,
+              height: '100%',
+              left: `${
+                slider_stuff.GetLeft(data.slider2, data.slider2_l) + 6
+              }px`,
+            }"
+          ></div>
+          <slider-cursor
+            v-if="
+              data.multicursor.select_mode && data.multicursor.subtractor_mode
+            "
+            @pointerdown="PressCursor"
+            @pointerover="
+              () => {
+                RegShiftKey();
+                ChangeCursor(data.slider2_l);
+              }
+            "
+            @pointerleave="UnRegShiftKey"
+            :style="{
+              left: `${data.slider2_l.position}px`,
+              cursor: data.multicursor.pressing_shiftkey
+                ? 'col-resize'
+                : '-webkit-grabbing',
+            }"
+            style="pointer-events: all; position: absolute"
+            :pressed="data.slider2_l.pressed"
+            :color="data.slider2_l.color"
+            @close="data.multicursor.select_mode = false"
+          >
+          </slider-cursor>
+        </div>
       </div>
     </div>
 
-    <div style="position: relative; top: 30px; height: 35px; width: 100%; pointer-events: none;">
-      <slider-cursor
-        @pointerdown="PressCursor"
-        @pointerover="
-          () => {
-            RegShiftKey();
-            ChangeCursor(data.slider1);
-          }
-        "
-        @pointerleave="UnRegShiftKey"
-        :style="{
-          left: `${data.slider1.position}px`,
-          cursor: data.multicursor.pressing_shiftkey
-            ? 'col-resize'
-            : '-webkit-grabbing',
-        }"
-        :pressed="data.slider1.pressed"
-        :color="data.slider1.color"
-        :closable="false"
-      >
-      </slider-cursor>
-      <!-- red frame -->
-      <div
-        v-if="data.multicursor.select_mode"
-        style="
-          position: absolute;
-          transition-duration: 0.1s;
-          top: 0px;
-          opacity: 0.2;
-          cursor: -webkit-grabbing;
-        "
-        :style="{
-          backgroundColor: slider_stuff.GetColor(data.slider1, data.slider1_l),
-          width: `${slider_stuff.GetWidth(data.slider1, data.slider1_l)}px`,
-          height: '100%',
-          left: `${slider_stuff.GetLeft(data.slider1, data.slider1_l) + 6}px`,
-        }"
-      ></div>
-      <slider-cursor
-        v-if="data.multicursor.select_mode"
-        @pointerdown="PressCursor"
-        @pointerover="
-          () => {
-            RegShiftKey();
-            ChangeCursor(data.slider1_l);
-          }
-        "
-        @pointerleave="UnRegShiftKey"
-        :style="{
-          left: `${data.slider1_l.position}px`,
-          cursor: data.multicursor.pressing_shiftkey
-            ? 'col-resize'
-            : '-webkit-grabbing',
-        }"
-        :pressed="data.slider1_l.pressed"
-        :color="data.slider1_l.color"
-        @close="data.multicursor.select_mode = false"
-      >
-      </slider-cursor>
-
-      <!-- Subtractor cursor -->
-      <slider-cursor
-        v-if="data.multicursor.subtractor_mode"
-        @pointerdown="PressCursor"
-        @pointerover="
-          () => {
-            RegShiftKey();
-            ChangeCursor(data.slider2);
-          }
-        "
-        @pointerleave="UnRegShiftKey"
-        :style="{
-          left: `${data.slider2.position}px`,
-          cursor: data.multicursor.pressing_shiftkey
-            ? 'col-resize'
-            : '-webkit-grabbing',
-        }"
-        :pressed="data.slider2.pressed"
-        :color="data.slider2.color"
-        @close="data.multicursor.select_mode = false"
-      >
-      </slider-cursor>
-      <!-- blue frame -->
-      <div
-        v-if="data.multicursor.select_mode"
-        style="
-          position: absolute;
-          transition-duration: 0.1s;
-          top: 0px;
-          opacity: 0.2;
-          cursor: -webkit-grabbing;
-        "
-        :style="{
-          backgroundColor: slider_stuff.GetColor(data.slider2, data.slider2_l),
-          width: `${slider_stuff.GetWidth(data.slider2, data.slider2_l)}px`,
-          height: '100%',
-          left: `${slider_stuff.GetLeft(data.slider2, data.slider2_l) + 6}px`,
-        }"
-      ></div>
-      <slider-cursor
-        v-if="data.multicursor.select_mode && data.multicursor.subtractor_mode"
-        @pointerdown="PressCursor"
-        @pointerover="
-          () => {
-            RegShiftKey();
-            ChangeCursor(data.slider2_l);
-          }
-        "
-        @pointerleave="UnRegShiftKey"
-        :style="{
-          left: `${data.slider2_l.position}px`,
-          cursor: data.multicursor.pressing_shiftkey
-            ? 'col-resize'
-            : '-webkit-grabbing',
-        }"
-        :pressed="data.slider2_l.pressed"
-        :color="data.slider2_l.color"
-        @close="data.multicursor.select_mode = false"
-      >
-      </slider-cursor>
-    </div>
     <!-- Tooltip when moving the slider cursor -->
     <el-tooltip
       :content="MapMonth(TimeLineMonth) + TimeLineYear"
@@ -209,8 +234,8 @@ class Slider {
     this.position = ref(0);
     this.SetPosition = (clientX) => {
       let pos = clientX - slider_pointer_left_offset;
-      pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
-      pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
+      // pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
+      // pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
       this.position.value = pos;
     };
   }
@@ -303,7 +328,7 @@ onMounted(() => {
   });
 
   // move slider to right most
-  data.current_slider.SetPosition(100000000);
+  data.current_slider.SetPosition(1000);
 
   // scroll timeline to right most
   document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
@@ -367,11 +392,6 @@ function MoveTimeScale(e) {
   data.scroll_position = document
     .getElementsByClassName("time-scale")
     .item(0).scrollLeft;
-  let vary = p_scroll - data.scroll_position;
-  p_scroll = data.scroll_position;
-  data.slider1.SetPosition(
-    slider_stuff.SliderPos2ClientX(data.slider1.position) + vary
-  );
 }
 
 function PressCursor() {
@@ -453,7 +473,7 @@ watch(
 
 <style lang="less">
 .timeline {
-  height: 7vh;
+  height: 100px;
   width: 100%;
   margin-bottom: 0px;
   position: relative;
@@ -463,9 +483,8 @@ watch(
 .timeline-runway {
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
   position: absolute;
-  height: 50%;
-  min-height: 32px;
-  top: 40%;
+  height: 35px;
+  top: 40px;
   width: 99.8%;
   background: linear-gradient(0deg, rgb(230, 230, 230), whitesmoke);
   overflow-y: visible;
@@ -495,10 +514,10 @@ watch(
 .month-scale {
   position: absolute;
   display: inline-block;
-  height: 40%;
+  height: 50%;
   width: 2.5px;
-  left: 0;
-  bottom: -3%;
+  left: 2px;
+  bottom: -2px;
   background-color: rgb(128, 128, 128);
   transition: 0.3s;
   border: solid 0.5px rgb(255, 255, 255);
@@ -512,8 +531,8 @@ watch(
   display: inline-block;
   height: 83%;
   width: 3px;
-  left: 0;
-  bottom: -3%;
+  left: 2px;
+  bottom: -2px;
   transition: 0.3s;
   background-color: rgb(128, 128, 128);
   border: solid 0.5px rgb(255, 255, 255);
@@ -525,13 +544,15 @@ watch(
 .year {
   position: relative;
   display: inline-block;
-  height: 100%;
+  height: 33px;
+  top: 28%;
+  overflow: hidden;
 
   &:hover {
     background-color: whitesmoke;
 
     .first-month-scale {
-      transform: scale(1.2, 1.2) translateY(-5%);
+      transform: scale(1.2, 1.2) translateY(-8%);
     }
   }
 }
@@ -548,12 +569,13 @@ watch(
 }
 
 .time-scale {
-  height: 100%;
+  position: relative;
+  top: -51%;
+  height: 200%;
   width: 100%;
   white-space: nowrap;
   overflow-x: scroll;
-  overflow-y: hidden;
-  border-radius: 10px;
+  overflow-y: visible;
 }
 
 .popper {
