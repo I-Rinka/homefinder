@@ -102,6 +102,67 @@
       >
       </slider-cursor>
 
+      <!-- Subtractor cursor -->
+      <slider-cursor
+        v-if="data.multicursor.subtractor_mode"
+        @pointerdown="PressCursor"
+        @pointerover="
+          () => {
+            RegShiftKey();
+            ChangeCursor(data.slider2);
+          }
+        "
+        @pointerleave="UnRegShiftKey"
+        :style="{
+          left: `${data.slider2.position}px`,
+          cursor: data.multicursor.pressing_shiftkey
+            ? 'col-resize'
+            : '-webkit-grabbing',
+        }"
+        :pressed="data.slider2.pressed"
+        :color="data.slider2.color"
+        @close="data.multicursor.select_mode = false"
+      >
+      </slider-cursor>
+      <!-- blue frame -->
+      <div
+        v-if="data.multicursor.select_mode"
+        style="
+          position: absolute;
+          transition-duration: 0.1s;
+          top: 0px;
+          opacity: 0.2;
+          cursor: -webkit-grabbing;
+        "
+        :style="{
+          backgroundColor: slider_stuff.GetColor(data.slider2, data.slider2_l),
+          width: `${slider_stuff.GetWidth(data.slider2, data.slider2_l)}px`,
+          height: '100%',
+          left: `${slider_stuff.GetLeft(data.slider2, data.slider2_l) + 6}px`,
+        }"
+      ></div>
+      <slider-cursor
+        v-if="data.multicursor.select_mode && data.multicursor.subtractor_mode"
+        @pointerdown="PressCursor"
+        @pointerover="
+          () => {
+            RegShiftKey();
+            ChangeCursor(data.slider2_l);
+          }
+        "
+        @pointerleave="UnRegShiftKey"
+        :style="{
+          left: `${data.slider2_l.position}px`,
+          cursor: data.multicursor.pressing_shiftkey
+            ? 'col-resize'
+            : '-webkit-grabbing',
+        }"
+        :pressed="data.slider2_l.pressed"
+        :color="data.slider2_l.color"
+        @close="data.multicursor.select_mode = false"
+      >
+      </slider-cursor>
+
       <!-- Tooltip when moving the slider cursor -->
       <el-tooltip
         :content="MapMonth(TimeLineMonth) + TimeLineYear"
@@ -116,6 +177,9 @@
     </div>
     <div class="timeline-label">Time Line</div>
   </div>
+  <el-button @click="data.multicursor.subtractor_mode = true"
+    >Add Cursor</el-button
+  >
 </template>
 
 <script setup>
@@ -193,10 +257,14 @@ const data = reactive({
   multicursor: {
     pressing_shiftkey: false,
     select_mode: false,
+    subtractor_mode: false,
   },
 
   slider1: new Slider("rgb(200, 26, 10)", "rgb(255, 50, 20)"),
   slider1_l: new Slider("rgb(200, 26, 10)", "rgb(255, 50, 20)"),
+
+  slider2: new Slider("rgb(84, 123, 192)", "rgb(90, 156, 248)"),
+  slider2_l: new Slider("rgb(84, 123, 192)", "rgb(90, 156, 248)"),
   current_slider: null,
 });
 data.current_slider = data.slider1;
@@ -246,13 +314,20 @@ function MoveSlider(e) {
   if (data.current_slider.pressed) {
     if (slider_move_timeout == null) {
       slider_move_timeout = setTimeout(() => {
+        // Enter select mode
         if (
           data.multicursor.pressing_shiftkey &&
           !data.multicursor.select_mode
         ) {
           data.multicursor.select_mode = true;
           data.current_slider.pressed = false;
-          data.current_slider = data.slider1_l;
+
+          if (data.current_slider === data.slider1) {
+            data.current_slider = data.slider1_l;
+          } else if (data.current_slider === data.slider2) {
+            data.current_slider = data.slider2_l;
+          }
+
           data.current_slider.pressed = true;
         }
 
