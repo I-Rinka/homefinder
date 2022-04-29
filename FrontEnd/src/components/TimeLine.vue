@@ -42,7 +42,7 @@
         <div
           style="
             position: absolute;
-            top: 20px;
+            top: 33px;
             height: 35px;
             width: 100%;
             pointer-events: none;
@@ -545,7 +545,7 @@ watch(
   position: relative;
   display: inline-block;
   height: 33px;
-  top: 28%;
+  top: 35px;
   overflow: hidden;
 
   &:hover {
@@ -570,9 +570,11 @@ watch(
 
 .time-scale {
   position: relative;
-  top: -51%;
-  height: 200%;
+  top: -95%;
+  // left: 0.4%;
+  // width: 99.2%;
   width: 100%;
+  height: 250%;
   white-space: nowrap;
   overflow-x: scroll;
   overflow-y: visible;
