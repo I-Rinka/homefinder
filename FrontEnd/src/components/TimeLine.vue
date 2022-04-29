@@ -62,7 +62,22 @@
         :color="data.slider1.color"
       >
       </slider-cursor>
-
+      <!-- red frame -->
+      <div
+        v-if="data.multicursor.select_mode"
+        style="
+          position: absolute;
+          transition-duration: 0.1s;
+          top: 0px;
+          opacity: 0.2;
+        "
+        :style="{
+          backgroundColor: slider_stuff.GetColor(data.slider1, data.slider1_l),
+          width: `${slider_stuff.GetWidth(data.slider1, data.slider1_l)}px`,
+          height: '100%',
+          left: `${slider_stuff.GetLeft(data.slider1, data.slider1_l) + 6}px`,
+        }"
+      ></div>
       <slider-cursor
         v-if="data.multicursor.select_mode"
         @pointerdown="PressCursor"
@@ -134,6 +149,26 @@ class Slider {
   }
 }
 
+const slider_stuff = {
+  GetColor: (slider1, slider2) => {
+    if (slider1.pressed || slider2.pressed) {
+      if (slider1.pressed) {
+        return slider1.color;
+      } else {
+        return slider2.color;
+      }
+    } else {
+      return slider1.color;
+    }
+  },
+  GetLeft: (slider1, slider2) =>
+    slider1.position > slider2.position ? slider2.position : slider1.position,
+  GetWidth: (slider1, slider2) => Math.abs(slider1.position - slider2.position),
+  SliderPos2ClientX: (pos) => {
+    return pos + slider_pointer_left_offset;
+  },
+};
+
 const tooltip_position = ref({
   top: 0,
   bottom: 0,
@@ -164,11 +199,6 @@ const data = reactive({
 data.current_slider = data.slider1;
 
 let slider_pointer_left_offset = 15;
-
-function SliderPos2ClientX(pos) {
-  return pos + slider_pointer_left_offset;
-}
-
 // Add Time Series before mounted
 onBeforeMount(() => {
   for (let i = 2012; i <= 2020; i++) {
@@ -240,8 +270,7 @@ function MoveSlider(e) {
 }
 
 function ChangeCursor(cursor) {
-  if (data.current_slider != cursor) {
-    console.log("overhead")
+  if (data.current_slider != cursor && !data.current_slider.pressed) {
     data.current_slider = cursor;
   }
 }
