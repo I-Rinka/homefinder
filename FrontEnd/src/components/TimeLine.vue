@@ -45,7 +45,12 @@
       </div>
       <slider-cursor
         @pointerdown="PressCursor"
-        @pointerover="RegShiftKey"
+        @pointerover="
+          () => {
+            RegShiftKey();
+            ChangeCursor(data.slider1);
+          }
+        "
         @pointerleave="UnRegShiftKey"
         :style="{
           left: `${data.slider1.position}px`,
@@ -55,6 +60,27 @@
         }"
         :press="data.slider1.pressed"
         :color="data.slider1.color"
+      >
+      </slider-cursor>
+
+      <slider-cursor
+        v-if="data.multicursor.select_mode"
+        @pointerdown="PressCursor"
+        @pointerover="
+          () => {
+            RegShiftKey();
+            ChangeCursor(data.slider1_l);
+          }
+        "
+        @pointerleave="UnRegShiftKey"
+        :style="{
+          left: `${data.slider1_l.position}px`,
+          cursor: data.multicursor.pressing_shiftkey
+            ? 'col-resize'
+            : '-webkit-grabbing',
+        }"
+        :press="data.slider1_l.pressed"
+        :color="data.slider1_l.color"
       >
       </slider-cursor>
 
@@ -132,6 +158,7 @@ const data = reactive({
   },
 
   slider1: new Slider("rgb(200, 26, 10)", "rgb(255, 50, 20)"),
+  slider1_l: new Slider("rgb(200, 26, 10)", "rgb(255, 50, 20)"),
   current_slider: null,
 });
 data.current_slider = data.slider1;
@@ -186,6 +213,16 @@ function MoveSlider(e) {
   if (data.current_slider.pressed) {
     if (slider_move_timeout == null) {
       slider_move_timeout = setTimeout(() => {
+        if (
+          data.multicursor.pressing_shiftkey &&
+          !data.multicursor.select_mode
+        ) {
+          data.multicursor.select_mode = true;
+          data.current_slider.pressed = false;
+          data.current_slider = data.slider1_l;
+          data.current_slider.pressed = true;
+        }
+
         slider_move_timeout = null;
 
         data.current_slider.SetPosition(e.clientX);
@@ -199,6 +236,13 @@ function MoveSlider(e) {
         });
       }, 10);
     }
+  }
+}
+
+function ChangeCursor(cursor) {
+  if (data.current_slider != cursor) {
+    console.log("overhead")
+    data.current_slider = cursor;
   }
 }
 
