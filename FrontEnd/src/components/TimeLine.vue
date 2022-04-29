@@ -48,11 +48,13 @@
         @pointerover="RegShiftKey"
         @pointerleave="UnRegShiftKey"
         :style="{
-          left: `${slider}px`,
-          cursor: data.pressing_shiftkey ? 'col-resize' : '-webkit-grabbing',
+          left: `${data.slider1.position}px`,
+          cursor: data.multicursor.pressing_shiftkey
+            ? 'col-resize'
+            : '-webkit-grabbing',
         }"
-        :press="data.slider_pressed"
-        :color="data.slider_color"
+        :press="data.slider1.pressed"
+        :color="data.slider1.color(data.slider1.pressed)"
       >
       </slider-cursor>
 
@@ -91,6 +93,19 @@ import { MapMonth } from "./TimeLine/date";
 */
 
 const emits = defineEmits(["changeCurrent"]);
+
+const slider_cursor = {
+  pressed: false,
+  color: (pressed) => (!pressed ? "rgb(200, 26, 10)" : "rgb(255, 50, 20)"),
+  position: 0,
+  SetPosition: (clientX) => {
+    let pos = clientX - slider_pointer_left_offset;
+    pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
+    pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
+    slider_cursor.position = pos;
+  },
+};
+
 const data = reactive({
   time_series: [],
   scroll_position: 0,
@@ -103,7 +118,13 @@ const data = reactive({
   curor_tooltip_visibility: false,
   tooltip_ref: null,
 
-  pressing_shiftkey: false,
+  multicursor: {
+    pressing_shiftkey: false,
+    select_mode: false,
+  },
+
+  slider1: slider_cursor,
+  current_slider: slider_cursor,
 });
 
 let slider_pointer_left_offset = 15;
@@ -122,6 +143,10 @@ let slider = computed({
     data.position = pos;
   },
 });
+
+function SliderPos2ClientX(pos) {
+  return pos + slider_pointer_left_offset;
+}
 
 // Add Time Series before mounted
 onBeforeMount(() => {
@@ -147,18 +172,25 @@ onMounted(() => {
   });
 
   // move slider to right most
-  slider.value = 100000000;
+  data.current_slider.SetPosition(100000000);
+
   // scroll timeline to right most
   document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
 });
 
 let slider_move_timeout = null;
 function MoveSlider(e) {
-  if (data.slider_pressed) {
+  // if (data.multicursor.select_mode == false) {
+  //   data.multicursor.select_mode = true;
+  // }
+
+  if (data.current_slider.pressed) {
     if (slider_move_timeout == null) {
       slider_move_timeout = setTimeout(() => {
         slider_move_timeout = null;
-        slider.value = e.clientX;
+
+        data.current_slider.SetPosition(e.clientX);
+
         // really wried, since the tooltip only moves when select a new getBoundingClientRect
         data.tooltip_ref = {
           getBoundingClientRect() {
@@ -183,15 +215,13 @@ function MoveTimeScale(e) {
 }
 
 function PressCursor() {
-  data.slider_pressed = true;
-  data.slider_color = "rgb(255, 50, 20)";
+  data.current_slider.pressed = true;
   window.addEventListener("mousemove", MoveSlider);
   window.addEventListener("mouseup", ReleaseCursor);
   data.curor_tooltip_visibility = true;
 }
 function ReleaseCursor() {
-  data.slider_pressed = false;
-  data.slider_color = "rgb(200, 26, 10)";
+  data.current_slider.pressed = false;
   window.removeEventListener("mousemove", MoveSlider);
   window.removeEventListener("mouseup", ReleaseCursor);
   data.curor_tooltip_visibility = false;
@@ -199,13 +229,13 @@ function ReleaseCursor() {
 
 function PressShiftKey(e) {
   if (e.key === "Shift") {
-    data.pressing_shiftkey = true;
+    data.multicursor.pressing_shiftkey = true;
     console.log(e);
   }
 }
 function ReleaseShiftKey(e) {
   if (e.key === "Shift") {
-    data.pressing_shiftkey = false;
+    data.multicursor.pressing_shiftkey = false;
   }
 }
 
@@ -217,7 +247,7 @@ function RegShiftKey() {
 function UnRegShiftKey() {
   window.removeEventListener("keydown", PressShiftKey);
   window.removeEventListener("keyup", ReleaseShiftKey);
-  data.pressing_shiftkey = false;
+  data.multicursor.pressing_shiftkey = false;
 }
 
 const TimeLineMonth = computed(() => {
