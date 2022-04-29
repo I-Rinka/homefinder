@@ -58,8 +58,9 @@
             ? 'col-resize'
             : '-webkit-grabbing',
         }"
-        :press="data.slider1.pressed"
+        :pressed="data.slider1.pressed"
         :color="data.slider1.color"
+        :closable="false"
       >
       </slider-cursor>
       <!-- red frame -->
@@ -94,8 +95,9 @@
             ? 'col-resize'
             : '-webkit-grabbing',
         }"
-        :press="data.slider1_l.pressed"
+        :pressed="data.slider1_l.pressed"
         :color="data.slider1_l.color"
+        @click="() => (data.multicursor.select_mode = false)"
       >
       </slider-cursor>
 
@@ -271,6 +273,7 @@ function MoveSlider(e) {
 
 function ChangeCursor(cursor) {
   if (data.current_slider != cursor && !data.current_slider.pressed) {
+    data.current_slider.pressed = false;
     data.current_slider = cursor;
   }
 }
