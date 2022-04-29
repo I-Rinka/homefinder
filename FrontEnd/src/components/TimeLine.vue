@@ -1,11 +1,7 @@
 <template>
   <div class="timeline">
     <div class="timeline-runway">
-      <div
-        class="time-scale"
-        @scroll="MoveTimeScale"
-        @dblclick="TranslateSlider"
-      >
+      <div class="time-scale" @dblclick="TranslateSlider">
         <div class="year" v-for="year in data.time_series" :key="year.year">
           <template
             v-for="(month, index) in year.month"
@@ -200,6 +196,8 @@ import { MapMonth } from "./TimeLine/date";
         2. multiple cursor support
 */
 
+let p_scroll = 0;
+
 const emits = defineEmits(["changeCurrent"]);
 
 class Slider {
@@ -307,6 +305,11 @@ onMounted(() => {
 
   // scroll timeline to right most
   document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
+  p_scroll = document.getElementsByClassName("time-scale").item(0).scrollLeft;
+
+  document
+    .getElementsByClassName("time-scale")[0]
+    .addEventListener("scroll", MoveTimeScale);
 });
 
 let slider_move_timeout = null;
@@ -362,6 +365,13 @@ function MoveTimeScale(e) {
   data.scroll_position = document
     .getElementsByClassName("time-scale")
     .item(0).scrollLeft;
+  let vary = p_scroll - data.scroll_position;
+  p_scroll = data.scroll_position;
+  // console.log(data.scroll_position);
+
+  data.slider1.SetPosition(
+    slider_stuff.SliderPos2ClientX(data.slider1.position) + vary
+  );
 }
 
 function PressCursor() {
