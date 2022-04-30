@@ -89,7 +89,7 @@
                 data.slider1,
                 data.slider1_l
               ),
-              width: `${slider_stuff.GetWidth(data.slider1, data.slider1_l)}px`,
+              width: `${sliders1_width}px`,
               height: '100%',
               left: `${
                 slider_stuff.GetLeft(data.slider1, data.slider1_l) + 6
@@ -159,7 +159,7 @@
                 data.slider2,
                 data.slider2_l
               ),
-              width: `${slider_stuff.GetWidth(data.slider2, data.slider2_l)}px`,
+              width: `${sliders1_width}px`,
               height: '100%',
               left: `${
                 slider_stuff.GetLeft(data.slider2, data.slider2_l) + 6
@@ -216,6 +216,7 @@
           position: relative;
           font-size: 1.2vh;
           top: -0.8vh;
+          right: 1vh;
           text-align: right;
         "
       >
@@ -276,7 +277,7 @@ import { MapMonth } from "./TimeLine/date";
 /*
     todo:
       1. sync selector length
-      2. limit slider position 
+      2. limit slider position
 */
 
 const emits = defineEmits(["changeCurrent"]);
@@ -301,6 +302,14 @@ class Slider {
   }
 }
 
+const sliders1_width = computed(() => {
+  return Math.abs(data.slider1.position - data.slider1_l.position);
+});
+
+const sliders2_width = computed(() => {
+  return Math.abs(data.slider2.position - data.slider2_l.position);
+});
+
 const slider_stuff = {
   GetColor: (slider1, slider2) => {
     if (slider1.pressed || slider2.pressed) {
@@ -315,7 +324,7 @@ const slider_stuff = {
   },
   GetLeft: (slider1, slider2) =>
     slider1.position > slider2.position ? slider2.position : slider1.position,
-  GetWidth: (slider1, slider2) => Math.abs(slider1.position - slider2.position),
+
   SliderPos2ClientX: (pos) => {
     return pos + slider_pointer_left_offset;
   },
@@ -354,6 +363,10 @@ const data = reactive({
   current_slider: null,
 });
 data.current_slider = data.slider1;
+data.slider2_l.position = computed({
+  get: () => data.slider2.position + sliders1_width.value,
+  set: (val) => {},
+});
 
 // Add Time Series before mounted
 onBeforeMount(() => {
