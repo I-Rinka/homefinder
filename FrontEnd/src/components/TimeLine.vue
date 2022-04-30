@@ -1,7 +1,11 @@
 <template>
   <div class="timeline">
     <div class="timeline-runway">
-      <div class="time-scale" @dblclick="TranslateSlider">
+      <div
+        class="time-scale"
+        @pointerdown="PressTimeScale"
+        @dblclick="TranslateSlider"
+      >
         <div class="year" v-for="year in data.time_series" :key="year.year">
           <template
             v-for="(month, index) in year.month"
@@ -337,10 +341,6 @@ onMounted(() => {
   // scroll timeline to right most
   document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
   p_scroll = document.getElementsByClassName("time-scale").item(0).scrollLeft;
-
-  document
-    .getElementsByClassName("time-scale")[0]
-    .addEventListener("scroll", MoveTimeScale);
 });
 
 let slider_move_timeout = null;
@@ -395,12 +395,6 @@ function TranslateSlider(e) {
   data.current_slider.SetPosition(e.clientX);
 }
 
-function MoveTimeScale(e) {
-  data.scroll_position = document
-    .getElementsByClassName("time-scale")
-    .item(0).scrollLeft;
-}
-
 function PressCursor() {
   data.current_slider.pressed = true;
   window.addEventListener("mousemove", MoveSlider);
@@ -412,6 +406,37 @@ function ReleaseCursor() {
   window.removeEventListener("mousemove", MoveSlider);
   window.removeEventListener("mouseup", ReleaseCursor);
   data.curor_tooltip_visibility = false;
+}
+
+let current_sliders = [];
+function PressSlider(slider, sliderl) {
+  current_sliders = [slider, sliderl];
+}
+
+let previous_clientX = 0;
+function PressTimeScale(e) {
+  previous_clientX =
+    document.getElementsByClassName("time-scale").item(0).scrollLeft +
+    e.clientX;
+  window.addEventListener("mousemove", MoveTimeScale);
+  window.addEventListener("mouseup", ReleaseTimeScale);
+}
+
+function ReleaseTimeScale(e) {
+  window.removeEventListener("mousemove", MoveTimeScale);
+  window.removeEventListener("mouseup", ReleaseTimeScale);
+}
+
+let timescale_move_timeout = null;
+function MoveTimeScale(e) {
+  if (timescale_move_timeout == null) {
+    timescale_move_timeout = setTimeout(() => {
+      document
+        .getElementsByClassName("time-scale")[0]
+        .scrollTo(previous_clientX - e.clientX, 0);
+      timescale_move_timeout = null;
+    }, 10);
+  }
 }
 
 function PressShiftKey(e) {
