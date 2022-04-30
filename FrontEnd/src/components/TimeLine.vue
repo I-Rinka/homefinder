@@ -206,11 +206,59 @@
       virtual-triggering
     >
     </el-tooltip>
-    <div class="timeline-label">Time Line</div>
+    <el-row class="timeline-label" justify="space-between">
+      <el-col :span="4">
+        <div style="position: relative; left: 10px">Time Line</div>
+      </el-col>
+      <el-col
+        :span="6"
+        style="
+          position: relative;
+          font-size: 1.2vh;
+          top: -0.8vh;
+          text-align: right;
+        "
+      >
+        <div
+          style="display: inline; padding-right: 5vh; cursor: pointer"
+          @click="data.multicursor.subtractor_mode = true"
+        >
+          <div style="display: inline-block; position: relative; top: 0.5vh">
+            Baseline
+          </div>
+          <div
+            style="
+              position: relative;
+              left: 0.5vh;
+              top: 0.6vh;
+              display: inline-block;
+              background-color: rgb(82, 124, 197);
+              height: 1.2vh;
+              width: 1.2vh;
+              border-radius: 1vh;
+            "
+          ></div>
+        </div>
+        <div style="display: inline; position: relative; padding-right: 2vh">
+          <div style="display: inline-block; position: relative; top: 0.5vh">
+            Current
+          </div>
+          <div
+            style="
+              position: relative;
+              left: 0.5vh;
+              top: 0.6vh;
+              display: inline-block;
+              background-color: rgb(191, 32, 25);
+              height: 1.2vh;
+              width: 1.2vh;
+              border-radius: 1vh;
+            "
+          ></div>
+        </div>
+      </el-col>
+    </el-row>
   </div>
-  <el-button @click="data.multicursor.subtractor_mode = true"
-    >Add Cursor</el-button
-  >
 </template>
 
 <script setup>
@@ -241,9 +289,10 @@ class Slider {
     this.position = ref(0);
     this.SetPosition = (clientX, is_relative) => {
       let pos =
-        clientX + 
+        clientX +
         (!is_relative
-          ? document.getElementsByClassName("time-scale").item(0).scrollLeft - slider_pointer_left_offset
+          ? document.getElementsByClassName("time-scale").item(0).scrollLeft -
+            slider_pointer_left_offset
           : 0);
       // pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
       // pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
@@ -684,10 +733,11 @@ watch(
 
 .timeline-label {
   position: absolute;
+  width: 100%;
   top: 15%;
   color: gray;
   font-weight: bolder;
   font-size: 1.5vh;
-  left: 1vw;
+  text-align: left;
 }
 </style>
