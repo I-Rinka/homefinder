@@ -268,6 +268,7 @@ import {
   onMounted,
   reactive,
   ref,
+  toRaw,
   watch,
 } from "@vue/runtime-core";
 import SliderCursor from "./TimeLine/SliderCursor.vue";
@@ -275,13 +276,12 @@ import { MapMonth } from "./TimeLine/date";
 
 /*
     todo:
-      1. sync selector length
       2. limit slider position
 */
 
 const emits = defineEmits(["changeCurrent"]);
 
-let slider_pointer_left_offset = 15;
+const slider_pointer_left_offset = 15;
 class Slider {
   constructor(color, pressed_color) {
     this.pressed = ref(false);
@@ -293,9 +293,70 @@ class Slider {
         (!is_relative
           ? TIME_SCALE_DOM.scrollLeft - slider_pointer_left_offset
           : 0);
-      // pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
-      // pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
-      this.position.value = pos;
+
+      let dom = document.getElementsByClassName("year");
+      let r_limit =
+        dom[0].getBoundingClientRect().width * dom.length -
+        slider_pointer_left_offset;
+      pos = pos > r_limit ? r_limit : pos;
+      pos = pos < 0 ? 0 : pos;
+
+      if (data.multicursor.select_mode && data.multicursor.subtractor_mode) {
+        // not move situation:
+        // 1. move left while some left cursor reach left limit
+        // 2. move right while some right cusor reach right limit
+        let vary = this.position.value - pos; // positive is moving left
+        if (this === toRaw(data.slider1) || this === toRaw(data.slider1_l)) {
+          let another =
+            this === toRaw(data.slider1) ? data.slider1_l : data.slider1;
+
+          // become larger
+          if (
+            (vary > 0 && another.position > this.position.value) ||
+            (vary < 0 && another.position < this.position.value)
+          ) {
+            if (
+              data.slider2.position < r_limit &&
+              data.slider2_l.position < r_limit &&
+              data.slider2.position > 0 &&
+              data.slider2_l.position > 0
+            ) {
+              this.position.value = pos;
+            }
+          } else {
+            this.position.value = pos;
+          }
+        } else if (
+          this === toRaw(data.slider2) ||
+          this === toRaw(data.slider2_l)
+        ) {
+          let another =
+            this === toRaw(data.slider2) ? data.slider2_l : data.slider2;
+
+          if (this === toRaw(data.slider2)) {
+            console.log(vary, another.position, this.position.value);
+          }
+
+          if (
+            (vary > 0 && another.position > this.position.value) ||
+            (vary < 0 && another.position < this.position.value)
+          ) {
+            console.log("larger");
+            if (
+              data.slider1.position < r_limit &&
+              data.slider1_l.position < r_limit &&
+              data.slider1.position > 0 &&
+              data.slider1_l.position > 0
+            ) {
+              this.position.value = pos;
+            }
+          } else {
+            this.position.value = pos;
+          }
+        }
+      } else {
+        this.position.value = pos;
+      }
     };
   }
 }
@@ -332,7 +393,6 @@ const tooltip_position = ref({
 
 const data = reactive({
   time_series: [],
-  scroll_position: 0,
   runway_limit: [0, 1000],
   previous_year_month: null,
   curor_tooltip_visibility: false,
@@ -391,11 +451,11 @@ onMounted(() => {
       .getBoundingClientRect();
   });
 
-  // move slider to right most
-  data.current_slider.SetPosition(1000);
-
   // scroll timeline to right most
   TIME_SCALE_DOM.scrollTo(1000000, 0);
+
+  // move slider to right most
+  data.current_slider.SetPosition(1000000);
 });
 
 let slider_move_timeout = null;
@@ -424,55 +484,55 @@ function MoveSlider(e) {
 
         data.current_slider.SetPosition(e.clientX);
 
-        // Select mode change another's position
-        if (data.multicursor.select_mode && data.multicursor.subtractor_mode) {
-          if (
-            data.current_slider === data.slider1 ||
-            data.current_slider === data.slider1_l
-          ) {
-            let l1_slider =
-              data.slider1.position < data.slider1_l.position
-                ? data.slider1
-                : data.slider1_l;
-            let l2_slider =
-              data.slider2.position < data.slider2_l.position
-                ? data.slider2
-                : data.slider2_l;
-            let r2_slider =
-              l2_slider === data.slider2_l ? data.slider2 : data.slider2_l;
-
-            if (l1_slider === data.current_slider) {
-              l2_slider.position = r2_slider.position - sliders_width.value;
-            } else {
-              r2_slider.position = l2_slider.position + sliders_width.value;
-            }
-          } else {
-            let l1_slider =
-              data.slider2.position < data.slider2_l.position
-                ? data.slider2
-                : data.slider2_l;
-            let l2_slider =
-              data.slider1.position < data.slider1_l.position
-                ? data.slider1
-                : data.slider1_l;
-            let r2_slider =
-              l2_slider === data.slider1_l ? data.slider1 : data.slider1_l;
-
-            let width = Math.abs(
-              data.slider2.position - data.slider2_l.position
-            );
-            if (l1_slider === data.current_slider) {
-              l2_slider.position = r2_slider.position - width;
-              console.log("move left", l2_slider);
-            } else {
-              r2_slider.position = l2_slider.position + width;
-              console.log("move right", r2_slider);
-            }
-          }
-        }
+        SlidersWidthHandler();
 
         SyncSliderTooltip();
       }, 20);
+    }
+  }
+}
+
+function SlidersWidthHandler() {
+  // Select mode change another's position
+  if (data.multicursor.select_mode && data.multicursor.subtractor_mode) {
+    if (
+      data.current_slider === data.slider1 ||
+      data.current_slider === data.slider1_l
+    ) {
+      let l1_slider =
+        data.slider1.position < data.slider1_l.position
+          ? data.slider1
+          : data.slider1_l;
+      let l2_slider =
+        data.slider2.position < data.slider2_l.position
+          ? data.slider2
+          : data.slider2_l;
+      let r2_slider =
+        l2_slider === data.slider2_l ? data.slider2 : data.slider2_l;
+
+      if (l1_slider === data.current_slider) {
+        l2_slider.SetPosition(r2_slider.position - sliders_width.value, true);
+      } else {
+        r2_slider.SetPosition(l2_slider.position + sliders_width.value, true);
+      }
+    } else {
+      let l1_slider =
+        data.slider2.position < data.slider2_l.position
+          ? data.slider2
+          : data.slider2_l;
+      let l2_slider =
+        data.slider1.position < data.slider1_l.position
+          ? data.slider1
+          : data.slider1_l;
+      let r2_slider =
+        l2_slider === data.slider1_l ? data.slider1 : data.slider1_l;
+
+      let width = Math.abs(data.slider2.position - data.slider2_l.position);
+      if (l1_slider === data.current_slider) {
+        l2_slider.SetPosition(r2_slider.position - width, true);
+      } else {
+        r2_slider.SetPosition(l2_slider.position + width, true);
+      }
     }
   }
 }
@@ -586,11 +646,16 @@ function RemoveSubtractor() {
   }
 }
 function AddSubtractor() {
-  data.multicursor.subtractor_mode=true;
-  data.slider2.position=TIME_SCALE_DOM.scrollLeft;
+  if (!data.multicursor.subtractor_mode) {
+    data.multicursor.subtractor_mode = true;
+    data.slider2.SetPosition(TIME_SCALE_DOM.scrollLeft, true);
 
-  if (data.multicursor.select_mode===true) {
-    data.slider2_l.position=TIME_SCALE_DOM.scrollLeft+sliders_width.value;
+    if (data.multicursor.select_mode === true) {
+      data.slider2_l.SetPosition(
+        TIME_SCALE_DOM.scrollLeft + sliders_width.value,
+        true
+      );
+    }
   }
 }
 
@@ -656,6 +721,12 @@ watch(
   () => TimeLineMonth.value,
   (new_val) => {
     emits("changeCurrent", { year: TimeLineYear.value, month: new_val });
+  }
+);
+watch(
+  () => data.slider2.position - data.slider2_l.position,
+  () => {
+    SlidersWidthHandler();
   }
 );
 </script>
@@ -739,7 +810,7 @@ watch(
   overflow: hidden;
   cursor: pointer;
   &:hover {
-    background-color: whitesmoke;
+    background-color: rgba(245, 245, 245, 0.6);
     .first-month-scale {
       transform: scale(1.2, 1.2) translateY(-8%);
     }
