@@ -54,13 +54,12 @@ function Close() {
 <style lang="less" scoped>
 .button-frame {
   filter: drop-shadow(0.5px 0.5px 2px rgba(0, 0, 0, 0.5));
-  position: inherit;
+  position: absolute;
   top: -25%;
   height: 125%;
   width: 12px;
-  transition: 50ms;
-  transition-timing-function: linear;
-
+  z-index: 20;
+  transition: 10ms;
   &:hover {
     filter: drop-shadow(0.5px 0.5px 3px rgba(0, 0, 0, 0.5));
 
@@ -108,5 +107,6 @@ function Close() {
   top: 2px;
   transition-duration: 0.2s;
   color: rgb(96, 98, 102);
+  z-index: 20;
 }
 </style>

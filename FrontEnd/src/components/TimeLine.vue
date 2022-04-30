@@ -1,7 +1,66 @@
 <template>
   <div class="timeline">
+    <el-row class="timeline-label" justify="space-between">
+      <el-col :span="4">
+        <div style="position: relative; left: 10px">Time Line</div>
+      </el-col>
+      <el-col
+        :span="6"
+        style="
+          position: relative;
+          font-size: 1.2vh;
+          top: -0.8vh;
+          right: 1vh;
+          text-align: right;
+        "
+      >
+        <div
+          style="
+            display: inline;
+            padding-right: 5vh;
+            cursor: pointer;
+            pointer-events: all;
+          "
+          @click="AddSubtractor"
+        >
+          <div style="display: inline-block; position: relative; top: 0.5vh">
+            Baseline
+          </div>
+          <div
+            style="
+              position: relative;
+              z-index: 10;
+              left: 0.5vh;
+              top: 0.6vh;
+              display: inline-block;
+              background-color: rgb(82, 124, 197);
+              height: 1.2vh;
+              width: 1.2vh;
+              border-radius: 1vh;
+            "
+          ></div>
+        </div>
+        <div style="display: inline; position: relative; padding-right: 2vh">
+          <div style="display: inline-block; position: relative; top: 0.5vh">
+            Current
+          </div>
+          <div
+            style="
+              position: relative;
+              left: 0.5vh;
+              top: 0.6vh;
+              display: inline-block;
+              background-color: rgb(191, 32, 25);
+              height: 1.2vh;
+              width: 1.2vh;
+              border-radius: 1vh;
+            "
+          ></div>
+        </div>
+      </el-col>
+    </el-row>
     <div class="timeline-runway">
-      <div class="time-scale" @dblclick="TranslateSlider">
+      <div class="time-scale">
         <div
           class="year"
           @pointerdown="PressTimeScale"
@@ -43,15 +102,7 @@
             </el-tooltip>
           </template>
         </div>
-        <div
-          style="
-            position: absolute;
-            top: 33px;
-            height: 35px;
-            width: 100%;
-            pointer-events: none;
-          "
-        >
+        <div class="sliders-frame">
           <slider-cursor
             @pointerdown="PressCursor"
             @pointerover="
@@ -73,30 +124,6 @@
             :closable="false"
           >
           </slider-cursor>
-          <!-- red frame -->
-          <div
-            v-if="data.multicursor.select_mode"
-            style="
-              position: absolute;
-              transition-duration: 71ms;
-              pointer-events: all;
-              top: 0px;
-              opacity: 0.2;
-              cursor: -webkit-grabbing;
-            "
-            :style="{
-              backgroundColor: slider_stuff.GetColor(
-                data.slider1,
-                data.slider1_l
-              ),
-              width: `${sliders1_width}px`,
-              height: '100%',
-              left: `${
-                slider_stuff.GetLeft(data.slider1, data.slider1_l) + 6
-              }px`,
-            }"
-            @pointerdown="(e) => PressSliders(e, data.slider1, data.slider1_l)"
-          ></div>
           <slider-cursor
             v-if="data.multicursor.select_mode"
             @pointerdown="PressCursor"
@@ -119,6 +146,29 @@
             @close="data.multicursor.select_mode = false"
           >
           </slider-cursor>
+          <!-- red frame -->
+          <div
+            v-if="data.multicursor.select_mode"
+            style="
+              position: absolute;
+              pointer-events: all;
+              top: 0px;
+              opacity: 0.2;
+              cursor: -webkit-grabbing;
+            "
+            :style="{
+              backgroundColor: slider_stuff.GetColor(
+                data.slider1,
+                data.slider1_l
+              ),
+              width: `${sliders_width}px`,
+              height: '100%',
+              left: `${
+                slider_stuff.GetLeft(data.slider1, data.slider1_l) + 6
+              }px`,
+            }"
+            @pointerdown="(e) => PressSliders(e, data.slider1, data.slider1_l)"
+          ></div>
 
           <!-- Subtractor cursor -->
           <slider-cursor
@@ -139,34 +189,11 @@
             }"
             style="pointer-events: all; position: absolute"
             :pressed="data.slider2.pressed"
+            :closable="!data.multicursor.select_mode"
             :color="data.slider2.color"
-            @close="data.multicursor.select_mode = false"
+            @close="RemoveSubtractor"
           >
           </slider-cursor>
-          <!-- blue frame -->
-          <div
-            v-if="data.multicursor.select_mode"
-            style="
-              position: absolute;
-              transition-duration: 71ms;
-              top: 0px;
-              opacity: 0.2;
-              pointer-events: all;
-              cursor: -webkit-grabbing;
-            "
-            :style="{
-              backgroundColor: slider_stuff.GetColor(
-                data.slider2,
-                data.slider2_l
-              ),
-              width: `${sliders1_width}px`,
-              height: '100%',
-              left: `${
-                slider_stuff.GetLeft(data.slider2, data.slider2_l) + 6
-              }px`,
-            }"
-            @pointerdown="(e) => PressSliders(e, data.slider2, data.slider2_l)"
-          ></div>
           <slider-cursor
             v-if="
               data.multicursor.select_mode && data.multicursor.subtractor_mode
@@ -188,9 +215,34 @@
             style="pointer-events: all; position: absolute"
             :pressed="data.slider2_l.pressed"
             :color="data.slider2_l.color"
-            @close="data.multicursor.select_mode = false"
+            @close="RemoveSubtractor"
           >
           </slider-cursor>
+          <!-- blue frame -->
+          <div
+            v-if="
+              data.multicursor.select_mode && data.multicursor.subtractor_mode
+            "
+            style="
+              position: absolute;
+              top: 0px;
+              opacity: 0.2;
+              pointer-events: all;
+              cursor: -webkit-grabbing;
+            "
+            :style="{
+              backgroundColor: slider_stuff.GetColor(
+                data.slider2,
+                data.slider2_l
+              ),
+              width: `${sliders_width}px`,
+              height: '100%',
+              left: `${
+                slider_stuff.GetLeft(data.slider2, data.slider2_l) + 6
+              }px`,
+            }"
+            @pointerdown="(e) => PressSliders(e, data.slider2, data.slider2_l)"
+          ></div>
         </div>
       </div>
     </div>
@@ -200,65 +252,12 @@
       :content="MapMonth(TimeLineMonth) + TimeLineYear"
       placement="top"
       effect="customized"
-      popper-class="popper-slow"
+      popper-class="popper-instant"
       :visible="data.curor_tooltip_visibility"
       :virtual-ref="data.tooltip_ref"
       virtual-triggering
     >
     </el-tooltip>
-    <el-row class="timeline-label" justify="space-between">
-      <el-col :span="4">
-        <div style="position: relative; left: 10px">Time Line</div>
-      </el-col>
-      <el-col
-        :span="6"
-        style="
-          position: relative;
-          font-size: 1.2vh;
-          top: -0.8vh;
-          right: 1vh;
-          text-align: right;
-        "
-      >
-        <div
-          style="display: inline; padding-right: 5vh; cursor: pointer"
-          @click="data.multicursor.subtractor_mode = true"
-        >
-          <div style="display: inline-block; position: relative; top: 0.5vh">
-            Baseline
-          </div>
-          <div
-            style="
-              position: relative;
-              left: 0.5vh;
-              top: 0.6vh;
-              display: inline-block;
-              background-color: rgb(82, 124, 197);
-              height: 1.2vh;
-              width: 1.2vh;
-              border-radius: 1vh;
-            "
-          ></div>
-        </div>
-        <div style="display: inline; position: relative; padding-right: 2vh">
-          <div style="display: inline-block; position: relative; top: 0.5vh">
-            Current
-          </div>
-          <div
-            style="
-              position: relative;
-              left: 0.5vh;
-              top: 0.6vh;
-              display: inline-block;
-              background-color: rgb(191, 32, 25);
-              height: 1.2vh;
-              width: 1.2vh;
-              border-radius: 1vh;
-            "
-          ></div>
-        </div>
-      </el-col>
-    </el-row>
   </div>
 </template>
 
@@ -292,8 +291,7 @@ class Slider {
       let pos =
         clientX +
         (!is_relative
-          ? document.getElementsByClassName("time-scale").item(0).scrollLeft -
-            slider_pointer_left_offset
+          ? TIME_SCALE_DOM.scrollLeft - slider_pointer_left_offset
           : 0);
       // pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
       // pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
@@ -302,12 +300,8 @@ class Slider {
   }
 }
 
-const sliders1_width = computed(() => {
+const sliders_width = computed(() => {
   return Math.abs(data.slider1.position - data.slider1_l.position);
-});
-
-const sliders2_width = computed(() => {
-  return Math.abs(data.slider2.position - data.slider2_l.position);
 });
 
 const slider_stuff = {
@@ -363,10 +357,6 @@ const data = reactive({
   current_slider: null,
 });
 data.current_slider = data.slider1;
-data.slider2_l.position = computed({
-  get: () => data.slider2.position + sliders1_width.value,
-  set: (val) => {},
-});
 
 // Add Time Series before mounted
 onBeforeMount(() => {
@@ -434,16 +424,66 @@ function MoveSlider(e) {
 
         data.current_slider.SetPosition(e.clientX);
 
-        // really wried, since the tooltip only moves when select a new getBoundingClientRect
-        tooltip_position.value = DOMRect.fromRect({
-          width: 0,
-          height: 0,
-          x: data.current_slider.position - TIME_SCALE_DOM.scrollLeft + 15,
-          y: tooltip_position.value.y,
-        });
-      }, 10);
+        // Select mode change another's position
+        if (data.multicursor.select_mode && data.multicursor.subtractor_mode) {
+          if (
+            data.current_slider === data.slider1 ||
+            data.current_slider === data.slider1_l
+          ) {
+            let l1_slider =
+              data.slider1.position < data.slider1_l.position
+                ? data.slider1
+                : data.slider1_l;
+            let l2_slider =
+              data.slider2.position < data.slider2_l.position
+                ? data.slider2
+                : data.slider2_l;
+            let r2_slider =
+              l2_slider === data.slider2_l ? data.slider2 : data.slider2_l;
+
+            if (l1_slider === data.current_slider) {
+              l2_slider.position = r2_slider.position - sliders_width.value;
+            } else {
+              r2_slider.position = l2_slider.position + sliders_width.value;
+            }
+          } else {
+            let l1_slider =
+              data.slider2.position < data.slider2_l.position
+                ? data.slider2
+                : data.slider2_l;
+            let l2_slider =
+              data.slider1.position < data.slider1_l.position
+                ? data.slider1
+                : data.slider1_l;
+            let r2_slider =
+              l2_slider === data.slider1_l ? data.slider1 : data.slider1_l;
+
+            let width = Math.abs(
+              data.slider2.position - data.slider2_l.position
+            );
+            if (l1_slider === data.current_slider) {
+              l2_slider.position = r2_slider.position - width;
+              console.log("move left", l2_slider);
+            } else {
+              r2_slider.position = l2_slider.position + width;
+              console.log("move right", r2_slider);
+            }
+          }
+        }
+
+        SyncSliderTooltip();
+      }, 20);
     }
   }
+}
+
+async function SyncSliderTooltip() {
+  tooltip_position.value = DOMRect.fromRect({
+    width: 0,
+    height: 0,
+    x: data.current_slider.position - TIME_SCALE_DOM.scrollLeft + 15,
+    y: tooltip_position.value.y,
+  });
 }
 
 function ChangeCursor(cursor) {
@@ -451,10 +491,6 @@ function ChangeCursor(cursor) {
     data.current_slider.pressed = false;
     data.current_slider = cursor;
   }
-}
-
-function TranslateSlider(e) {
-  data.current_slider.SetPosition(e.clientX);
 }
 
 function PressCursor() {
@@ -495,7 +531,7 @@ function MoveTimeScale(e) {
     timescale_move_timeout = setTimeout(() => {
       TIME_SCALE_DOM.scrollTo(previous_clientX - e.clientX, 0);
       timescale_move_timeout = null;
-    }, 10);
+    }, 20);
   }
 }
 
@@ -539,6 +575,22 @@ function MoveSliders(e) {
       );
       sliders_move_timeout = null;
     }, 20);
+  }
+}
+
+function RemoveSubtractor() {
+  if (data.multicursor.select_mode) {
+    data.multicursor.select_mode = false;
+  } else {
+    data.multicursor.subtractor_mode = false;
+  }
+}
+function AddSubtractor() {
+  data.multicursor.subtractor_mode=true;
+  data.slider2.position=TIME_SCALE_DOM.scrollLeft;
+
+  if (data.multicursor.select_mode===true) {
+    data.slider2_l.position=TIME_SCALE_DOM.scrollLeft+sliders_width.value;
   }
 }
 
@@ -679,13 +731,15 @@ watch(
 }
 
 .year {
+  pointer-events: all;
   position: relative;
   display: inline-block;
   height: 33px;
-  top: 35px;
+  top: 40px;
   overflow: hidden;
   cursor: pointer;
   &:hover {
+    background-color: whitesmoke;
     .first-month-scale {
       transform: scale(1.2, 1.2) translateY(-8%);
     }
@@ -711,11 +765,22 @@ watch(
 .time-scale {
   position: relative;
   padding: 0px 2px 0px 2px;
-  top: -95%;
+  top: -108%;
   width: 99.8%;
-  height: 250%;
+  height: 220%;
   white-space: nowrap;
   overflow-x: scroll;
+  z-index: 0;
+  // pointer-events: none;
+}
+
+.sliders-frame {
+  position: absolute;
+  top: 37.5px;
+  height: 35px;
+  width: 100%;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .popper {
@@ -723,9 +788,8 @@ watch(
   transition-duration: 0.1s;
 }
 
-.popper-slow {
+.popper-instant {
   filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.3));
-  transition-duration: 0.3s;
 }
 
 .el-popper.is-customized {
@@ -745,6 +809,7 @@ watch(
 }
 
 .timeline-label {
+  // pointer-events: none;
   position: absolute;
   width: 100%;
   top: 15%;
