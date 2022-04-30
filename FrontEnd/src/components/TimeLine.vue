@@ -161,7 +161,7 @@
                 data.slider1,
                 data.slider1_l
               ),
-              width: `${sliders_width}px`,
+              width: `${slider_stuff.GetWidth(data.slider1, data.slider1_l)}px`,
               height: '100%',
               left: `${
                 slider_stuff.GetLeft(data.slider1, data.slider1_l) + 6
@@ -235,7 +235,7 @@
                 data.slider2,
                 data.slider2_l
               ),
-              width: `${sliders_width}px`,
+              width: `${slider_stuff.GetWidth(data.slider2, data.slider2_l)}px`,
               height: '100%',
               left: `${
                 slider_stuff.GetLeft(data.slider2, data.slider2_l) + 6
@@ -274,14 +274,18 @@ import {
 import SliderCursor from "./TimeLine/SliderCursor.vue";
 import { MapMonth } from "./TimeLine/date";
 
-/*
-    todo:
-      2. limit slider position
-*/
+// todo: initial position
 
 const emits = defineEmits(["changeCurrent"]);
 
 const slider_pointer_left_offset = 15;
+function GetRightLimit() {
+  let dom = document.getElementsByClassName("year");
+  return (
+    dom[0].getBoundingClientRect().width * dom.length -
+    slider_pointer_left_offset
+  );
+}
 class Slider {
   constructor(color, pressed_color) {
     this.pressed = ref(false);
@@ -294,10 +298,8 @@ class Slider {
           ? TIME_SCALE_DOM.scrollLeft - slider_pointer_left_offset
           : 0);
 
-      let dom = document.getElementsByClassName("year");
-      let r_limit =
-        dom[0].getBoundingClientRect().width * dom.length -
-        slider_pointer_left_offset;
+      let r_limit = GetRightLimit();
+
       pos = pos > r_limit ? r_limit : pos;
       pos = pos < 0 ? 0 : pos;
 
@@ -323,20 +325,23 @@ class Slider {
           l_2 = data.slider2_l;
           r_2 = data.slider2;
         }
+
         if (this === toRaw(data.slider1) || this === toRaw(data.slider1_l)) {
           // right
-          if (vary < 0 && this === toRaw(r_1)) {
-            console.log("right larger", vary, toRaw(r_1));
-            if (r_2.position < r_limit) {
+          if (vary > 0 && this === toRaw(r_1)) {
+            let new_width = pos - l_1.position;
+            if (l_2.position + new_width < r_limit) {
               this.position.value = pos;
             } else {
+              this.position.value = l_1.position + r_limit - l_2.position;
             }
             // left
           } else if (vary < 0 && this === toRaw(l_1)) {
-            console.log("left larger", vary, toRaw(l_1));
-            if (l_2.position > 0) {
+            let new_width = r_1.position - pos;
+            if (r_2.position - new_width > 0) {
               this.position.value = pos;
             } else {
+              this.position.value = r_1.position - r_2.position;
             }
           } else {
             this.position.value = pos;
@@ -347,17 +352,19 @@ class Slider {
         ) {
           // right
           if (vary > 0 && this === toRaw(r_2)) {
-            console.log("right larger", vary, toRaw(r_2));
-            if (r_1.position < r_limit) {
+            let new_width = pos - l_2.position;
+            if (l_1.position + new_width < r_limit) {
               this.position.value = pos;
             } else {
+              this.position.value = l_2.position + r_limit - l_1.position;
             }
             // left
           } else if (vary < 0 && this === toRaw(l_2)) {
-            console.log("left larger", vary, toRaw(l_2));
-            if (l_1.position > 0) {
+            let new_width = r_2.position - pos;
+            if (r_1.position - new_width > 0) {
               this.position.value = pos;
             } else {
+              this.position.value = r_2.position - r_1.position;
             }
           } else {
             this.position.value = pos;
@@ -370,9 +377,39 @@ class Slider {
   }
 }
 
-const sliders_width = computed(() => {
-  return Math.abs(data.slider1.position - data.slider1_l.position);
-});
+function SyncSliders() {
+  if (data.multicursor.select_mode && data.multicursor.subtractor_mode) {
+    // not move situation:
+    // 1. move left while some left cursor reach left limit
+    // 2. move right while some right cusor reach right limit
+    let l_1, r_1;
+    if (data.slider1.position < data.slider1_l.position) {
+      l_1 = data.slider1;
+      r_1 = data.slider1_l;
+    } else {
+      l_1 = data.slider1_l;
+      r_1 = data.slider1;
+    }
+
+    let l_2, r_2;
+    if (data.slider2.position < data.slider2_l.position) {
+      l_2 = data.slider2;
+      r_2 = data.slider2_l;
+    } else {
+      l_2 = data.slider2_l;
+      r_2 = data.slider2;
+    }
+    if (data.current_slider === r_2) {
+      r_1.SetPosition(l_1.position + slider_stuff.GetWidth(l_2, r_2), true);
+    } else if (data.current_slider === r_1) {
+      r_2.SetPosition(l_2.position + slider_stuff.GetWidth(l_1, r_1), true);
+    } else if (data.current_slider === l_1) {
+      l_2.SetPosition(r_2.position - slider_stuff.GetWidth(l_1, r_1), true);
+    } else if (data.current_slider === l_2) {
+      l_1.SetPosition(r_1.position - slider_stuff.GetWidth(l_2, r_2), true);
+    }
+  }
+}
 
 const slider_stuff = {
   GetColor: (slider1, slider2) => {
@@ -388,6 +425,7 @@ const slider_stuff = {
   },
   GetLeft: (slider1, slider2) =>
     slider1.position > slider2.position ? slider2.position : slider1.position,
+  GetWidth: (slider1, slider2) => Math.abs(slider1.position - slider2.position),
 
   SliderPos2ClientX: (pos) => {
     return pos + slider_pointer_left_offset;
@@ -492,55 +530,10 @@ function MoveSlider(e) {
         slider_move_timeout = null;
 
         data.current_slider.SetPosition(e.clientX);
-        SlidersWidthHandler();
 
         SyncSliderTooltip();
+        SyncSliders();
       }, 20);
-    }
-  }
-}
-
-function SlidersWidthHandler() {
-  // Select mode change another's position
-  if (data.multicursor.select_mode && data.multicursor.subtractor_mode) {
-    if (
-      data.current_slider === data.slider1 ||
-      data.current_slider === data.slider1_l
-    ) {
-      let l1_slider =
-        data.slider1.position < data.slider1_l.position
-          ? data.slider1
-          : data.slider1_l;
-      let l2_slider =
-        data.slider2.position < data.slider2_l.position
-          ? data.slider2
-          : data.slider2_l;
-      let r2_slider =
-        l2_slider === data.slider2_l ? data.slider2 : data.slider2_l;
-
-      if (l1_slider === data.current_slider) {
-        l2_slider.SetPosition(r2_slider.position - sliders_width.value, true);
-      } else {
-        r2_slider.SetPosition(l2_slider.position + sliders_width.value, true);
-      }
-    } else {
-      let l1_slider =
-        data.slider2.position < data.slider2_l.position
-          ? data.slider2
-          : data.slider2_l;
-      let l2_slider =
-        data.slider1.position < data.slider1_l.position
-          ? data.slider1
-          : data.slider1_l;
-      let r2_slider =
-        l2_slider === data.slider1_l ? data.slider1 : data.slider1_l;
-
-      let width = Math.abs(data.slider2.position - data.slider2_l.position);
-      if (l1_slider === data.current_slider) {
-        l2_slider.SetPosition(r2_slider.position - width, true);
-      } else {
-        r2_slider.SetPosition(l2_slider.position + width, true);
-      }
     }
   }
 }
@@ -605,14 +598,21 @@ function MoveTimeScale(e) {
 
 // Move selection
 let current_sliders = [];
-let previous_sliders_position = [];
+let previous_sliders_clientX = 0;
+let previous_sliders_positions = [];
 
 function PressSliders(e, slider, sliderl) {
-  current_sliders = [slider, sliderl];
-  previous_sliders_position = [
-    slider.position - e.clientX,
-    sliderl.position - e.clientX,
+  if (slider.position < sliderl.position) {
+    current_sliders = [slider, sliderl];
+  } else {
+    current_sliders = [sliderl, slider];
+  }
+  previous_sliders_positions = [
+    current_sliders[0].position,
+    current_sliders[1].position,
   ];
+  previous_sliders_clientX = e.clientX;
+
   current_sliders[0].pressed = true;
   current_sliders[1].pressed = true;
   window.addEventListener("mousemove", MoveSliders);
@@ -632,15 +632,36 @@ let sliders_move_timeout = null;
 
 function MoveSliders(e) {
   if (sliders_move_timeout == null) {
+    let move_offset = e.clientX - previous_sliders_clientX;
+    let width = current_sliders[1].position - current_sliders[0].position;
     sliders_move_timeout = setTimeout(() => {
-      current_sliders[0].SetPosition(
-        previous_sliders_position[0] + e.clientX,
-        true
-      );
-      current_sliders[1].SetPosition(
-        previous_sliders_position[1] + e.clientX,
-        true
-      );
+      // positive is moving right
+      if (move_offset > 0) {
+        let to_position = previous_sliders_positions[1] + move_offset;
+        if (to_position < GetRightLimit()) {
+          current_sliders[1].position = to_position;
+        } else {
+          current_sliders[1].position = GetRightLimit();
+        }
+
+        current_sliders[0].SetPosition(
+          current_sliders[1].position - width,
+          true
+        );
+      } else {
+        let to_position = previous_sliders_positions[0] + move_offset;
+        if (to_position > 0) {
+          current_sliders[0].position = to_position;
+        } else {
+          current_sliders[0].position = 0;
+        }
+
+        current_sliders[1].SetPosition(
+          current_sliders[0].position + width,
+          true
+        );
+      }
+
       sliders_move_timeout = null;
     }, 20);
   }
@@ -660,7 +681,8 @@ function AddSubtractor() {
 
     if (data.multicursor.select_mode === true) {
       data.slider2_l.SetPosition(
-        TIME_SCALE_DOM.scrollLeft + sliders_width.value,
+        TIME_SCALE_DOM.scrollLeft +
+          slider_stuff.GetWidth(data.slider1, data.slider1_l),
         true
       );
     }
@@ -729,12 +751,6 @@ watch(
   () => TimeLineMonth.value,
   (new_val) => {
     emits("changeCurrent", { year: TimeLineYear.value, month: new_val });
-  }
-);
-watch(
-  () => data.slider2.position - data.slider2_l.position,
-  () => {
-    SlidersWidthHandler();
   }
 );
 </script>
