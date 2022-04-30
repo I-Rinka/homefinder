@@ -165,6 +165,7 @@
                 slider_stuff.GetLeft(data.slider2, data.slider2_l) + 6
               }px`,
             }"
+            @pointerdown="(e) => PressSliders(e, data.slider2, data.slider2_l)"
           ></div>
           <slider-cursor
             v-if="
@@ -226,14 +227,13 @@ import { MapMonth } from "./TimeLine/date";
 
 /*
     todo:
-        1. drag time line
-        2. multiple cursor support
+      1. sync selector length
+      2. limit slider position 
 */
-
-let p_scroll = 0;
 
 const emits = defineEmits(["changeCurrent"]);
 
+let slider_pointer_left_offset = 15;
 class Slider {
   constructor(color, pressed_color) {
     this.pressed = ref(false);
@@ -241,10 +241,9 @@ class Slider {
     this.position = ref(0);
     this.SetPosition = (clientX, is_relative) => {
       let pos =
-        clientX -
-        slider_pointer_left_offset +
+        clientX + 
         (!is_relative
-          ? document.getElementsByClassName("time-scale").item(0).scrollLeft
+          ? document.getElementsByClassName("time-scale").item(0).scrollLeft - slider_pointer_left_offset
           : 0);
       // pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
       // pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
@@ -307,7 +306,6 @@ const data = reactive({
 });
 data.current_slider = data.slider1;
 
-let slider_pointer_left_offset = 15;
 // Add Time Series before mounted
 onBeforeMount(() => {
   for (let i = 2012; i <= 2020; i++) {
@@ -320,11 +318,13 @@ onBeforeMount(() => {
 });
 
 // some default configuration
+let TIME_SCALE_DOM = null;
 onMounted(() => {
+  TIME_SCALE_DOM = document.getElementsByClassName("time-scale").item(0);
+
   // modify slider right limit
   data.runway_limit[1] =
-    document.getElementsByClassName("time-scale")[0].clientWidth -
-    slider_pointer_left_offset;
+    TIME_SCALE_DOM.clientWidth - slider_pointer_left_offset;
 
   tooltip_position.value = document
     .getElementsByClassName("button-frame")[0]
@@ -332,8 +332,7 @@ onMounted(() => {
 
   window.addEventListener("resize", function (e) {
     data.runway_limit[1] =
-      document.getElementsByClassName("time-scale")[0].clientWidth -
-      slider_pointer_left_offset;
+      TIME_SCALE_DOM.clientWidth - slider_pointer_left_offset;
 
     tooltip_position.value = document
       .getElementsByClassName("button-frame")[0]
@@ -344,10 +343,8 @@ onMounted(() => {
   data.current_slider.SetPosition(1000);
 
   // scroll timeline to right most
-  document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
-  p_scroll = document.getElementsByClassName("time-scale").item(0).scrollLeft;
+  TIME_SCALE_DOM.scrollTo(1000000, 0);
 });
-let time_scale_dom=null;
 
 let slider_move_timeout = null;
 function MoveSlider(e) {
@@ -379,10 +376,7 @@ function MoveSlider(e) {
         tooltip_position.value = DOMRect.fromRect({
           width: 0,
           height: 0,
-          x:
-            data.current_slider.position -
-            document.getElementsByClassName("time-scale").item(0).scrollLeft +
-            15,
+          x: data.current_slider.position - TIME_SCALE_DOM.scrollLeft + 15,
           y: tooltip_position.value.y,
         });
       }, 10);
@@ -420,9 +414,7 @@ function ReleaseCursor() {
 let previous_clientX = 0;
 
 function PressTimeScale(e) {
-  previous_clientX =
-    document.getElementsByClassName("time-scale").item(0).scrollLeft +
-    e.clientX;
+  previous_clientX = TIME_SCALE_DOM.scrollLeft + e.clientX;
   window.addEventListener("mousemove", MoveTimeScale);
   window.addEventListener("mouseup", ReleaseTimeScale);
   data.timescale_tooltip_visibility = false;
@@ -439,9 +431,7 @@ let timescale_move_timeout = null;
 function MoveTimeScale(e) {
   if (timescale_move_timeout == null) {
     timescale_move_timeout = setTimeout(() => {
-      document
-        .getElementsByClassName("time-scale")[0]
-        .scrollTo(previous_clientX - e.clientX, 0);
+      TIME_SCALE_DOM.scrollTo(previous_clientX - e.clientX, 0);
       timescale_move_timeout = null;
     }, 10);
   }
@@ -694,7 +684,7 @@ watch(
 
 .timeline-label {
   position: absolute;
-  top: 8%;
+  top: 15%;
   color: gray;
   font-weight: bolder;
   font-size: 1.5vh;
