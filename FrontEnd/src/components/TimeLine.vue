@@ -1,12 +1,13 @@
 <template>
   <div class="timeline">
     <div class="timeline-runway">
-      <div
-        class="time-scale"
-        @pointerdown="PressTimeScale"
-        @dblclick="TranslateSlider"
-      >
-        <div class="year" v-for="year in data.time_series" :key="year.year">
+      <div class="time-scale" @dblclick="TranslateSlider">
+        <div
+          class="year"
+          @pointerdown="PressTimeScale"
+          v-for="year in data.time_series"
+          :key="year.year"
+        >
           <template
             v-for="(month, index) in year.month"
             :key="month.toString() + year.toString()"
@@ -27,7 +28,7 @@
               effect="customized"
               :hide-after="0"
               popper-class="popper"
-              :disabled="data.curor_tooltip_visibility"
+              :disabled="!data.timescale_tooltip_visibility"
             >
               <div v-if="index != 0" class="month">
                 <div class="month-scale"></div>
@@ -94,6 +95,7 @@
                 slider_stuff.GetLeft(data.slider1, data.slider1_l) + 6
               }px`,
             }"
+            @pointerdown="(e) => PressSliders(e, data.slider1, data.slider1_l)"
           ></div>
           <slider-cursor
             v-if="data.multicursor.select_mode"
@@ -237,11 +239,13 @@ class Slider {
     this.pressed = ref(false);
     this.color = computed(() => (!this.pressed.value ? color : pressed_color));
     this.position = ref(0);
-    this.SetPosition = (clientX) => {
+    this.SetPosition = (clientX, is_relative) => {
       let pos =
         clientX -
         slider_pointer_left_offset +
-        document.getElementsByClassName("time-scale").item(0).scrollLeft;
+        (!is_relative
+          ? document.getElementsByClassName("time-scale").item(0).scrollLeft
+          : 0);
       // pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
       // pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
       this.position.value = pos;
@@ -281,6 +285,7 @@ const data = reactive({
   runway_limit: [0, 1000],
   previous_year_month: null,
   curor_tooltip_visibility: false,
+  timescale_tooltip_visibility: true,
   tooltip_ref: {
     getBoundingClientRect() {
       return tooltip_position.value;
@@ -342,6 +347,7 @@ onMounted(() => {
   document.getElementsByClassName("time-scale")[0].scrollTo(1000000, 0);
   p_scroll = document.getElementsByClassName("time-scale").item(0).scrollLeft;
 });
+let time_scale_dom=null;
 
 let slider_move_timeout = null;
 function MoveSlider(e) {
@@ -399,35 +405,37 @@ function PressCursor() {
   data.current_slider.pressed = true;
   window.addEventListener("mousemove", MoveSlider);
   window.addEventListener("mouseup", ReleaseCursor);
+  data.timescale_tooltip_visibility = false;
   data.curor_tooltip_visibility = true;
 }
 function ReleaseCursor() {
   data.current_slider.pressed = false;
   window.removeEventListener("mousemove", MoveSlider);
   window.removeEventListener("mouseup", ReleaseCursor);
+  data.timescale_tooltip_visibility = true;
   data.curor_tooltip_visibility = false;
 }
 
-let current_sliders = [];
-function PressSlider(slider, sliderl) {
-  current_sliders = [slider, sliderl];
-}
-
+// Drag to move timescale
 let previous_clientX = 0;
+
 function PressTimeScale(e) {
   previous_clientX =
     document.getElementsByClassName("time-scale").item(0).scrollLeft +
     e.clientX;
   window.addEventListener("mousemove", MoveTimeScale);
   window.addEventListener("mouseup", ReleaseTimeScale);
+  data.timescale_tooltip_visibility = false;
 }
 
-function ReleaseTimeScale(e) {
+function ReleaseTimeScale() {
   window.removeEventListener("mousemove", MoveTimeScale);
   window.removeEventListener("mouseup", ReleaseTimeScale);
+  data.timescale_tooltip_visibility = true;
 }
 
 let timescale_move_timeout = null;
+
 function MoveTimeScale(e) {
   if (timescale_move_timeout == null) {
     timescale_move_timeout = setTimeout(() => {
@@ -439,11 +447,56 @@ function MoveTimeScale(e) {
   }
 }
 
+// Move selection
+let current_sliders = [];
+let previous_sliders_position = [];
+
+function PressSliders(e, slider, sliderl) {
+  current_sliders = [slider, sliderl];
+  previous_sliders_position = [
+    slider.position - e.clientX,
+    sliderl.position - e.clientX,
+  ];
+  current_sliders[0].pressed = true;
+  current_sliders[1].pressed = true;
+  window.addEventListener("mousemove", MoveSliders);
+  window.addEventListener("mouseup", ReleaseSliders);
+  data.timescale_tooltip_visibility = false;
+}
+
+function ReleaseSliders() {
+  current_sliders[0].pressed = false;
+  current_sliders[1].pressed = false;
+  window.removeEventListener("mousemove", MoveSliders);
+  window.removeEventListener("mouseup", ReleaseSliders);
+  data.timescale_tooltip_visibility = true;
+}
+
+let sliders_move_timeout = null;
+
+function MoveSliders(e) {
+  if (sliders_move_timeout == null) {
+    sliders_move_timeout = setTimeout(() => {
+      current_sliders[0].SetPosition(
+        previous_sliders_position[0] + e.clientX,
+        true
+      );
+      current_sliders[1].SetPosition(
+        previous_sliders_position[1] + e.clientX,
+        true
+      );
+      sliders_move_timeout = null;
+    }, 20);
+  }
+}
+
+// Press shift key to enter select mode
 function PressShiftKey(e) {
   if (e.key === "Shift") {
     data.multicursor.pressing_shiftkey = true;
   }
 }
+
 function ReleaseShiftKey(e) {
   if (e.key === "Shift") {
     data.multicursor.pressing_shiftkey = false;
@@ -533,7 +586,7 @@ watch(
   height: 100%;
   position: relative;
   width: 23px;
-  cursor: pointer;
+  // cursor: pointer;
 
   &:hover {
     .month-scale {
@@ -579,11 +632,14 @@ watch(
   height: 33px;
   top: 35px;
   overflow: hidden;
-
+  cursor: pointer;
   &:hover {
     .first-month-scale {
       transform: scale(1.2, 1.2) translateY(-8%);
     }
+  }
+  &:active {
+    cursor: -webkit-grabbing;
   }
 }
 
@@ -596,7 +652,7 @@ watch(
   transform: scale(0.8, 0.8);
   font-size: 10px;
   left: 2px;
-  top: 2px;
+  top: 1px;
   user-select: none;
 }
 
