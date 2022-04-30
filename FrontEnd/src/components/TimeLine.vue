@@ -305,23 +305,38 @@ class Slider {
         // not move situation:
         // 1. move left while some left cursor reach left limit
         // 2. move right while some right cusor reach right limit
-        let vary = this.position.value - pos; // positive is moving left
-        if (this === toRaw(data.slider1) || this === toRaw(data.slider1_l)) {
-          let another =
-            this === toRaw(data.slider1) ? data.slider1_l : data.slider1;
+        let vary = pos - this.position.value; // positive is moving left
+        let l_1, r_1;
+        if (data.slider1.position < data.slider1_l.position) {
+          l_1 = data.slider1;
+          r_1 = data.slider1_l;
+        } else {
+          l_1 = data.slider1_l;
+          r_1 = data.slider1;
+        }
 
-          // become larger
-          if (
-            (vary > 0 && another.position > this.position.value) ||
-            (vary < 0 && another.position < this.position.value)
-          ) {
-            if (
-              data.slider2.position < r_limit &&
-              data.slider2_l.position < r_limit &&
-              data.slider2.position > 0 &&
-              data.slider2_l.position > 0
-            ) {
+        let l_2, r_2;
+        if (data.slider2.position < data.slider2_l.position) {
+          l_2 = data.slider2;
+          r_2 = data.slider2_l;
+        } else {
+          l_2 = data.slider2_l;
+          r_2 = data.slider2;
+        }
+        if (this === toRaw(data.slider1) || this === toRaw(data.slider1_l)) {
+          // right
+          if (vary < 0 && this === toRaw(r_1)) {
+            console.log("right larger", vary, toRaw(r_1));
+            if (r_2.position < r_limit) {
               this.position.value = pos;
+            } else {
+            }
+            // left
+          } else if (vary < 0 && this === toRaw(l_1)) {
+            console.log("left larger", vary, toRaw(l_1));
+            if (l_2.position > 0) {
+              this.position.value = pos;
+            } else {
             }
           } else {
             this.position.value = pos;
@@ -330,25 +345,19 @@ class Slider {
           this === toRaw(data.slider2) ||
           this === toRaw(data.slider2_l)
         ) {
-          let another =
-            this === toRaw(data.slider2) ? data.slider2_l : data.slider2;
-
-          if (this === toRaw(data.slider2)) {
-            console.log(vary, another.position, this.position.value);
-          }
-
-          if (
-            (vary > 0 && another.position > this.position.value) ||
-            (vary < 0 && another.position < this.position.value)
-          ) {
-            console.log("larger");
-            if (
-              data.slider1.position < r_limit &&
-              data.slider1_l.position < r_limit &&
-              data.slider1.position > 0 &&
-              data.slider1_l.position > 0
-            ) {
+          // right
+          if (vary > 0 && this === toRaw(r_2)) {
+            console.log("right larger", vary, toRaw(r_2));
+            if (r_1.position < r_limit) {
               this.position.value = pos;
+            } else {
+            }
+            // left
+          } else if (vary < 0 && this === toRaw(l_2)) {
+            console.log("left larger", vary, toRaw(l_2));
+            if (l_1.position > 0) {
+              this.position.value = pos;
+            } else {
             }
           } else {
             this.position.value = pos;
@@ -483,7 +492,6 @@ function MoveSlider(e) {
         slider_move_timeout = null;
 
         data.current_slider.SetPosition(e.clientX);
-
         SlidersWidthHandler();
 
         SyncSliderTooltip();
