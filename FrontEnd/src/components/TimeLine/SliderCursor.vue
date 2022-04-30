@@ -58,7 +58,8 @@ function Close() {
   top: -25%;
   height: 125%;
   width: 12px;
-  transition: 0.1s;
+  transition: 50ms;
+  transition-timing-function: linear;
 
   &:hover {
     filter: drop-shadow(0.5px 0.5px 3px rgba(0, 0, 0, 0.5));

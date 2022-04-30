@@ -73,7 +73,8 @@
             v-if="data.multicursor.select_mode"
             style="
               position: absolute;
-              transition-duration: 0.1s;
+              transition-duration: 71ms;
+              pointer-events: all;
               top: 0px;
               opacity: 0.2;
               cursor: -webkit-grabbing;
@@ -141,9 +142,10 @@
             v-if="data.multicursor.select_mode"
             style="
               position: absolute;
-              transition-duration: 0.1s;
+              transition-duration: 71ms;
               top: 0px;
               opacity: 0.2;
+              pointer-events: all;
               cursor: -webkit-grabbing;
             "
             :style="{
@@ -191,7 +193,7 @@
       :content="MapMonth(TimeLineMonth) + TimeLineYear"
       placement="top"
       effect="customized"
-      popper-class="popper"
+      popper-class="popper-slow"
       :visible="data.curor_tooltip_visibility"
       :virtual-ref="data.tooltip_ref"
       virtual-triggering
@@ -232,7 +234,10 @@ class Slider {
     this.color = computed(() => (!this.pressed.value ? color : pressed_color));
     this.position = ref(0);
     this.SetPosition = (clientX) => {
-      let pos = clientX - slider_pointer_left_offset;
+      let pos =
+        clientX -
+        slider_pointer_left_offset +
+        document.getElementsByClassName("time-scale").item(0).scrollLeft;
       // pos = pos > data.runway_limit[1] ? data.runway_limit[1] : pos;
       // pos = pos < data.runway_limit[0] ? data.runway_limit[0] : pos;
       this.position.value = pos;
@@ -368,7 +373,10 @@ function MoveSlider(e) {
         tooltip_position.value = DOMRect.fromRect({
           width: 0,
           height: 0,
-          x: e.clientX,
+          x:
+            data.current_slider.position -
+            document.getElementsByClassName("time-scale").item(0).scrollLeft +
+            15,
           y: tooltip_position.value.y,
         });
       }, 10);
@@ -579,6 +587,12 @@ watch(
 
 .popper {
   filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.3));
+  transition-duration: 0.1s;
+}
+
+.popper-slow {
+  filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.3));
+  transition-duration: 0.3s;
 }
 
 .el-popper.is-customized {
@@ -586,7 +600,6 @@ watch(
   padding: 6px 12px;
   pointer-events: none;
   background: linear-gradient(90deg, rgb(230, 230, 230), rgb(255, 255, 255));
-  transition-duration: 0.2s;
 
   span {
     user-select: none;
