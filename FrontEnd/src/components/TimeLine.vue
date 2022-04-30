@@ -399,10 +399,11 @@ function SyncSliders() {
       l_2 = data.slider2_l;
       r_2 = data.slider2;
     }
-    if (data.current_slider === r_2) {
-      r_1.SetPosition(l_1.position + slider_stuff.GetWidth(l_2, r_2), true);
-    } else if (data.current_slider === r_1) {
+
+    if (data.current_slider === r_1) {
       r_2.SetPosition(l_2.position + slider_stuff.GetWidth(l_1, r_1), true);
+    } else if (data.current_slider === r_2) {
+      r_1.SetPosition(l_1.position + slider_stuff.GetWidth(l_2, r_2), true);
     } else if (data.current_slider === l_1) {
       l_2.SetPosition(r_2.position - slider_stuff.GetWidth(l_1, r_1), true);
     } else if (data.current_slider === l_2) {
@@ -515,16 +516,9 @@ function MoveSlider(e) {
           data.multicursor.pressing_shiftkey &&
           !data.multicursor.select_mode
         ) {
+          data.slider1_l.position = data.slider1.position;
+          data.slider2_l.position = data.slider2.position;
           data.multicursor.select_mode = true;
-          data.current_slider.pressed = false;
-
-          if (data.current_slider === data.slider1) {
-            data.current_slider = data.slider1_l;
-          } else if (data.current_slider === data.slider2) {
-            data.current_slider = data.slider2_l;
-          }
-
-          data.current_slider.pressed = true;
         }
 
         slider_move_timeout = null;
@@ -677,14 +671,16 @@ function RemoveSubtractor() {
 function AddSubtractor() {
   if (!data.multicursor.subtractor_mode) {
     data.multicursor.subtractor_mode = true;
-    data.slider2.SetPosition(TIME_SCALE_DOM.scrollLeft, true);
 
     if (data.multicursor.select_mode === true) {
-      data.slider2_l.SetPosition(
+      data.slider2_l.SetPosition(TIME_SCALE_DOM.scrollLeft, true);
+      data.slider2.SetPosition(
         TIME_SCALE_DOM.scrollLeft +
           slider_stuff.GetWidth(data.slider1, data.slider1_l),
         true
       );
+    } else {
+      data.slider2.SetPosition(TIME_SCALE_DOM.scrollLeft, true);
     }
   }
 }
