@@ -249,7 +249,7 @@
 
     <!-- Tooltip when moving the slider cursor -->
     <el-tooltip
-      :content="MapMonth(TimeLineMonth) + TimeLineYear"
+      :content="MapMonth(TimeLineMonth()) + TimeLineYear()"
       placement="top"
       effect="customized"
       popper-class="popper-instant"
@@ -274,13 +274,13 @@ import {
 import SliderCursor from "./TimeLine/SliderCursor.vue";
 import { MapMonth } from "./TimeLine/date";
 
-// todo: event handler
-
 const emits = defineEmits([
-  "changeCurrentTime",
-  "changeBaselineTime",
-  "changeCurrentSection",
-  "changeBaselineSection",
+  "changeCurrentTime", // single cursor move
+  "changeSubtractor", // two cursor move
+  "changeSelection", // selection move
+  "changeSubtractorSelection", // 4 cursors move
+  "changeSubtractorMode",
+  "changeSelectMode",
 ]);
 
 const slider_pointer_left_offset = 15;
@@ -291,6 +291,7 @@ function GetRightLimit() {
     slider_pointer_left_offset
   );
 }
+
 class Slider {
   constructor(color, pressed_color) {
     this.pressed = ref(false);
@@ -379,6 +380,87 @@ class Slider {
         this.position.value = pos;
       }
     };
+    this.GetMonth = () => {
+      try {
+        let scale_length = this.position.value;
+        let year_width = document
+          .getElementsByClassName("year")
+          .item(0).clientWidth;
+        let year_index = Math.floor(scale_length / year_width);
+
+        let month_width = document
+          .getElementsByClassName("month")
+          .item(0).clientWidth;
+        let month_index = Math.floor((scale_length % year_width) / month_width);
+
+        return data.time_series[year_index].month[month_index];
+      } catch (error) {
+        return NaN;
+      }
+    };
+    this.GetYear = () => {
+      try {
+        let scale_length = this.position.value;
+        let year_width = document
+          .getElementsByClassName("year")
+          .item(0).clientWidth;
+        let year_index = Math.floor(scale_length / year_width);
+
+        return data.time_series[year_index].year;
+      } catch (error) {
+        return NaN;
+      }
+    };
+  }
+}
+
+function HandlerTimeEvents() {
+  let l_1, r_1;
+  if (data.slider1.position < data.slider1_l.position) {
+    l_1 = data.slider1;
+    r_1 = data.slider1_l;
+  } else {
+    l_1 = data.slider1_l;
+    r_1 = data.slider1;
+  }
+
+  let l_2, r_2;
+  if (data.slider2.position < data.slider2_l.position) {
+    l_2 = data.slider2;
+    r_2 = data.slider2_l;
+  } else {
+    l_2 = data.slider2_l;
+    r_2 = data.slider2;
+  }
+  if (data.multicursor.select_mode && data.multicursor.subtractor_mode) {
+    emits("changeSubtractorSelection", [
+      [
+        { year: l_1.GetYear(), month: l_1.GetMonth() },
+        { year: r_1.GetYear(), month: r_1.GetMonth() },
+      ],
+      [
+        { year: l_2.GetYear(), month: l_2.GetMonth() },
+        { year: r_2.GetYear(), month: r_2.GetMonth() },
+      ],
+    ]);
+  } else if (data.multicursor.select_mode) {
+    emits("changeSelection", [
+      { year: l_1.GetYear(), month: l_1.GetMonth() },
+      { year: r_1.GetYear(), month: r_1.GetMonth() },
+    ]);
+  } else if (data.multicursor.subtractor_mode) {
+    emits("changeSubtractor", [
+      { year: data.slider1.GetYear(), month: data.slider1.GetMonth() },
+      { year: data.slider2.GetYear(), month: data.slider2.GetMonth() },
+    ]);
+  } else if (
+    !data.multicursor.select_mode &&
+    !data.multicursor.subtractor_mode
+  ) {
+    emits("changeCurrentTime", {
+      year: data.slider1.GetYear(),
+      month: data.slider1.GetMonth(),
+    });
   }
 }
 
@@ -471,6 +553,39 @@ const data = reactive({
 });
 data.current_slider = data.slider1;
 
+function TimeLineYear() {
+  return data.current_slider.GetYear();
+}
+
+function TimeLineMonth() {
+  return data.current_slider.GetMonth();
+}
+
+watch(
+  () =>
+    data.slider1.GetMonth() +
+    data.slider1_l.GetMonth() +
+    data.slider2.GetMonth() +
+    data.slider2_l.GetMonth(),
+  () => {
+    HandlerTimeEvents();
+  }
+);
+
+watch(
+  () => data.multicursor.select_mode,
+  (new_val) => {
+    emits("changeSelectMode", new_val);
+  }
+);
+
+watch(
+  () => data.multicursor.subtractor_mode,
+  (new_val) => {
+    emits("changeSubtractorMode", new_val);
+  }
+);
+
 // Add Time Series before mounted
 onBeforeMount(() => {
   for (let i = 2012; i <= 2020; i++) {
@@ -532,6 +647,7 @@ function MoveSlider(e) {
 
         SyncSliderTooltip();
         SyncSliders();
+        // HandlerTimeEvents();
       }, 20);
     }
   }
@@ -662,6 +778,8 @@ function MoveSliders(e) {
       }
 
       sliders_move_timeout = null;
+
+      // HandlerTimeEvents();
     }, 20);
   }
 }
@@ -713,50 +831,6 @@ function UnRegShiftKey() {
   window.removeEventListener("keyup", ReleaseShiftKey);
   data.multicursor.pressing_shiftkey = false;
 }
-
-const TimeLineMonth = computed(() => {
-  try {
-    let scale_length = data.scroll_position + slider.value;
-    let year_width = document
-      .getElementsByClassName("year")
-      .item(0).clientWidth;
-    let year_index = Math.floor(scale_length / year_width);
-
-    let month_width = document
-      .getElementsByClassName("month")
-      .item(0).clientWidth;
-    let month_index = Math.floor((scale_length % year_width) / month_width);
-
-    return data.time_series[year_index].month[month_index];
-  } catch (error) {
-    return NaN;
-  }
-});
-
-const TimeLineYear = computed(() => {
-  try {
-    let scale_length = data.scroll_position + slider.value;
-    let year_width = document
-      .getElementsByClassName("year")
-      .item(0).clientWidth;
-    let year_index = Math.floor(scale_length / year_width);
-
-    return data.time_series[year_index].year;
-  } catch (error) {
-    return NaN;
-  }
-});
-
-// emit change events to parent
-watch(
-  () => TimeLineMonth.value,
-  (new_val) => {
-    emits("changeTimePoint", "changeBaselineTime", {
-      year: TimeLineYear.value,
-      month: new_val,
-    });
-  }
-);
 </script>
 
 <style lang="less">
