@@ -1,7 +1,7 @@
 <template>
   <div id="weight-view">
     <div class="weight-view-frame">
-      <line-up></line-up>
+      <line-up :ranking_records="data.newest_records"></line-up>
       <weight-lifter></weight-lifter>
     </div>
   </div>

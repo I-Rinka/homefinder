@@ -28,4 +28,22 @@ import RankView from "./components/RankView.vue";
   --el-border-color: grey;
   --el-border-color-light: grey;
 }
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: rgba(150, 150, 150, 0.4);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.7);
+}
+
+::-webkit-scrollbar-corner {
+  display: none;
+}
 </style>
