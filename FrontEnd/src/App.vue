@@ -3,14 +3,14 @@
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 // import MapView from "./components/MapView.vue";
 import MapView from "./components/MapView.vue";
-import WeightView from "./components/WeightView.vue";
+import RankView from "./components/RankView.vue";
 </script>
 
 <template>
   <!-- <map-view></map-view> -->
   <div>
     <map-view></map-view>
-    <weight-view></weight-view>
+    <rank-view></rank-view>
   </div>
 </template>
 

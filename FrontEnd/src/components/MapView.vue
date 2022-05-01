@@ -44,38 +44,8 @@
       ></vis-adaptor>
     </div>
   </div>
-  <!-- :style="{ visibility: data.selling_view ? 'hidden' : 'visible' }" -->
   <time-line @changeCurrent="ChangeCurrentTime"> </time-line>
-  <!-- <div v-show="data.selling_view" class="user-marks-order">
-    <div class="user-mark-label">Interested Locations</div>
-    <div class="user-mark-guidance" v-if="data.user_marks.length == 0">
-      Double click the Map to add interested points
-    </div>
-    <div
-      class="user-mark-color-strip"
-      v-for="(mark, index) in data.user_marks_strip"
-      :key="mark"
-      :style="{ backgroundColor: mark.color }"
-    >
-      <div
-        style="
-          border-radius: 10px;
-          height: 15px;
-          width: 15px;
-          font-size: 10px;
-          font-weight: bold;
-          color: white;
-          border: solid white 2px;
-          transform: scale(0.5, 0.5);
-          position: relative;
-          top: -2px;
-          left: 2px;
-        "
-      >
-        {{ index + 1 }}
-      </div>
-    </div>
-  </div> -->
+
 </template>
 
 <script setup>
@@ -85,7 +55,6 @@ import { LocationFilled } from "@element-plus/icons-vue";
 import * as d3 from "d3";
 
 import {
-  GetCurrentRecord,
   GetBlocks,
   GetRegions,
   GetBlocksAvgPrice,

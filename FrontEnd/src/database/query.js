@@ -1,18 +1,6 @@
 import axios from "axios";
 let url = "http://localhost:27727/api/"
 
-export async function GetCurrentRecord() {
-    let res = await axios.get(url + "currentrecord")
-    let resObj = res.data
-    console.log(resObj);
-    let ans = {};
-    for (let i = 0; i < resObj.length; i++) {
-        const element = resObj[i];
-        ans[element["block"]] = { year: element.year, month: element.month };
-    }
-    return ans;
-}
-
 export async function GetBlocksAvgPrice(blocks, controller) {
     let query_url = url + "avgprice/";
     let res = await axios.post(query_url, blocks, {
@@ -34,6 +22,7 @@ export async function GetBlocksAvgPriceYearMonth(blocks, year, month, controller
     let resObj = res.data;
     return resObj[0];
 }
+
 export async function GetBlocksAvgPriceAllTime(blocks, controller) {
     let query_url = url + "avgprice/";
     try {
@@ -49,6 +38,11 @@ export async function GetBlocksAvgPriceAllTime(blocks, controller) {
     } catch (error) {
         throw error;
     }
+}
+
+export async function GetNewestRecords() {
+    let res = await axios.get("http://localhost:3000/newest_records.json")
+    return res.data;
 }
 
 export async function GetBlocks() {
