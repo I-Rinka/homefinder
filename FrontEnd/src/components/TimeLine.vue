@@ -572,16 +572,24 @@ watch(
   }
 );
 
+// only previous is not select mode the multi cursor would emit event
+let previeous_select_mode = false;
+// change select: after select OK / select mode === false
 watch(
   () => data.multicursor.select_mode,
   (new_val) => {
-    emits("changeSelectMode", new_val);
+    if (new_val === false) {
+      HandlerTimeEvents();
+      emits("changeSelectMode", new_val);
+      previeous_select_mode = false;
+    }
   }
 );
 
 watch(
   () => data.multicursor.subtractor_mode,
   (new_val) => {
+    HandlerTimeEvents();
     emits("changeSubtractorMode", new_val);
   }
 );
@@ -676,12 +684,19 @@ function PressCursor() {
   data.timescale_tooltip_visibility = false;
   data.curor_tooltip_visibility = true;
 }
+
 function ReleaseCursor() {
   data.current_slider.pressed = false;
   window.removeEventListener("mousemove", MoveSlider);
   window.removeEventListener("mouseup", ReleaseCursor);
   data.timescale_tooltip_visibility = true;
   data.curor_tooltip_visibility = false;
+
+  // only after select a range and previous mode is not select will it emit
+  if (data.multicursor.select_mode && !previeous_select_mode) {
+    emits("changeSelectMode", true);
+    previeous_select_mode = true;
+  }
 }
 
 // Drag to move timescale

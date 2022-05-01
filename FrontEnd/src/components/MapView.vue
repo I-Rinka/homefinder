@@ -38,14 +38,20 @@
         :map="map"
         :feature="feature"
         :markArray="data.user_marks"
-        :basePrice="data.base_price"
         :price_mode="data.price_view"
         :current_time="data.current_time"
       ></vis-adaptor>
     </div>
   </div>
-  <time-line @changeCurrent="ChangeCurrentTime"> </time-line>
-
+  <time-line
+    @changeCurrentTime="ChangeCurrentTime"
+    @changeSubtractor="ChangeSubtractor"
+    @changeSelection="ChangeSelection"
+    @changeSubtractorSelection="ChangeSubtractorSelection"
+    @changeSubtractorMode="ChangeSubtracorMode"
+    @changeSelectMode="ChangeSelectMode"
+  >
+  </time-line>
 </template>
 
 <script setup>
@@ -114,8 +120,25 @@ const data = reactive({
   features: [],
   user_marks: [],
   user_marks_strip: [],
-  base_price: 0,
+
+  use_baseline: false,
+
   current_time: { year: 0, month: 0 },
+  baseline_time: { year: 0, month: 0 },
+  selection_time: [
+    { year: 0, month: 0 },
+    { year: 0, month: 0 },
+  ],
+  current_baseline_selection: [
+    [
+      { year: 0, month: 0 },
+      { year: 0, month: 0 },
+    ],
+    [
+      { year: 0, month: 0 },
+      { year: 0, month: 0 },
+    ],
+  ],
 });
 
 const view_choice = computed({
@@ -138,6 +161,31 @@ function GetBasePrice() {
 
 function ChangeCurrentTime(t) {
   data.current_time = t;
+  console.log("change current time");
+}
+
+function ChangeSelection(t) {
+  data.current_baseline_selection = t;
+  console.log("change selection", t);
+}
+
+function ChangeSubtractor(t) {
+  data.current_time = t[0];
+  data.baseline_time = t[1];
+  console.log("change subtractor", t);
+}
+
+function ChangeSubtractorSelection(t) {
+  data.current_baseline_selection = t;
+  console.log("change subtractor selection", t);
+}
+
+function ChangeSubtracorMode(b) {
+  data.use_baseline = true;
+}
+
+function ChangeSelectMode(b) {
+  data.price_view = !b;
 }
 
 // -------------------------- Useful functions ---------------------------
