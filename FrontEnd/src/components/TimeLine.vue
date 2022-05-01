@@ -274,9 +274,14 @@ import {
 import SliderCursor from "./TimeLine/SliderCursor.vue";
 import { MapMonth } from "./TimeLine/date";
 
-// todo: initial position
+// todo: event handler
 
-const emits = defineEmits(["changeCurrent"]);
+const emits = defineEmits([
+  "changeCurrentTime",
+  "changeBaselineTime",
+  "changeCurrentSection",
+  "changeBaselineSection",
+]);
 
 const slider_pointer_left_offset = 15;
 function GetRightLimit() {
@@ -746,7 +751,10 @@ const TimeLineYear = computed(() => {
 watch(
   () => TimeLineMonth.value,
   (new_val) => {
-    emits("changeCurrent", { year: TimeLineYear.value, month: new_val });
+    emits("changeTimePoint", "changeBaselineTime", {
+      year: TimeLineYear.value,
+      month: new_val,
+    });
   }
 );
 </script>
