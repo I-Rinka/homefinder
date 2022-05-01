@@ -23,6 +23,7 @@
           transform: `rotate(${mark.orientation}deg)`,
         }"
       />
+    <!-- cicle in the middle -->
       <circle
         class="sun-chart-price"
         :r="price_r"
