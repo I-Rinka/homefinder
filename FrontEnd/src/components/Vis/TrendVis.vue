@@ -2,8 +2,9 @@
   <div class="trend-vis">
     <svg
       ref="visMountPoint"
-      width="600"
-      height="600"
+      width="200"
+      height="300"
+      viewBox="0 0 200 250"
       xmlns="http://www.w3.org/2000/svg"
     ></svg>
   </div>
@@ -52,18 +53,19 @@ function PrintRecords() {
 }
 
 function Update() {
+  const width = 200;
   let x = d3
     .scaleTime()
-    .range([20, 200])
+    .range([20, width - 20])
     .domain([
-      d3.min(records.value, (d) => new Date(d.time)),
-      d3.max(records.value, (d) => new Date(d.time)),
+      d3.min(records.value, (d) => d.time),
+      d3.max(records.value, (d) => d.time),
     ]);
 
-  const height = 200;
+  const height = 150;
   let y = d3
     .scaleLinear()
-    .range([10, 200])
+    .range([10, height])
     .domain([0, d3.max(records.value, (d) => d.price)]);
 
   let svg = d3.select(visMountPoint.value);
@@ -101,4 +103,7 @@ onUpdated(() => {
 </script>
 
 <style>
+.trend-vis {
+  position: relative;
+}
 </style>

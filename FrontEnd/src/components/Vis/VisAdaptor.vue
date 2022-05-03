@@ -7,7 +7,7 @@
     >
       <sun-chart
         class="adaptor-sun-chart"
-        v-show="props.price_mode"
+        v-if="props.price_mode"
         :myCoordinates="props.feature.getGeometry().getCoordinates()"
         :marks="props.markArray"
         :color="sun_chart_color"
@@ -15,7 +15,7 @@
       ></sun-chart>
       <trend-vis
         class="adaptor-trend-vis"
-        v-if="!props.price_mode"
+        v-else-if="!props.price_mode"
         :history_records="react_data.history_records"
         :selection_time="props.selection_time"
       ></trend-vis>
@@ -341,6 +341,6 @@ let sun_chart_color = computed(() => {
   position: relative;
 }
 .adaptor-trend-vis {
-  position: absolute;
+  position: relative;
 }
 </style>
