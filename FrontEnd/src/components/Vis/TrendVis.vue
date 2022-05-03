@@ -80,7 +80,7 @@ function Update() {
   let y = d3
     .scaleLinear()
     .range([0, height])
-    .domain([d3.min(data, (d) => d.price)/2, d3.max(data, (d) => d.price)]);
+    .domain([d3.min(data, (d) => d.price)*2/3, d3.max(data, (d) => d.price)]);
 
   let svg = d3.select(visMountPoint.value);
 
@@ -97,7 +97,7 @@ function Update() {
   bar
     .enter()
     .append("rect")
-    .style("fill", "steelblue")
+    .style("fill", "rgb(184, 48, 31)")
     .attr("width", (200 - 20) / data.length)
     .attr("transform", (d) => "translate(" + x(d.time) + "," + height + ")")
     .transition()
