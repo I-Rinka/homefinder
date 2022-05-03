@@ -15,7 +15,7 @@
       ></sun-chart>
       <trend-vis
         class="adaptor-trend-vis"
-        v-else-if="!props.price_mode"
+        v-show="!props.price_mode"
         :history_records="react_data.history_records"
         :selection_time="props.selection_time"
       ></trend-vis>
