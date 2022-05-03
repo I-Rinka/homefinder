@@ -33,7 +33,13 @@ const props = defineProps({
 watch(
     () => props.selection_time,
     () => {
-        console.log("change");
+        Update();
+    }
+);
+
+watch(
+    () => props.history_records,
+    () => {
         Update();
     }
 );
