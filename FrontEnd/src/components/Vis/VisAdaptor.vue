@@ -1,14 +1,23 @@
 <template>
   <div>
     <!-- 向子传递必须要proxy -->
-    <div :id="props.feature.getGeometry().getCoordinates().toString()">
+    <div
+      class="adaptor"
+      :id="props.feature.getGeometry().getCoordinates().toString()"
+    >
       <sun-chart
+        class="adaptor-sun-chart"
         v-show="props.price_mode"
         :myCoordinates="props.feature.getGeometry().getCoordinates()"
         :marks="props.markArray"
         :color="sun_chart_color"
         :text="computed_price"
       ></sun-chart>
+      <trend-vis
+        class="adaptor-trend-vis"
+        v-show="!props.price_mode"
+        :history_records="react_data.history_records"
+      ></trend-vis>
     </div>
   </div>
 </template>
@@ -25,6 +34,7 @@ import {
   watch,
 } from "@vue/runtime-core";
 import SunChart from "./SunChart.vue";
+import TrendVis from "./TrendVis.vue";
 import Overlay from "ol/Overlay";
 import {
   GetBlocksAvgPrice,
@@ -60,6 +70,10 @@ const unit_price = ref(-1);
 const data = {
   history_cache: {},
   isCached: false,
+};
+
+const react_data = {
+  history_records: [],
 };
 
 const ol_data = {
@@ -124,7 +138,22 @@ onMounted(() => {
     );
     GetTimeAvgPrice(props.current_time.year, props.current_time.month).then(
       () => {
-        CachePrice();
+        CachePrice().then(() => {
+          // send trend view price
+          let history_records = [];
+          for (const key in data.history_cache) {
+            if (Object.hasOwnProperty.call(data.history_cache, key)) {
+              const element = data.history_cache[key];
+              let t = key.split(",");
+              history_records.push({
+                time: Date.UTC(t[0], t[1]),
+                price: element,
+              });
+            }
+          }
+          history_records.sort((a, b) => a.time - b.time);
+          react_data.history_records = history_records;
+        });
       }
     );
   }
@@ -199,58 +228,56 @@ async function GetTimeAvgPrice(year, month) {
 }
 
 async function CachePrice() {
-  GetBlocksAvgPriceAllTime(
-    ol_data.contained_blocks.map((record) => record.block),
-    request_controller
-  )
-    .then((res) => {
-      data.isCached = true;
-      for (let i = 0; i < res.length; i++) {
-        const element = res[i];
-        let year = element.year;
-        let month = element.month;
-        let token = year + "," + month;
+  try {
+    let res = await GetBlocksAvgPriceAllTime(
+      ol_data.contained_blocks.map((record) => record.block),
+      request_controller
+    );
+    data.isCached = true;
+    for (let i = 0; i < res.length; i++) {
+      const element = res[i];
+      let year = element.year;
+      let month = element.month;
+      let token = year + "," + month;
 
-        if (year !== 2020 && month != 12) {
-          data.history_cache[token] = element.unit_price;
+      if (year !== 2020 && month != 12) {
+        data.history_cache[token] = element.unit_price;
+      }
+    }
+    let patch_cache = function () {
+      let i = -1;
+      let n_year, n_month;
+      let n_price = data.history_cache["2020,12"];
+      do {
+        [n_year, n_month] = CaculateTimeOffset(2020, 12, i);
+        i--;
+        let token = n_year + "," + n_month;
+        if (data.history_cache[token] && data.history_cache[token] != -1) {
+          n_price = data.history_cache[token];
+        } else {
+          data.history_cache[token] = n_price;
         }
-      }
-      let patch_cache = function () {
-        let i = -1;
-        let n_year, n_month;
-        let n_price = data.history_cache["2020,12"];
-        do {
-          [n_year, n_month] = CaculateTimeOffset(2020, 12, i);
-          i--;
-          let token = n_year + "," + n_month;
-          if (data.history_cache[token] && data.history_cache[token] != -1) {
-            n_price = data.history_cache[token];
-          } else {
-            data.history_cache[token] = n_price;
-          }
 
-          if (
-            props.current_time.year === n_year &&
-            props.current_time.month === n_month
-          ) {
-            unit_price.value = data.history_cache[token];
-          }
-        } while (n_year > 2012 || n_month > 1);
-      };
+        if (
+          props.current_time.year === n_year &&
+          props.current_time.month === n_month
+        ) {
+          unit_price.value = data.history_cache[token];
+        }
+      } while (n_year > 2012 || n_month > 1);
+    };
 
-      if (!data.history_cache["2020,12"]) {
-        RequestPrice(2020, 12).then(() => {
-          patch_cache();
-        });
-      } else {
-        patch_cache();
-      }
-    })
-    .catch((error) => {
-      if (error.message !== "canceled") {
-        throw error;
-      }
-    });
+    if (!data.history_cache["2020,12"]) {
+      await RequestPrice(2020, 12);
+      patch_cache();
+    } else {
+      patch_cache();
+    }
+  } catch (error) {
+    if (error.message !== "canceled") {
+      throw error;
+    }
+  }
 }
 
 function CaculateTimeOffset(year, month, offset) {
@@ -300,5 +327,14 @@ let sun_chart_color = computed(() => {
 <style>
 .ol-overlay-container {
   pointer-events: none !important;
+}
+.adaptor {
+  position: relative;
+}
+.adaptor-sun-chart {
+  position: relative;
+}
+.adaptor-trend-vis {
+  position: absolute;
 }
 </style>
