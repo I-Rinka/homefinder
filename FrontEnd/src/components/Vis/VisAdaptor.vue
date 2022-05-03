@@ -248,7 +248,7 @@ async function CachePrice() {
       let month = element.month;
       let token = year + "," + month;
 
-      if (year !== 2020 && month != 12) {
+      if (year <= config.timeRange[1].year && month <= config.timeRange[1].month) {
         data.history_cache[token] = element.unit_price;
       }
     }
