@@ -60,7 +60,7 @@
       </el-col>
     </el-row>
     <div class="timeline-runway">
-      <div class="time-scale">
+      <div class="time-scale" @dblclick="TranslateRedSlider">
         <div
           class="year"
           @pointerdown="PressTimeScale"
@@ -273,6 +273,7 @@ import {
 } from "@vue/runtime-core";
 import SliderCursor from "./TimeLine/SliderCursor.vue";
 import { MapMonth } from "./TimeLine/date";
+import { config } from "../config";
 
 const emits = defineEmits([
   "changeCurrentTime", // single cursor move
@@ -437,6 +438,20 @@ function GetLRSliders() {
 }
 
 function HandlerTimeEvents_realtime() {
+  if (!data.multicursor.select_mode && !data.multicursor.subtractor_mode) {
+    emits("changeCurrentTime", {
+      year: data.slider1.GetYear(),
+      month: data.slider1.GetMonth(),
+    });
+  } else if (data.multicursor.subtractor_mode) {
+    emits("changeSubtractor", [
+      { year: data.slider1.GetYear(), month: data.slider1.GetMonth() },
+      { year: data.slider2.GetYear(), month: data.slider2.GetMonth() },
+    ]);
+  }
+}
+
+function HandlerTimeEvents_slow() {
   let [l_1, r_1, l_2, r_2] = GetLRSliders();
   if (data.multicursor.select_mode && data.multicursor.subtractor_mode) {
     emits("changeSubtractorSelection", [
@@ -449,21 +464,6 @@ function HandlerTimeEvents_realtime() {
         { year: r_2.GetYear(), month: r_2.GetMonth() },
       ],
     ]);
-  } else if (data.multicursor.subtractor_mode) {
-    emits("changeSubtractor", [
-      { year: data.slider1.GetYear(), month: data.slider1.GetMonth() },
-      { year: data.slider2.GetYear(), month: data.slider2.GetMonth() },
-    ]);
-  }
-}
-
-function HandlerTimeEvents_slow() {
-  let [l_1, r_1, l_2, r_2] = GetLRSliders();
-  if (!data.multicursor.select_mode && !data.multicursor.subtractor_mode) {
-    emits("changeCurrentTime", {
-      year: data.slider1.GetYear(),
-      month: data.slider1.GetMonth(),
-    });
   } else if (data.multicursor.select_mode) {
     emits("changeSelection", [
       { year: l_1.GetYear(), month: l_1.GetMonth() },
@@ -589,7 +589,7 @@ watch(
 
 // Add Time Series before mounted
 onBeforeMount(() => {
-  for (let i = 2012; i <= 2020; i++) {
+  for (let i = 2012; i <= config.timeRange[1].year; i++) {
     let month = [];
     for (let j = 1; j <= 12; j++) {
       month.push(j);
@@ -691,6 +691,12 @@ function ReleaseCursor() {
   if (data.multicursor.select_mode && !previeous_select_mode) {
     emits("changeSelectMode", true);
     previeous_select_mode = true;
+  }
+}
+
+function TranslateRedSlider(e) {
+  if (!data.multicursor.select_mode) {
+    data.slider1.SetPosition(e.clientX);
   }
 }
 
@@ -802,6 +808,7 @@ function RemoveSubtractor() {
     data.multicursor.subtractor_mode = false;
   }
 }
+
 function AddSubtractor() {
   if (!data.multicursor.subtractor_mode) {
     data.multicursor.subtractor_mode = true;

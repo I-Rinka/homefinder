@@ -42,6 +42,8 @@ import {
   GetBlocksAvgPriceYearMonth,
   GetBlocksAvgPriceAllTime,
 } from "../../database/query";
+
+import { config } from "../../config";
 import * as d3 from "d3";
 
 const props = defineProps({
@@ -152,7 +154,7 @@ onMounted(() => {
               const element = data.history_cache[key];
               let t = key.split(",");
               history_records.push({
-                time: Date.UTC(t[0], t[1]-1),
+                time: Date.UTC(t[0], t[1] - 1),
                 price: element,
               });
             }
@@ -250,12 +252,17 @@ async function CachePrice() {
         data.history_cache[token] = element.unit_price;
       }
     }
+
     let patch_cache = function () {
       let i = -1;
       let n_year, n_month;
       let n_price = data.history_cache["2020,12"];
       do {
-        [n_year, n_month] = CaculateTimeOffset(2020, 12, i);
+        [n_year, n_month] = CaculateTimeOffset(
+          config.timeRange[1].year,
+          config.timeRange[1].month,
+          i
+        );
         i--;
         let token = n_year + "," + n_month;
         if (data.history_cache[token] && data.history_cache[token] != -1) {
@@ -270,7 +277,10 @@ async function CachePrice() {
         ) {
           unit_price.value = data.history_cache[token];
         }
-      } while (n_year > 2012 || n_month > 1);
+      } while (
+        n_year > config.timeRange[0].year ||
+        n_month > config.timeRange[0].month
+      );
     };
 
     if (!data.history_cache["2020,12"]) {
