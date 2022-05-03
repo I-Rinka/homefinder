@@ -17,6 +17,7 @@
         class="adaptor-trend-vis"
         v-show="!props.price_mode"
         :history_records="react_data.history_records"
+        :selection_time="props.selection_time"
       ></trend-vis>
     </div>
   </div>
@@ -60,6 +61,11 @@ const props = defineProps({
   },
   current_time: {
     type: Object,
+    default: null,
+    required: false,
+  },
+  selection_time: {
+    type: Array,
     default: null,
     required: false,
   },
@@ -146,7 +152,7 @@ onMounted(() => {
               const element = data.history_cache[key];
               let t = key.split(",");
               history_records.push({
-                time: Date.UTC(t[0], t[1]),
+                time: Date.UTC(t[0], t[1]-1),
                 price: element,
               });
             }

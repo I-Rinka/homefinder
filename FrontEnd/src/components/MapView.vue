@@ -40,6 +40,7 @@
         :markArray="data.user_marks"
         :price_mode="data.price_view"
         :current_time="data.current_time"
+        :selection_time="data.selection_time"
       ></vis-adaptor>
     </div>
   </div>
@@ -165,8 +166,7 @@ function ChangeCurrentTime(t) {
 }
 
 function ChangeSelection(t) {
-  data.current_baseline_selection = t;
-  console.log("change selection", t);
+  data.selection_time = t;
 }
 
 function ChangeSubtractor(t) {
@@ -181,11 +181,31 @@ function ChangeSubtractorSelection(t) {
 }
 
 function ChangeSubtracorMode(b) {
-  data.use_baseline = true;
+  data.use_baseline = b;
+  if (!b) {
+    data.baseline_time = { year: 0, month: 0 };
+  }
 }
 
 function ChangeSelectMode(b) {
   data.price_view = !b;
+
+  if (!b) {
+    data.selection_time = [
+      { year: 0, month: 0 },
+      { year: 0, month: 0 },
+    ];
+    data.current_baseline_selection = [
+      [
+        { year: 0, month: 0 },
+        { year: 0, month: 0 },
+      ],
+      [
+        { year: 0, month: 0 },
+        { year: 0, month: 0 },
+      ],
+    ];
+  }
 }
 
 // -------------------------- Useful functions ---------------------------
