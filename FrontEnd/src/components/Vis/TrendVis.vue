@@ -2,9 +2,9 @@
   <div class="trend-vis">
     <svg
       ref="visMountPoint"
-      width="200"
-      height="300"
-      viewBox="0 0 200 250"
+      width="100"
+      height="100"
+      viewBox="0 -50 200 200"
       xmlns="http://www.w3.org/2000/svg"
     ></svg>
   </div>
@@ -48,30 +48,43 @@ const records = computed(() => {
   }
 });
 
-function PrintRecords() {
-  console.log(records.value);
+function GetRecords() {
+  if (props.selection_time === null || props.selection_time[0].year === 0) {
+    return props.history_records;
+  } else {
+    let l = Date.UTC(
+      props.selection_time[0].year,
+      props.selection_time[0].month - 1
+    );
+    let r = Date.UTC(
+      props.selection_time[1].year,
+      props.selection_time[1].month - 1
+    );
+    return props.history_records
+      .filter((d) => d.time >= l && d.time <= r)
+      .map((d) => {
+        return { time: d.time, price: d.price };
+      });
+  }
 }
 
 function Update() {
   const width = 200;
+  let data = GetRecords();
   let x = d3
     .scaleTime()
     .range([20, width - 20])
-    .domain([
-      d3.min(records.value, (d) => d.time),
-      d3.max(records.value, (d) => d.time),
-    ]);
+    .domain([d3.min(data, (d) => d.time), d3.max(data, (d) => d.time)]);
 
-  const height = 150;
+  const height = 100;
   let y = d3
     .scaleLinear()
-    .range([10, height])
-    .domain([0, d3.max(records.value, (d) => d.price)]);
+    .range([0, height])
+    .domain([d3.min(data, (d) => d.price)/2, d3.max(data, (d) => d.price)]);
 
   let svg = d3.select(visMountPoint.value);
 
-  let bar = svg.selectAll("rect").data(records.value);
-  console.log(records.value);
+  let bar = svg.selectAll("rect").data(data);
 
   bar
     .exit()
@@ -80,16 +93,20 @@ function Update() {
     .duration(600)
     .attr("height", 0)
     .remove();
+
   bar
     .enter()
     .append("rect")
     .style("fill", "steelblue")
-    .attr("width", (200 - 20) / records.value.length)
+    .attr("width", (200 - 20) / data.length)
     .attr("transform", (d) => "translate(" + x(d.time) + "," + height + ")")
     .transition()
     .duration(600)
-    .attr("transform", (d) => "translate(" + x(d.time) + "," + y(d.price) + ")")
-    .attr("height", (d) => height - y(d.price));
+    .attr(
+      "transform",
+      (d) => "translate(" + x(d.time) + "," + (height-y(d.price)) + ")"
+    )
+    .attr("height", (d) => y(d.price));
 }
 
 let visMountPoint = ref(null);
