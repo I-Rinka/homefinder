@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUpdated, toRaw, ref } from "@vue/runtime-core";
+import { computed, onMounted, onUpdated, toRaw, ref, watch } from "@vue/runtime-core";
 import * as d3 from "d3";
 
 const props = defineProps({
@@ -26,6 +26,11 @@ const props = defineProps({
     required: false,
   },
 });
+
+watch(()=>props.selection_time,()=>{
+
+    console.log("change");
+})
 
 const records = computed(() => {
   // select All
@@ -88,10 +93,10 @@ function Update() {
 
   bar
     .exit()
-    .transition()
-    .attr("transform", (d) => "translate(" + 0 + "," + height + ")")
-    .duration(600)
-    .attr("height", 0)
+    // .transition()
+    // .attr("transform", (d) => "translate(" + 0 + "," + height + ")")
+    // .duration(600)
+    // .attr("height", 0)
     .remove();
 
   bar
@@ -111,10 +116,6 @@ function Update() {
 
 let visMountPoint = ref(null);
 onMounted(() => {
-  //   console.log(visMountPoint.value);
-  Update();
-});
-onUpdated(() => {
   Update();
 });
 </script>
