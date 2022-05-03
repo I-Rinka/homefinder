@@ -72,9 +72,9 @@ const data = {
   isCached: false,
 };
 
-const react_data = {
+const react_data = reactive({
   history_records: [],
-};
+});
 
 const ol_data = {
   contained_blocks: [],
