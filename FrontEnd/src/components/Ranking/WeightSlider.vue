@@ -11,7 +11,6 @@
         </div>
       </div>
       <el-slider
-        style="width: 10px"
         v-model="bottom_slider_percentage"
         vertical
         height="200px"
@@ -66,11 +65,11 @@ const bottom_slider_percentage = computed({
     let old_value = bottom_slider_percentage.value;
     let change = value / old_value;
 
-    for (let i = 0; i < top.value.length; i++) {
+    for (let i = 0; i < bottom.value.length; i++) {
       bottom.value[i].weight *= change;
     }
 
-    for (let i = 0; i < bottom.value.length; i++) {
+    for (let i = 0; i < top.value.length; i++) {
       top.value[i].weight *= (1 - value) / (1 - old_value);
     }
   },
