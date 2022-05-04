@@ -202,7 +202,6 @@ const top_percentage_sum = computed(() => {
         opacity: 1;
         transform: translate(0%, 0%);
         background-color: var(--strip-color);
-        filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0));
       }
     }
   }
@@ -237,8 +236,9 @@ const top_percentage_sum = computed(() => {
       color: white;
       transition: 0.5s;
       pointer-events: none;
-      transform: scale(0, 0) translate(-100%, -20%);
-      padding: 5px 5px 5px 5px;
+      transform: scale(0, 0) translate(-100%, -2vh);
+      padding: 0.5vh;
+      font-size: 1.5vh;
       border-radius: 3px;
     }
     &:hover {
@@ -249,8 +249,7 @@ const top_percentage_sum = computed(() => {
         opacity: 1;
         background-color: var(--strip-color);
         transform: scale(1, 1)
-          translate(calc(0% - var(--strip-width) * 2 / 3), -55%);
-        filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0));
+          translate(calc(0% - var(--strip-width) * 2 / 3), -60%);
       }
     }
     &:active {
