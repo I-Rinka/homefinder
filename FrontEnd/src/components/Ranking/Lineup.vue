@@ -81,7 +81,7 @@ const props = defineProps({
 
 // the reactive data
 const data = reactive({
-  mapping_dialog_visible: true,
+  mapping_dialog_visible: false,
   ranking_score: [],
 })
 
@@ -93,13 +93,18 @@ function HandleConfirmMapping() {
   data.mapping_dialog_visible = false
 }
 
-// Add defualt criteria, this should be name of records criteria. Like price, area etc.
+// Add default criteria, this should be name of records criteria. Like price, area etc.
 // name, color, enabled(default is disabled)
-store.AddCriteria("red", "#bf2019", true);
-store.AddCriteria("blue", "#527cc5");
-store.AddCriteria("yellow", "#ea8f35");
-store.AddCriteria("green", "#62a04f");
-store.AddCriteria("bluegreen", "#7fb7b1", true);
+store.AddCriteria("area", "#a6cee3", true);
+store.AddCriteria("decoration", "#1f78b4");
+store.AddCriteria("deal_price", "#b2df8a");
+store.AddCriteria("unit_price", "#33a02c", true);
+store.AddCriteria("position", "#fb9a99");
+store.AddCriteria("room", "#e31a1c");
+store.AddCriteria("hall", "#fdbf6f");
+store.AddCriteria("block_height", "#ff7f00");
+store.AddCriteria("built_year", "#cab2d6");
+store.AddCriteria("type", "#6a3d9a");
 
 const enabled_strip = computed(() => store.weights.filter((d) => d.enabled));
 

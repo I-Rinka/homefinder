@@ -8,16 +8,16 @@
     </div>
     <div class="sliders-container">
       <weight-slider
-        :top-criterias="['red']"
-        :bottom-criterias="['blue']"
+        :top-criterias="['area']"
+        :bottom-criterias="['unit_price', 'deal_price']"
       ></weight-slider>
       <weight-slider
-        :top-criterias="['green', 'yellow']"
-        :bottom-criterias="['blue', 'red']"
+        :top-criterias="['room', 'hall']"
+        :bottom-criterias="['position', 'block_height']"
       ></weight-slider>
       <weight-slider
-        :top-criterias="['blue', 'green', 'yellow']"
-        :bottom-criterias="['red']"
+        :top-criterias="['type', 'decoration', 'area']"
+        :bottom-criterias="['built_year']"
       ></weight-slider>
     </div>
   </div>
