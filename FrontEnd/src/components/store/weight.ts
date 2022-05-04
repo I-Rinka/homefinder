@@ -7,14 +7,12 @@ class Criteria {
   name: string;
   color: string;
   weight?: number;
-  constructor(name: string, color: string, weight?: number) {
+  enabled?: boolean;
+  constructor(name: string, color: string, weight?: number, enabled?: boolean) {
     this.name = name;
     this.color = color;
-    if (weight) {
-      this.weight = weight;
-    } else {
-      this.weight = 0;
-    }
+    this.weight = weight ? weight : 0;
+    this.enabled = enabled;
   }
 }
 
@@ -43,15 +41,30 @@ export const useStore = defineStore("weight", {
         .filter((x: Criteria) => !name_s.has(x.name))
         .map((x) => x.name);
     },
-    AddCriteria(name: string, color: string) {
+    AddCriteria(
+      name: string,
+      color?: string,
+      enabled?: boolean,
+      weight?: number
+    ) {
       let reduce_proportion = this.weights.length / (this.weights.length + 1);
-      let sum_weights = 0;
 
-      for (let i = 0; i < this.weights.length; i++) {
-        this.weights[i].weight *= reduce_proportion;
-        sum_weights += this.weights[i].weight;
+      let w = weight;
+      if (w != undefined && 0 < weight && weight < 1) {
+        w = weight;
+      } else {
+        let sum_weights = 0;
+        for (let i = 0; i < this.weights.length; i++) {
+          this.weights[i].weight *= reduce_proportion;
+          sum_weights += this.weights[i].weight;
+        }
+        w = 1 - sum_weights;
       }
-      const new_criteria = new Criteria(name, color, 1 - sum_weights);
+
+      let c = color ? color : "grey";
+      let e = enabled ? enabled : false;
+
+      const new_criteria = new Criteria(name, c, w, e);
       this.weights.push(new_criteria);
     },
   },
