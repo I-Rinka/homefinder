@@ -3,7 +3,7 @@
     <div>
       <!-- other -->
       <vue-draggable-next
-        class="top"
+        class="global-weight-hinter"
         :list="store.GetCriterisNames(include_props)"
         :group="{ name: 'all' }"
       >
@@ -15,7 +15,11 @@
             '--strip-width': `${100 * store.GetCriteria(c).weight}%`,
           }"
           :key="store.GetCriteria(c).name"
-        ></div>
+        >
+          <div>
+            {{ store.GetCriteria(c).name }}
+          </div>
+        </div>
         <div
           class="current"
           :style="{
@@ -39,7 +43,11 @@
             }%`,
           }"
           :key="store.GetCriteria(c).name"
-        ></div>
+        >
+          <div>
+            {{ store.GetCriteria(c).name }}
+          </div>
+        </div>
       </vue-draggable-next>
 
       <el-slider
@@ -66,7 +74,11 @@
             }%`,
           }"
           :key="store.GetCriteria(c).name"
-        ></div>
+        >
+          <div>
+            {{ store.GetCriteria(c).name }}
+          </div>
+        </div>
       </vue-draggable-next>
     </div>
   </div>
@@ -147,54 +159,93 @@ const top_percentage_sum = computed(() => {
 <style lang="less" scoped>
 .slider-block {
   align-items: center;
-  margin: 10px;
-  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
+  margin-left: 20px;
+  margin-right: 20px;
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
   .el-slider {
     position: relative;
     left: 5px;
-    width: 70px;
-    --el-slider-runway-bg-color: whitesmoke;
+    width: 90px;
+    --el-slider-runway-bg-color: #e7eae8;
   }
 }
 
 .slider-ends {
+  box-shadow: 0px 0px 0px 1px grey;
   display: flex;
-  width: 80px;
+  width: 100px;
   border-radius: 5px;
   overflow: hidden;
-  justify-content: center;
-  border: solid gray 1px;
   div {
-    height: 2.5vh;
+    height: 3vh;
+
+    div {
+      opacity: 0;
+      position: absolute;
+      color: white;
+      filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.8));
+      transition: 0.5s;
+      pointer-events: none;
+      transform: scale(0, 0) translate(20%, 20%);
+    }
+    &:hover {
+      div {
+        opacity: 1;
+        transform: scale(1, 1) translate(20%, 20%);
+      }
+    }
   }
 }
-.top {
+
+.global-weight-hinter {
   display: flex;
   margin-left: 5px;
+  margin-bottom: 0.9px;
   height: 1vh;
-  width: 70px;
+  width: 90px;
+  :first-child {
+    border-top-left-radius: 3px;
+  }
+  :last-child {
+    border-top-right-radius: 3px;
+  }
   .reserved {
     margin: 0;
     width: var(--strip-width);
     height: 1vh;
-    cursor: -webkit-grab;
+    cursor: grab;
     transition: 0.3s;
     transition-property: transform, padding-left, padding-right;
+
+    div {
+      opacity: 0;
+      position: absolute;
+      color: white;
+      filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.8));
+      transition: 0.5s;
+      pointer-events: none;
+      transform: scale(0, 0) translate(20%, 20%);
+    }
     &:hover {
       padding-left: calc(var(--strip-width) / 3);
       padding-right: calc(var(--strip-width) / 3);
       transform: scale(1, 1.5) translateY(-0.15vh);
+      div {
+        opacity: 1;
+        transform: scale(1.5, 1) translate(20%, 20%);
+      }
     }
     &:active {
-      cursor: -webkit-grabbing;
+      cursor: grabbing;
     }
   }
   .current {
     background-color: #ffffff;
     height: 0.5vh;
     position: relative;
-    top: 5px;
     width: var(--strip-width);
+    top: 0.5vh;
+    bottom: 0;
   }
 }
 </style>
