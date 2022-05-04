@@ -262,6 +262,8 @@
 </template>
 
 <script setup>
+// todo: corner auto scroll
+
 import {
   computed,
   onBeforeMount,
