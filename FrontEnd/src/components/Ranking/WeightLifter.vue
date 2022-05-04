@@ -1,8 +1,17 @@
 <template>
-  <div class="weight-lifter"></div>
+  <div class="weight-lifter">
+    {{ store.count }}
+    <weight-slider></weight-slider>
+  </div>
 </template>
 
-<script setup></script>
+<script setup>
+import WeightSlider from "./WeightSlider.vue";
+import { useStore } from "../store/weight";
+
+const store = useStore();
+
+</script>
 
 <style lang="less" scoped>
 .weight-lifter {
