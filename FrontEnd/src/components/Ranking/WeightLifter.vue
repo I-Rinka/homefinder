@@ -1,14 +1,5 @@
 <template>
   <div class="weight-lifter">
-    <div>
-      <span
-        style="margin: 10px; color: white; padding: 3px"
-        v-for="c in store.weights"
-        :style="{ backgroundColor: c.color }"
-        :key="c.name"
-        >{{ c.weight.toFixed(2) }}</span
-      >
-    </div>
     <div class="sliders-container">
       <weight-slider
         :top-criterias="['red']"
@@ -32,10 +23,11 @@ import { useStore } from "../store/weight";
 
 const store = useStore();
 
-store.AddCriteria("red", "red");
-store.AddCriteria("blue", "blue");
-store.AddCriteria("yellow", "yellow");
-store.AddCriteria("green", "green");
+store.AddCriteria("red", "#bf2019");
+store.AddCriteria("blue", "#527cc5");
+store.AddCriteria("yellow", "#ea8f35");
+store.AddCriteria("green", "#62a04f");
+store.AddCriteria("bluegreen", "#7fb7b1");
 </script>
 
 <style lang="less" scoped>
@@ -48,6 +40,8 @@ store.AddCriteria("green", "green");
 }
 
 .sliders-container {
+  position: absolute;
+  margin: 30px;
   display: flex;
 }
 </style>

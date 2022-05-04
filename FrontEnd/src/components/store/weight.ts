@@ -31,6 +31,18 @@ export const useStore = defineStore("weight", {
       let name_s = new Set(expected_names);
       return this.weights.filter((x: Criteria) => name_s.has(x.name));
     },
+    GetCriteria(expected_name: string): Criteria {
+      const found = this.weights.find(
+        (element) => element.name == expected_name
+      );
+      return found as Criteria;
+    },
+    GetCriterisNames(exclude_names?: string[]) {
+      let name_s = new Set(exclude_names);
+      return this.weights
+        .filter((x: Criteria) => !name_s.has(x.name))
+        .map((x) => x.name);
+    },
     AddCriteria(name: string, color: string) {
       let reduce_proportion = this.weights.length / (this.weights.length + 1);
       let sum_weights = 0;
