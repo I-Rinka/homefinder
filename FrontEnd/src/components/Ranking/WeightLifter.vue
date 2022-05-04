@@ -2,7 +2,7 @@
   <div class="weight-lifter">
     <div class="test">
       <div class="disabled" v-for="d in disabled" :key="d.name">
-        <el-checkbox v-model="d.enabled"></el-checkbox>
+        <el-checkbox style="z-index:-0" v-model="d.enabled"></el-checkbox>
         {{ d.name }}
       </div>
     </div>
