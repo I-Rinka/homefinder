@@ -8,7 +8,7 @@ class Criteria {
   color: string;
   weight?: number;
   enabled?: boolean;
-  constructor(name: string, color: string, weight?: number, enabled?: boolean) {
+  constructor(name: string, color: string, enabled?: boolean, weight?: number) {
     this.name = name;
     this.color = color;
     this.weight = weight ? weight : 0;
@@ -64,7 +64,7 @@ export const useStore = defineStore("weight", {
       let c = color ? color : "grey";
       let e = enabled ? enabled : false;
 
-      const new_criteria = new Criteria(name, c, w, e);
+      const new_criteria = new Criteria(name, c, e, w);
       this.weights.push(new_criteria);
     },
   },

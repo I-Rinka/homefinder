@@ -11,7 +11,7 @@
           class="reserved"
           v-for="c in store.GetCriterisNames(include_props)"
           :style="{
-            backgroundColor: store.GetCriteria(c).color,
+            '--strip-color': store.GetCriteria(c).color,
             '--strip-width': `${100 * store.GetCriteria(c).weight}%`,
           }"
           :key="store.GetCriteria(c).name"
@@ -41,6 +41,7 @@
             width: `${
               (store.GetCriteria(c).weight / top_percentage_sum) * 100
             }%`,
+            '--strip-color': store.GetCriteria(c).color,
           }"
           :key="store.GetCriteria(c).name"
         >
@@ -72,6 +73,7 @@
             width: `${
               (store.GetCriteria(c).weight / bottom_percentage_sum) * 100
             }%`,
+            '--strip-color': store.GetCriteria(c).color,
           }"
           :key="store.GetCriteria(c).name"
         >
@@ -159,8 +161,10 @@ const top_percentage_sum = computed(() => {
 <style lang="less" scoped>
 .slider-block {
   align-items: center;
-  margin-left: 20px;
-  margin-right: 20px;
+  margin-left: 30px;
+  margin-right: 30px;
+  position: relative;
+  z-index: 0;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
   .el-slider {
     position: relative;
@@ -176,22 +180,28 @@ const top_percentage_sum = computed(() => {
   width: 100px;
   border-radius: 5px;
   overflow: hidden;
+  // position: relative;
+  z-index: 0;
   div {
     height: 3vh;
 
     div {
+      font-size: 1.5vh;
       opacity: 0;
       position: absolute;
       color: white;
-      filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.8));
-      transition: 0.5s;
+      transition: 0.4s;
       pointer-events: none;
-      transform: scale(0, 0) translate(20%, 20%);
+      transform: translate(0%, 25%);
+      border-radius: 3px;
+      height: 2vh;
     }
     &:hover {
       div {
+        padding: 0.5vh;
         opacity: 1;
-        transform: scale(1, 1) translate(20%, 20%);
+        transform: translate(0%, 0%);
+        background-color: var(--strip-color);
       }
     }
   }
@@ -214,25 +224,32 @@ const top_percentage_sum = computed(() => {
     width: var(--strip-width);
     height: 1vh;
     cursor: grab;
-    transition: 0.3s;
-    transition-property: transform, padding-left, padding-right;
-
+    transition-property: padding-left, padding-right;
+    background-color: var(--strip-color);
+    transition: 0.5s;
+    padding-left: 0;
+    padding-right: 0;
     div {
       opacity: 0;
       position: absolute;
+      z-index: 10;
       color: white;
-      filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.8));
       transition: 0.5s;
       pointer-events: none;
-      transform: scale(0, 0) translate(20%, 20%);
+      transform: scale(0, 0) translate(-100%, -2vh);
+      padding: 0.5vh;
+      font-size: 1.5vh;
+      border-radius: 3px;
     }
     &:hover {
       padding-left: calc(var(--strip-width) / 3);
       padding-right: calc(var(--strip-width) / 3);
-      transform: scale(1, 1.5) translateY(-0.15vh);
       div {
+        user-select: none;
         opacity: 1;
-        transform: scale(1.5, 1) translate(20%, 20%);
+        background-color: var(--strip-color);
+        transform: scale(1, 1)
+          translate(calc(0% - var(--strip-width) * 2 / 3), -60%);
       }
     }
     &:active {
@@ -246,6 +263,7 @@ const top_percentage_sum = computed(() => {
     width: var(--strip-width);
     top: 0.5vh;
     bottom: 0;
+    z-index: -1;
   }
 }
 </style>
