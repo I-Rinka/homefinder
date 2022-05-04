@@ -6,23 +6,11 @@
     </div>
 
     <div class="zoom-slider">
-      <el-button
-        @click="ResetPosition"
-        :icon="LocationFilled"
-        style="margin-bottom: 1vh"
-        circle
-      >
+      <el-button @click="ResetPosition" :icon="LocationFilled" style="margin-bottom: 1vh" circle>
       </el-button>
       <!-- @click="ResetPosition"
         @input="SetZoom" -->
-      <el-slider
-        v-model="data.zoom"
-        :step="1"
-        :max="100"
-        :min="0"
-        @input="ChangeZoom"
-        vertical
-      >
+      <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
       </el-slider>
     </div>
     <div id="view-choice">
@@ -32,26 +20,17 @@
       </el-radio-group>
     </div>
     <div>
-      <vis-adaptor
-        v-for="feature in data.features"
-        :key="feature.getGeometry().getCoordinates().toString()"
-        :map="map"
-        :feature="feature"
-        :markArray="data.user_marks"
-        :price_mode="data.price_view"
-        :current_time="data.current_time"
-      ></vis-adaptor>
+      <vis-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()" :map="map"
+        :feature="feature" :markArray="data.user_marks" :price_mode="data.price_view" :current_time="data.current_time"
+        :selection_time="data.selection_time"></vis-adaptor>
     </div>
   </div>
-  <time-line
-    @changeCurrentTime="ChangeCurrentTime"
-    @changeSubtractor="ChangeSubtractor"
-    @changeSelection="ChangeSelection"
-    @changeSubtractorSelection="ChangeSubtractorSelection"
-    @changeSubtractorMode="ChangeSubtracorMode"
-    @changeSelectMode="ChangeSelectMode"
-  >
+  <time-line @changeCurrentTime="ChangeCurrentTime" @changeSubtractor="ChangeSubtractor"
+    @changeSelection="ChangeSelection" @changeSubtractorSelection="ChangeSubtractorSelection"
+    @changeSubtractorMode="ChangeSubtracorMode" @changeSelectMode="ChangeSelectMode">
   </time-line>
+
+  <!-- <el-button @click="GetPixels">Get Pixel</el-button> -->
 </template>
 
 <script setup>
@@ -155,6 +134,20 @@ const view_choice = computed({
   },
 });
 
+function GetPixels() {
+  let view_port = [map.getSize()[0], map.getSize()[1]];
+  let currentExtent = map.getView().calculateExtent(view_port);
+  let h = currentExtent[3] - currentExtent[1];
+  let w = currentExtent[2] - currentExtent[0];
+  let re = map.getView().getResolution();
+  h = (h / re * 1000 * 145).toFixed(2)
+  w = (w / re * 1000 * 111).toFixed(2)
+  let rec = document.getElementsByClassName("ol-layer")[0].getBoundingClientRect()
+  console.log(rec)
+  console.log("h:", h, "w:", w);
+  // console.log(map.getView().getResolutionForExtent(currentExtent));
+}
+
 function GetBasePrice() {
   GetBlocksAvgPrice(["*"]).then((res) => (data.base_price = res.unit_price));
 }
@@ -165,8 +158,7 @@ function ChangeCurrentTime(t) {
 }
 
 function ChangeSelection(t) {
-  data.current_baseline_selection = t;
-  console.log("change selection", t);
+  data.selection_time = t;
 }
 
 function ChangeSubtractor(t) {
@@ -181,11 +173,31 @@ function ChangeSubtractorSelection(t) {
 }
 
 function ChangeSubtracorMode(b) {
-  data.use_baseline = true;
+  data.use_baseline = b;
+  if (!b) {
+    data.baseline_time = { year: 0, month: 0 };
+  }
 }
 
 function ChangeSelectMode(b) {
   data.price_view = !b;
+
+  if (!b) {
+    data.selection_time = [
+      { year: 0, month: 0 },
+      { year: 0, month: 0 },
+    ];
+    data.current_baseline_selection = [
+      [
+        { year: 0, month: 0 },
+        { year: 0, month: 0 },
+      ],
+      [
+        { year: 0, month: 0 },
+        { year: 0, month: 0 },
+      ],
+    ];
+  }
 }
 
 // -------------------------- Useful functions ---------------------------
@@ -358,8 +370,8 @@ function ChangeView() {
 
 function GetOnScreenFeatures() {
   let view_port = [map.getSize()[0], map.getSize()[1]];
-  // view_port[0] *= 2;
-  // view_port[1] *= 2;
+  view_port[0] *= 1.2;
+  view_port[1] *= 1.2;
 
   let currentExtent = map.getView().calculateExtent(view_port);
 
@@ -491,7 +503,7 @@ function GetOnScreenFeatures() {
 }
 
 .ol-layer {
-  > canvas {
+  >canvas {
     border-radius: 11px;
   }
 }
@@ -515,7 +527,7 @@ function GetOnScreenFeatures() {
   cursor: default;
   filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
 
-  > div {
+  >div {
     height: 20vh;
 
     .el-slider__runway {

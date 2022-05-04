@@ -1,15 +1,77 @@
 <template>
-  <div class="weight-lifter"></div>
+  <div class="weight-lifter">
+    <div class="test">
+      <div class="disabled" v-for="d in disabled" :key="d.name">
+        <el-checkbox v-model="d.enabled"></el-checkbox>
+        {{ d.name }}
+      </div>
+    </div>
+    <div class="sliders-container">
+      <weight-slider
+        :top-criterias="['red']"
+        :bottom-criterias="['blue']"
+      ></weight-slider>
+      <weight-slider
+        :top-criterias="['green', 'yellow']"
+        :bottom-criterias="['blue', 'red']"
+      ></weight-slider>
+      <weight-slider
+        :top-criterias="['blue', 'green', 'yellow']"
+        :bottom-criterias="['red']"
+      ></weight-slider>
+    </div>
+  </div>
 </template>
 
-<script setup></script>
+<script setup>
+import WeightSlider from "./WeightSlider.vue";
+import { useStore } from "../store/weight";
+import { reactive } from "@vue/reactivity";
+import { computed, onMounted } from "@vue/runtime-core";
+
+const disabled = computed(() => store.weights.filter((d) => !d.enabled));
+
+const store = useStore();
+
+</script>
 
 <style lang="less" scoped>
 .weight-lifter {
   height: 100%;
   width: 40%;
-  background-color: rgb(80, 130, 179);
-  background-image: url("http://localhost:3000/weighlifter.jpg");
-  background-size: contain;
+  background-color: rgb(255, 255, 255);
+
+  // background-image: url("http://localhost:3000/weighlifter.jpg");
+  // background-size: contain;
+}
+
+.sliders-container {
+  position: absolute;
+  margin: 10px;
+  display: flex;
+}
+.test {
+  display: flex;
+  width: 100%;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: aliceblue;
+
+  .disabled {
+    transition: 0.5s;
+    margin: 2px 5px 2px 5px;
+    color: white;
+    background-color: rgb(53, 53, 53);
+    animation: enter 0.5s;
+  }
+}
+
+@keyframes enter {
+  from {
+    transform: scale(0, 0);
+  }
+  to {
+    transform: scale(1, 1);
+  }
 }
 </style>

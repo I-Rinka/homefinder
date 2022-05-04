@@ -60,7 +60,7 @@
       </el-col>
     </el-row>
     <div class="timeline-runway">
-      <div class="time-scale">
+      <div class="time-scale" @dblclick="TranslateRedSlider">
         <div
           class="year"
           @pointerdown="PressTimeScale"
@@ -262,6 +262,8 @@
 </template>
 
 <script setup>
+// todo: corner auto scroll
+
 import {
   computed,
   onBeforeMount,
@@ -273,6 +275,7 @@ import {
 } from "@vue/runtime-core";
 import SliderCursor from "./TimeLine/SliderCursor.vue";
 import { MapMonth } from "./TimeLine/date";
+import { config } from "../config";
 
 const emits = defineEmits([
   "changeCurrentTime", // single cursor move
@@ -414,7 +417,7 @@ class Slider {
   }
 }
 
-function HandlerTimeEvents() {
+function GetLRSliders() {
   let l_1, r_1;
   if (data.slider1.position < data.slider1_l.position) {
     l_1 = data.slider1;
@@ -432,6 +435,26 @@ function HandlerTimeEvents() {
     l_2 = data.slider2_l;
     r_2 = data.slider2;
   }
+
+  return [l_1, r_1, l_2, r_2];
+}
+
+function HandlerTimeEvents_realtime() {
+  if (!data.multicursor.select_mode && !data.multicursor.subtractor_mode) {
+    emits("changeCurrentTime", {
+      year: data.slider1.GetYear(),
+      month: data.slider1.GetMonth(),
+    });
+  } else if (data.multicursor.subtractor_mode) {
+    emits("changeSubtractor", [
+      { year: data.slider1.GetYear(), month: data.slider1.GetMonth() },
+      { year: data.slider2.GetYear(), month: data.slider2.GetMonth() },
+    ]);
+  }
+}
+
+function HandlerTimeEvents_slow() {
+  let [l_1, r_1, l_2, r_2] = GetLRSliders();
   if (data.multicursor.select_mode && data.multicursor.subtractor_mode) {
     emits("changeSubtractorSelection", [
       [
@@ -448,19 +471,6 @@ function HandlerTimeEvents() {
       { year: l_1.GetYear(), month: l_1.GetMonth() },
       { year: r_1.GetYear(), month: r_1.GetMonth() },
     ]);
-  } else if (data.multicursor.subtractor_mode) {
-    emits("changeSubtractor", [
-      { year: data.slider1.GetYear(), month: data.slider1.GetMonth() },
-      { year: data.slider2.GetYear(), month: data.slider2.GetMonth() },
-    ]);
-  } else if (
-    !data.multicursor.select_mode &&
-    !data.multicursor.subtractor_mode
-  ) {
-    emits("changeCurrentTime", {
-      year: data.slider1.GetYear(),
-      month: data.slider1.GetMonth(),
-    });
   }
 }
 
@@ -469,23 +479,8 @@ function SyncSliders() {
     // not move situation:
     // 1. move left while some left cursor reach left limit
     // 2. move right while some right cusor reach right limit
-    let l_1, r_1;
-    if (data.slider1.position < data.slider1_l.position) {
-      l_1 = data.slider1;
-      r_1 = data.slider1_l;
-    } else {
-      l_1 = data.slider1_l;
-      r_1 = data.slider1;
-    }
 
-    let l_2, r_2;
-    if (data.slider2.position < data.slider2_l.position) {
-      l_2 = data.slider2;
-      r_2 = data.slider2_l;
-    } else {
-      l_2 = data.slider2_l;
-      r_2 = data.slider2;
-    }
+    let [l_1, r_1, l_2, r_2] = GetLRSliders();
 
     if (data.current_slider === r_1) {
       r_2.SetPosition(l_2.position + slider_stuff.GetWidth(l_1, r_1), true);
@@ -568,7 +563,7 @@ watch(
     data.slider2.GetMonth() +
     data.slider2_l.GetMonth(),
   () => {
-    HandlerTimeEvents();
+    HandlerTimeEvents_realtime();
   }
 );
 
@@ -579,7 +574,7 @@ watch(
   () => data.multicursor.select_mode,
   (new_val) => {
     if (new_val === false) {
-      HandlerTimeEvents();
+      HandlerTimeEvents_realtime();
       emits("changeSelectMode", new_val);
       previeous_select_mode = false;
     }
@@ -589,14 +584,14 @@ watch(
 watch(
   () => data.multicursor.subtractor_mode,
   (new_val) => {
-    HandlerTimeEvents();
+    HandlerTimeEvents_realtime();
     emits("changeSubtractorMode", new_val);
   }
 );
 
 // Add Time Series before mounted
 onBeforeMount(() => {
-  for (let i = 2012; i <= 2020; i++) {
+  for (let i = 2012; i <= config.timeRange[1].year; i++) {
     let month = [];
     for (let j = 1; j <= 12; j++) {
       month.push(j);
@@ -692,10 +687,18 @@ function ReleaseCursor() {
   data.timescale_tooltip_visibility = true;
   data.curor_tooltip_visibility = false;
 
+  HandlerTimeEvents_slow();
+
   // only after select a range and previous mode is not select will it emit
   if (data.multicursor.select_mode && !previeous_select_mode) {
     emits("changeSelectMode", true);
     previeous_select_mode = true;
+  }
+}
+
+function TranslateRedSlider(e) {
+  if (!data.multicursor.select_mode) {
+    data.slider1.SetPosition(e.clientX);
   }
 }
 
@@ -756,6 +759,7 @@ function ReleaseSliders() {
   window.removeEventListener("mousemove", MoveSliders);
   window.removeEventListener("mouseup", ReleaseSliders);
   data.timescale_tooltip_visibility = true;
+  HandlerTimeEvents_slow();
 }
 
 let sliders_move_timeout = null;
@@ -806,6 +810,7 @@ function RemoveSubtractor() {
     data.multicursor.subtractor_mode = false;
   }
 }
+
 function AddSubtractor() {
   if (!data.multicursor.subtractor_mode) {
     data.multicursor.subtractor_mode = true;
