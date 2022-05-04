@@ -35,10 +35,7 @@
           :style="{
             backgroundColor: store.GetCriteria(c).color,
             width: `${
-              data.topCriterias.length <= 1
-                ? 100
-                : (100 * store.GetCriteria(c).weight) /
-                  (1 - bottom_slider_percentage.toFixed(2))
+              (store.GetCriteria(c).weight / top_percentage_sum) * 100
             }%`,
           }"
           :key="store.GetCriteria(c).name"
@@ -65,10 +62,7 @@
           :style="{
             backgroundColor: store.GetCriteria(c).color,
             width: `${
-              data.bottomCriterias.length <= 1
-                ? 100
-                : (100 * store.GetCriteria(c).weight) /
-                  bottom_slider_percentage.toFixed(2)
+              (store.GetCriteria(c).weight / bottom_percentage_sum) * 100
             }%`,
           }"
           :key="store.GetCriteria(c).name"
@@ -130,6 +124,24 @@ const bottom_slider_percentage = computed({
     }
   },
 });
+
+const bottom_percentage_sum = computed(() => {
+  let sum = 0;
+  for (let i = 0; i < data.bottomCriterias.length; i++) {
+    const c = data.bottomCriterias[i];
+    sum += store.GetCriteria(c).weight;
+  }
+  return sum;
+});
+
+const top_percentage_sum = computed(() => {
+  let sum = 0;
+  for (let i = 0; i < data.topCriterias.length; i++) {
+    const c = data.topCriterias[i];
+    sum += store.GetCriteria(c).weight;
+  }
+  return sum;
+});
 </script>
 
 <style lang="less" scoped>
@@ -151,9 +163,8 @@ const bottom_slider_percentage = computed({
   border-radius: 5px;
   overflow: hidden;
   justify-content: center;
+  border: solid gray 1px;
   div {
-    margin: 0;
-    width: 100%;
     height: 2.5vh;
   }
 }
