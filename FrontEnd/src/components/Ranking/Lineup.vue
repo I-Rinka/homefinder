@@ -50,7 +50,7 @@
           v-for="d in enabled_strip"
           :key="d.name"
         >
-          {{data.scaled_records[item.index][d.name] * d.weight}}
+          {{props.origin_records[item.index][d.name] + " : " + data.scaled_records[item.index][d.name] * d.weight + " ; "}}
         </div>
 
       </div>
