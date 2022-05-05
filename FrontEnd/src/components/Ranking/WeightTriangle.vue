@@ -79,8 +79,19 @@
           class="triangle"
           :points="`0,${Root3(100)} 100,0 200,${Root3(100)} 0,${Root3(100)}`"
           vector-effect="non-scaling-stroke"
+          @mousemove="MoveSlider"
+          @click="PrintData"
+        />
+        <polygon
+          class="slider"
+          :points="`0,${Root3(5)} 5,0 10,${Root3(5)} 0,${Root3(5)}`"
+          :style="{
+            transform: `translate(${data.slider.x}px,${data.slider.y}px)`,
+          }"
+          @pointerdown="PressSlider"
         />
       </svg>
+      <!-- <div class="slider-stage" @click="PrintData"></div> -->
     </div>
 
     <div class="bottom-ends">
@@ -144,6 +155,11 @@ const store = useStore();
 
 const data = reactive({
   tri: store.GetCriterias(props.criterias),
+  slider: {
+    pressed: false,
+    x: 92,
+    y: 95,
+  },
 });
 
 const include_names = computed(() => data.tri.map((d) => d.name));
@@ -200,6 +216,24 @@ function ReplaceBottomCriteria1(d) {
     }
   }
 }
+
+function PressSlider() {
+  data.slider.pressed = true;
+  window.addEventListener("pointerup", ReleaseSlider);
+}
+
+function ReleaseSlider() {
+  data.slider.pressed = false;
+  window.removeEventListener("pointerup", ReleaseSlider);
+}
+
+function MoveSlider(e) {
+  if (data.slider.pressed) {
+    console.log(e.offsetX,e.offsetY);
+    data.slider.x=e.offsetX;
+    data.slider.y=e.offsetY;
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -208,6 +242,7 @@ function ReplaceBottomCriteria1(d) {
   margin-left: 30px;
   margin-right: 30px;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+
   .el-slider {
     position: relative;
     left: 5px;
@@ -215,8 +250,30 @@ function ReplaceBottomCriteria1(d) {
     --el-slider-runway-bg-color: #e7eae8;
   }
 }
+
 .triangle-container {
   height: 25vh;
+  position: relative;
+}
+
+.triangle {
+  position: absolute;
+  stroke-linejoin: round;
+  fill: #e7eae8;
+  stroke: gray;
+  stroke-width: 1px;
+}
+
+.slider {
+  position: absolute;
+  stroke-linejoin: round;
+  fill: #b62422;
+  filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.8));
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+    fill: #f33726;
+  }
 }
 
 .bottom-ends {
@@ -308,12 +365,5 @@ function ReplaceBottomCriteria1(d) {
     bottom: 0;
     z-index: -1;
   }
-}
-
-.triangle {
-  stroke-linejoin: round;
-  fill: #e7eae8;
-  stroke: gray;
-  stroke-width: 1px;
 }
 </style>
