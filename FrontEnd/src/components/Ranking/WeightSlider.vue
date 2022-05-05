@@ -8,17 +8,31 @@
         :group="{ name: 'all' }"
       >
         <template v-for="c in exclude_criterias" :key="c">
-          <div
-            class="reserved"
-            :style="{
-              '--strip-color': c.color,
-              '--strip-width': `${100 * c.weight}%`,
+          <el-tooltip
+            :content="c.name"
+            :popper-options="{
+              modifiers: [
+                {
+                  name: 'offset',
+                  options: {
+                    offset: [0, 10],
+                  },
+                },
+              ],
             }"
+            placement="top"
+            effect="customized"
+            :hide-after="0"
+            popper-class="popper"
           >
-            <div>
-              {{ c.name }}
-            </div>
-          </div>
+            <div
+              class="reserved"
+              :style="{
+                '--strip-color': c.color,
+                '--strip-width': `${100 * c.weight}%`,
+              }"
+            ></div>
+          </el-tooltip>
         </template>
         <div
           class="current"
@@ -41,9 +55,9 @@
               '--strip-color': c.color,
             }"
           >
-            <div>
+            <!-- <div>
               {{ c.name }}
-            </div>
+            </div> -->
           </div>
         </template>
       </vue-draggable-next>
@@ -197,13 +211,15 @@ const top_percentage_sum = computed(() => {
     div {
       font-size: 1.5vh;
       opacity: 0;
-      position: absolute;
+      // position: absolute;
       color: white;
       transition: 0.4s;
       pointer-events: none;
       transform: translate(0%, 25%);
       border-radius: 3px;
       height: 2vh;
+      padding-left: 0.5vh;
+      padding-right: 0.5vh;
     }
     &:hover {
       div {
@@ -238,28 +254,11 @@ const top_percentage_sum = computed(() => {
     transition: 0.5s;
     padding-left: 0;
     padding-right: 0;
-    div {
-      opacity: 0;
-      position: absolute;
-      z-index: 10;
-      color: white;
-      transition: 0.5s;
-      pointer-events: none;
-      transform: scale(0, 0) translate(-100%, -2vh);
-      padding: 0.5vh;
-      font-size: 1.5vh;
-      border-radius: 3px;
-    }
     &:hover {
-      padding-left: calc(var(--strip-width) / 3);
-      padding-right: calc(var(--strip-width) / 3);
-      div {
-        user-select: none;
-        opacity: 1;
-        background-color: var(--strip-color);
-        transform: scale(1, 1)
-          translate(calc(0% - var(--strip-width) * 2 / 3), -60%);
-      }
+      padding-left: calc(var(--strip-width) / 4);
+      padding-right: calc(var(--strip-width) / 4);
+
+      transform: scale(1, 1.5) translate(0,-20%);
     }
     &:active {
       cursor: grabbing;
