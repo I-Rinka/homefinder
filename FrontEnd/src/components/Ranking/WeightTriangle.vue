@@ -6,7 +6,6 @@
         :group="{ name: 'tri' }"
         :list="exclude_criterias"
       >
-        <!-- @end="PrintData" -->
         <div
           v-for="c in exclude_criterias"
           :key="c"
@@ -71,7 +70,8 @@
 
     <div class="triangle-container">
       <svg
-        style="height: 100%; width: 100%"
+        ref="triSvg"
+        style="height: 25vh; width: 100%"
         viewBox="-3 0 206 174"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -82,12 +82,17 @@
           @mousemove="MoveSlider"
           @click="PrintData"
         />
+
         <polygon
           class="slider"
-          :points="`0,${Root3(5)} 5,0 10,${Root3(5)} 0,${Root3(5)}`"
+          ref="triSlider"
           :style="{
             transform: `translate(${data.slider.x}px,${data.slider.y}px)`,
           }"
+          :points="`${0 - 7.5},${Root3(5)} ${5 - 7.5},0 ${10 - 7.5},${Root3(
+            5
+          )} }`"
+          vector-effect="non-scaling-stroke"
           @pointerdown="PressSlider"
         />
       </svg>
@@ -137,7 +142,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, toRaw } from "@vue/reactivity";
+import { reactive, computed, toRaw, ref } from "@vue/reactivity";
 import { useStore } from "../store/weight";
 import { VueDraggableNext } from "vue-draggable-next";
 
@@ -157,8 +162,8 @@ const data = reactive({
   tri: store.GetCriterias(props.criterias),
   slider: {
     pressed: false,
-    x: 92,
-    y: 95,
+    x: 90,
+    y: 90,
   },
 });
 
@@ -227,11 +232,19 @@ function ReleaseSlider() {
   window.removeEventListener("pointerup", ReleaseSlider);
 }
 
+let triSlider = ref(null);
+let triSvg = ref(null);
 function MoveSlider(e) {
   if (data.slider.pressed) {
-    console.log(e.offsetX,e.offsetY);
-    data.slider.x=e.offsetX;
-    data.slider.y=e.offsetY;
+    let XRatio =
+      triSlider.value.getBBox().width /
+      triSlider.value.getBoundingClientRect().width;
+    let YRatio =
+      triSlider.value.getBBox().height /
+      triSlider.value.getBoundingClientRect().height;
+    data.slider.x = e.offsetX * XRatio;
+    data.slider.y = e.offsetY * YRatio;
+    data.slider.y = data.slider.y > 165 ? 165 : data.slider.y;
   }
 }
 </script>
@@ -265,7 +278,6 @@ function MoveSlider(e) {
 }
 
 .slider {
-  position: absolute;
   stroke-linejoin: round;
   fill: #b62422;
   filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.8));
