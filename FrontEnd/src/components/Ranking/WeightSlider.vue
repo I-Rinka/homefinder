@@ -201,33 +201,36 @@ const top_percentage_sum = computed(() => {
   width: 100px;
   border-radius: 5px;
   overflow: hidden;
-  // position: relative;
-  // z-index: 0;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
+
   div {
     height: 3vh;
     background-color: var(--strip-color);
     width: var(--strip-width);
 
     div {
+      text-align: right;
       position: absolute;
+      right: 0;
       z-index: 10px;
       font-size: 1.5vh;
       opacity: 0;
       color: white;
       transition: 0.3s;
       pointer-events: none;
-      width: calc(var(--text-length) * 0.5vh);
+      width: 80px;
+      padding: 0.6vh 0px 0.4vh 0px;
       height: 2vh;
       border-radius: 5px;
-      padding: 0.5vh 0vh 0.5vh 2vh;
-      transform: translateX(calc(var(--text-length) * (-0.4vh)));
     }
     &:hover {
       div {
-        padding: 0.5vh 0vh 0.5vh 1vh;
         opacity: 1;
+        padding: 0.6vh 10px 0.4vh 10px;
         text-shadow: 0px 0px 3px rgba(0, 0, 0, 0.8);
-        transform: translateX(calc(var(--text-length) * (-0.4vh)));
       }
     }
   }

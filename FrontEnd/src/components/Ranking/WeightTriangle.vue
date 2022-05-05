@@ -182,28 +182,36 @@ function Root3(number) {
   width: 100px;
   border-radius: 5px;
   overflow: hidden;
-  // position: relative;
-  z-index: 0;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
+
   div {
     height: 3vh;
     background-color: var(--strip-color);
     width: var(--strip-width);
+
+    position: relative;
     div {
+      text-align: right;
+      position: absolute;
+      right: 0;
+      z-index: 10px;
       font-size: 1.5vh;
       opacity: 0;
-      position: absolute;
       color: white;
       transition: 0.3s;
       pointer-events: none;
-      width: calc(var(--text-length) * 1vh);
+      width: 80px;
+      padding: 0.6vh 0px 0.4vh 0px;
       height: 2vh;
       border-radius: 5px;
-      padding: 0.5vh 0vh 0.5vh 0vh;
     }
     &:hover {
       div {
-        padding: 0.5vh;
         opacity: 1;
+        padding: 0.6vh 10px 0.4vh 10px;
         text-shadow: 0px 0px 3px rgba(0, 0, 0, 0.8);
       }
     }
