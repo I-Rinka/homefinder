@@ -3,9 +3,10 @@
     <div class="top-ends">
       <vue-draggable-next
         class="global-weight-hinter"
-        :group="{ name: 'all' }"
+        :group="{ name: 'tri' }"
         :list="exclude_criterias"
       >
+        <!-- @end="PrintData" -->
         <div
           v-for="c in exclude_criterias"
           :key="c"
@@ -47,7 +48,13 @@
 
     <!-- slider top end -->
     <div class="top-ends">
-      <vue-draggable-next class="slider-ends" :group="{ name: 'all' }">
+      <vue-draggable-next
+        class="slider-ends"
+        :list="data.tri"
+        :group="{ name: 'tri', pull: false }"
+        @add="ReplaceTopCriteria"
+      >
+        <!-- :move="PrintData" -->
         <div
           v-if="data.tri[0]"
           :style="{
@@ -78,8 +85,10 @@
 
     <div class="bottom-ends">
       <vue-draggable-next
+        :list="data.tri"
         class="slider-ends"
-        :group="{ name: 'all', pull: false }"
+        :group="{ name: 'tri', pull: false }"
+        @add="ReplaceBottomCriteria0"
       >
         <div
           v-if="data.tri[1]"
@@ -95,8 +104,10 @@
       </vue-draggable-next>
 
       <vue-draggable-next
+        :list="data.tri"
         class="slider-ends"
-        :group="{ name: 'all', pull: false }"
+        :group="{ name: 'tri', pull: false }"
+        @add="ReplaceBottomCriteria1"
       >
         <div
           v-if="data.tri[2]"
@@ -115,9 +126,13 @@
 </template>
 
 <script setup>
-import { reactive, computed } from "@vue/reactivity";
+import { reactive, computed, toRaw } from "@vue/reactivity";
 import { useStore } from "../store/weight";
 import { VueDraggableNext } from "vue-draggable-next";
+
+function PrintData(d) {
+  console.log(d);
+}
 
 const props = defineProps({
   criterias: {
@@ -145,6 +160,45 @@ const current_weight_overall = computed(() => {
 
 function Root3(number) {
   return Math.sqrt(3) * number;
+}
+
+function ReplaceTopCriteria(d) {
+  if (data.tri.length == 3) {
+  } else {
+    if (d.newIndex === 0) {
+      data.tri.splice(1, 1);
+    } else {
+      data.tri.splice(0, 1);
+    }
+  }
+}
+
+function ReplaceBottomCriteria0(d) {
+  if (data.tri.length == 3) {
+    console.log(d);
+  } else {
+    if (d.newIndex === 0) {
+      data.tri[2] = data.tri[0];
+      data.tri.splice(0, 1);
+    } else {
+      data.tri[2] = data.tri[1];
+      data.tri.splice(1, 1);
+    }
+  }
+}
+
+function ReplaceBottomCriteria1(d) {
+  if (data.tri.length == 3) {
+    console.log(d);
+  } else {
+    if (d.newIndex === 0) {
+      data.tri[3] = data.tri[0];
+      data.tri.splice(0, 1);
+    } else {
+      data.tri[3] = data.tri[1];
+      data.tri.splice(1, 1);
+    }
+  }
 }
 </script>
 
