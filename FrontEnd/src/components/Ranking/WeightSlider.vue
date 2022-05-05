@@ -1,5 +1,8 @@
 <template>
-  <div class="slider-block" v-if="top.length > 0 && bottom.length > 0">
+  <div
+    class="slider-block"
+    v-if="data.top.length > 0 && data.bottom.length > 0"
+  >
     <div>
       <!-- other -->
       <vue-draggable-next
@@ -45,10 +48,10 @@
       <!-- slider top end -->
       <vue-draggable-next
         class="slider-ends"
-        :list="data.topCriterias"
+        :list="data.top"
         :group="{ name: 'all' }"
       >
-        <template v-for="c in top" :key="c">
+        <template v-for="c in data.top" :key="c">
           <div
             :style="{
               '--strip-width': `${(c.weight / top_percentage_sum) * 100}%`,
@@ -74,20 +77,16 @@
       <!-- slider bottom end -->
       <vue-draggable-next
         class="slider-ends"
-        :list="data.bottomCriterias"
+        :list="data.bottom"
         :group="{ name: 'all' }"
       >
-        <template v-for="c in bottom" :key="c">
+        <template v-for="c in data.bottom" :key="c">
           <div
             :style="{
               '--strip-width': `${(c.weight / bottom_percentage_sum) * 100}%`,
               '--strip-color': c.color,
             }"
-          >
-            <div>
-              {{ c.name }}
-            </div>
-          </div>
+          ></div>
         </template>
       </vue-draggable-next>
     </div>
@@ -115,66 +114,57 @@ const props = defineProps({
 });
 
 const data = reactive({
-  topCriterias: props.topCriterias,
-  bottomCriterias: props.bottomCriterias,
+  top: store.GetCriterias(props.topCriterias),
+  bottom: store.GetCriterias(props.bottomCriterias),
 });
 
+// data.top = store.GetCriterias(props.topCriterias);
+// data.bottom = store.GetCriterias(props.bottomCriterias);
+
 const include_names = computed(() =>
-  data.topCriterias.concat(data.bottomCriterias)
+  data.bottom.map((d) => d.name).concat(data.top.map((d) => d.name))
 );
 
-const top = computed(() => store.GetCriterias(data.topCriterias));
-const bottom = computed(() => store.GetCriterias(data.bottomCriterias));
 const exclude_criterias = computed(() =>
   store.GetCriterias(store.GetCriteriaNames(include_names.value))
 );
 
 const current_weight_overall = computed(() => {
   let sum = 0;
-  top.value.forEach((x) => (sum += x.weight));
-  bottom.value.forEach((x) => (sum += x.weight));
+  data.top.forEach((x) => (sum += x.weight));
+  data.bottom.forEach((x) => (sum += x.weight));
   return sum;
 });
 
 const bottom_slider_percentage = computed({
   get() {
     let sum = 0;
-    bottom.value.forEach((x) => (sum += x.weight));
+    data.bottom.forEach((x) => (sum += x.weight));
     return sum / current_weight_overall.value;
   },
   set(value) {
     let old_value = bottom_slider_percentage.value;
     let change = value / old_value;
 
-    for (let i = 0; i < bottom.value.length; i++) {
-      bottom.value[i].weight *= change;
+    for (let i = 0; i < data.bottom.length; i++) {
+      data.bottom[i].weight *= change;
     }
 
-    for (let i = 0; i < top.value.length; i++) {
-      top.value[i].weight *= (1 - value) / (1 - old_value);
+    for (let i = 0; i < data.top.length; i++) {
+      data.top[i].weight *= (1 - value) / (1 - old_value);
     }
   },
 });
 
 const bottom_percentage_sum = computed(() => {
   let sum = 0;
-  for (let i = 0; i < data.bottomCriterias.length; i++) {
-    const c = store.GetCriteria(data.bottomCriterias[i]);
-    if (c) {
-      sum += c.weight;
-    }
-  }
+  data.bottom.forEach((d) => (sum += d.weight));
   return sum;
 });
 
 const top_percentage_sum = computed(() => {
   let sum = 0;
-  for (let i = 0; i < data.topCriterias.length; i++) {
-    const c = store.GetCriteria(data.topCriterias[i]);
-    if (c) {
-      sum += c.weight;
-    }
-  }
+  data.top.forEach((d) => (sum += d.weight));
   return sum;
 });
 </script>
@@ -258,7 +248,7 @@ const top_percentage_sum = computed(() => {
       padding-left: calc(var(--strip-width) / 4);
       padding-right: calc(var(--strip-width) / 4);
 
-      transform: scale(1, 1.5) translate(0,-20%);
+      transform: scale(1, 1.5) translate(0, -20%);
     }
     &:active {
       cursor: grabbing;
