@@ -19,7 +19,7 @@
     </div>
 
     <div class="table">
-      <div
+      <!-- <div
         class="table-content"
         v-for="record in props.origin_records"
         :key="record._id"
@@ -37,7 +37,28 @@
           " , " +
           record.deal_price
         }}
+      </div> -->
+      <div class="table-content"
+        v-for="item in ranking_score"
+        :key="item.index">
+        
+        <div class="table-content-block">
+          <span > {{props.origin_records[item.index].block}}  </span>
+        </div>
+
+        <div class="table-content-weighted" 
+          v-for="d in enabled_strip"
+          :key="d.name"
+          :style="{
+          '--strip-color': d.color,
+          '--strip-width': `${d.weight / strip_percentage_sum * data.scaled_records[item.index][d.name] * data.origin_bar_width}px`,
+        }"
+        >
+          {{props.origin_records[item.index][d.name]}}
+        </div>
+
       </div>
+      
     </div>
 
     <el-dialog v-model="data.mapping_dialog_visible" title="Data Mapping">
@@ -84,8 +105,10 @@ const props = defineProps({
 
 // the reactive data
 const data = reactive({
+  origin_bar_width: 1000,
   mapping_dialog_visible: false,
-  // ranking_score: [],
+  // ranking_score: null, // todo: need to be recalculate！！！！！！！！！！！！！！！！！！！
+  scaled_records: [], // the scaled value of each origin record
 });
 
 const nominal_attr_name = ["direction", "decoration", "position", "type"];
@@ -93,12 +116,11 @@ const scale_list = new Map(); // the scale of each attr
 
 // Add default criteria, this should be name of records criteria. Like price, area etc.
 // name, color, enabled(default is disabled)
-
 let criteria = [];
 criteria.push(store.CreateCriteria("area", "#a6cee3", true));
-criteria.push(store.CreateCriteria("direction", "#ffff99", true));
+criteria.push(store.CreateCriteria("direction", "#ffff99"));
 criteria.push(store.CreateCriteria("decoration", "#1f78b4"));
-criteria.push(store.CreateCriteria("deal_price", "#b2df8a"));
+criteria.push(store.CreateCriteria("deal_price", "#b2df8a", true));
 criteria.push(store.CreateCriteria("unit_price", "#33a02c", true));
 criteria.push(store.CreateCriteria("position", "#fb9a99"));
 criteria.push(store.CreateCriteria("room", "#e31a1c"));
@@ -124,6 +146,7 @@ watch(
       CalculateScale(attr);
       CalculateScaledRecords(attr);
     });
+    // data.ranking_score = computed_ranking_score()
   }
 );
 
@@ -148,10 +171,9 @@ watch(
     } else {
       // delete an attr but try to keep the calculated values, so do nothing
     }
-  }
+  },
+  {deep: true}
 );
-
-const scaled_records = []; // the scaled value of each origin record
 
 function CalculateScale(name) {
   if (nominal_attr_name.indexOf(name) == -1) {
@@ -164,30 +186,69 @@ function CalculateScale(name) {
 
     let scale = d3.scaleLinear().range([0, 1]).domain([min, max]);
     scale_list.set(name, scale);
-  } else {
+  } 
+  else {
     // todo: nominal
+    if (name == "direction") { // todo: just test!!!!!!!!!!
+      let scale = function (input) {
+        if (input.includes("南")) return 0.3
+        else return 1
+      }
+      scale_list.set(name, scale);
+    }  
   }
 }
 
 function CalculateScaledRecords(name) {
-  if (nominal_attr_name.indexOf(name) != -1) return; //todo: nominal
-
   let value_list = props.origin_records.map((record) => record[name]);
-  if (scaled_records.length == 0) {
+  if (data.scaled_records.length == 0) {
     // the first time to calculate, create
     for (let i = 0; i < value_list.length; i++) {
       let obj = new Object();
       obj[name] = scale_list.get(name)(value_list[i]);
-      scaled_records.push(obj);
+      data.scaled_records.push(obj);
     }
   } else {
     for (let i = 0; i < value_list.length; i++) {
-      scaled_records[i][name] = scale_list.get(name)(value_list[i]);
+      data.scaled_records[i][name] = scale_list.get(name)(value_list[i]);
     }
   }
-
-  console.log("scale_records", scaled_records);
+  // console.log("scale_records", data.scaled_records);
 }
+
+const ranking_score = computed ( () => {
+  let scores = []
+  for (let i=0; i<data.scaled_records.length; i++) {
+    let record = data.scaled_records[i]
+    let s = 0
+    for (let j=0; j<enabled_strip.value.length; j++) {
+      let d = enabled_strip.value[j]
+      s += record[d.name] * d.weight
+    }
+    let obj = {index: i, score: s}
+    scores.push(obj)
+  }
+  console.log("computed_ranking_score", scores)
+
+ scores.sort((a,b)=>{ return a.score-b.score})
+  return scores
+})
+
+// function computed_ranking_score () {
+//   let scores = []
+//   for (let i=0; i<data.scaled_records.length; i++) {
+//     let record = data.scaled_records[i]
+//     let s = 0
+//     for (let j=0; j<enabled_strip.value.length; j++) {
+//       let d = enabled_strip.value[j]
+//       s += record[d.name] * d.weight
+//     }
+//     let obj = {index: i, score: s}
+//     scores.push(obj)
+//   }
+//   console.log("computed_ranking_score", scores)
+//   return scores
+// }
 
 function HandleConfirmMapping() {
   data.mapping_dialog_visible = false;
@@ -204,16 +265,39 @@ function HandleConfirmMapping() {
 .table {
   position: relative;
   margin: 20px;
-  height: 95%;
+  height: 90%;
   width: 98%;
   overflow: scroll;
 }
 .table-content {
   text-align: left;
-  height: fit-content;
-  margin: 5px;
-  padding: 5px;
+  height: 30px;
+  border-bottom: solid #eaeaea 2px;
+  // margin: 5px;
+
   background-color: rgb(255, 255, 255);
+}
+.table-content-block {
+  width:15%; 
+  height:100%;
+  border-right: solid 2px #eaeaea; 
+  overflow:hidden; 
+  white-space: nowrap; 
+  // padding-top: 5px;
+  padding-left: 5px;
+  display: inline-block;
+}
+.table-content-weighted {
+  height:100%;
+  overflow:hidden; 
+  white-space: nowrap; 
+  // padding-top: 5px;
+  // padding-left: 5px;
+  display: inline-block;
+  // border-bottom: solid 2px #eaeaea; 
+
+  background-color: var(--strip-color);
+  width: var(--strip-width);
 }
 .weight-strip {
   display: flex;

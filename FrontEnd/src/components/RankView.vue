@@ -1,7 +1,8 @@
 <template>
   <div id="weight-view">
     <div class="weight-view-frame">
-      <line-up :origin_records="data.newest_records"></line-up>
+      <line-up :origin_records="data.newest_records.filter((d) => (d.area < 30))"></line-up>
+      <!-- <line-up :origin_records="data.newest_records"></line-up> -->
       <weight-lifter></weight-lifter>
     </div>
   </div>
@@ -21,7 +22,6 @@ const data = reactive({
 onMounted(() => {
   GetNewestRecords().then((res) => {
     data.newest_records = res;
-    console.log("dataaaaa", res)
   });
 });
 </script>
