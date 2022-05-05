@@ -43,7 +43,7 @@
         :key="item.index">
         
         <div class="table-content-block">
-          {{props.origin_records[item.index].block}} 
+          <span > {{props.origin_records[item.index].block}}  </span>
         </div>
 
         <div class="table-content-weighted" 
@@ -266,17 +266,18 @@ function HandleConfirmMapping() {
   border-right: solid 2px #eaeaea; 
   overflow:hidden; 
   white-space: nowrap; 
-  padding-top: 5px;
+  // padding-top: 5px;
   padding-left: 5px;
   display: inline-block;
 }
 .table-content-weighted {
   height:100%;
-  // overflow:hidden; 
+  overflow:hidden; 
   white-space: nowrap; 
-  padding-top: 5px;
-  padding-left: 5px;
+  // padding-top: 5px;
+  // padding-left: 5px;
   display: inline-block;
+  // border-bottom: solid 2px #eaeaea; 
 
   background-color: var(--strip-color);
   width: var(--strip-width);
