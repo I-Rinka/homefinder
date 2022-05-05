@@ -1,16 +1,22 @@
 <template>
   <div class="triangle-block">
     <div class="top-ends">
-      <vue-draggable-next class="global-weight-hinter" :group="{ name: 'all' }">
-        <!-- :list="exclude_criterias" -->
+      <vue-draggable-next
+        class="global-weight-hinter"
+        :group="{ name: 'all' }"
+        :list="exclude_criterias"
+      >
         <div
+          v-for="c in exclude_criterias"
+          :key="c"
           class="reserved"
           :style="{
-            // '--strip-color': c.color,
-            '--strip-width': `${0}%`,
+            '--strip-color': c.color,
+            '--strip-width': `${100 * c.weight}%`,
           }"
         >
           <el-tooltip
+            :content="c.name"
             :popper-options="{
               modifiers: [
                 {
@@ -33,7 +39,7 @@
         <div
           class="current"
           :style="{
-            '--strip-width': `${100}%`,
+            '--strip-width': `${100 * current_weight_overall}%`,
           }"
         ></div>
       </vue-draggable-next>
@@ -109,7 +115,7 @@
 </template>
 
 <script setup>
-import { reactive } from "@vue/reactivity";
+import { reactive, computed } from "@vue/reactivity";
 import { useStore } from "../store/weight";
 import { VueDraggableNext } from "vue-draggable-next";
 
@@ -125,6 +131,18 @@ const data = reactive({
   tri: store.GetCriterias(props.criterias),
 });
 
+const include_names = computed(() => data.tri.map((d) => d.name));
+
+const exclude_criterias = computed(() =>
+  store.GetCriterias(store.GetCriteriaNames(include_names.value))
+);
+
+const current_weight_overall = computed(() => {
+  let sum = 0;
+  data.tri.forEach((x) => (sum += x.weight));
+  return sum;
+});
+
 function Root3(number) {
   return Math.sqrt(3) * number;
 }
@@ -135,8 +153,6 @@ function Root3(number) {
   align-items: center;
   margin-left: 30px;
   margin-right: 30px;
-  position: relative;
-  z-index: 0;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
   .el-slider {
     position: relative;
@@ -172,7 +188,6 @@ function Root3(number) {
     height: 3vh;
     background-color: var(--strip-color);
     width: var(--strip-width);
-
     div {
       font-size: 1.5vh;
       opacity: 0;
