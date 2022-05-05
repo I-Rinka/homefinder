@@ -107,8 +107,39 @@ const props = defineProps({
 const data = reactive({
   origin_bar_width: 1000,
   mapping_dialog_visible: false,
-  // ranking_score: null, // todo: need to be recalculate！！！！！！！！！！！！！！！！！！！
   scaled_records: [], // the scaled value of each origin record
+
+  quantitative_mapping_type: // true: positive; false: negative 
+  // todo: user interaction
+  {
+    "area":false, 
+    "deal_price":true, 
+    "unit_price":true, 
+    "room":false, 
+    "hall":false, 
+    "block_height":false, 
+    "built_year":false
+  },  
+
+  nominal_mapping_function: // todo: user interaction
+  {
+    "direction": function (input) {
+      if (input.includes("南")) return 0.3
+      else return 1
+    }, 
+    "decoration": function (input) {
+      if (input.includes("精装")) return 0.3
+      else return 1
+    },
+    "position":function (input) {
+      if (input.includes("中楼层")) return 0.3
+      else return 1
+    }, 
+    "type":function (input) {
+      if (input.includes("板楼")) return 0.3
+      else return 1
+    }, 
+  }
 });
 
 const nominal_attr_name = ["direction", "decoration", "position", "type"];
@@ -143,10 +174,9 @@ watch(
   () => {
     let default_attr_list = enabled_strip.value.map((s) => s.name);
     default_attr_list.forEach((attr) => {
-      CalculateScale(attr);
+      HandleScale(attr);
       CalculateScaledRecords(attr);
     });
-    // data.ranking_score = computed_ranking_score()
   }
 );
 
@@ -162,7 +192,7 @@ watch(
           if (scale_list.has(new_list[i])) {
           } // already have scale, don't calculate again
           else {
-            CalculateScale(new_list[i]); // todo: need user interaction
+            HandleScale(new_list[i]); // todo: need user interaction
             CalculateScaledRecords(new_list[i]);
           }
           break;
@@ -175,29 +205,53 @@ watch(
   {deep: true}
 );
 
-function CalculateScale(name) {
-  if (nominal_attr_name.indexOf(name) == -1) {
-    // quantitative
-    let value_list = props.origin_records.map((record) => record[name]);
-    let min = Math.min(...value_list);
-    let max = Math.max(...value_list);
-
-    // todo: user choose between negative and positive correlation
-
-    let scale = d3.scaleLinear().range([0, 1]).domain([min, max]);
-    scale_list.set(name, scale);
-  } 
-  else {
-    // todo: nominal
-    if (name == "direction") { // todo: just test!!!!!!!!!!
-      let scale = function (input) {
-        if (input.includes("南")) return 0.3
-        else return 1
-      }
-      scale_list.set(name, scale);
-    }  
+function HandleScale(name) {
+  if (nominal_attr_name.indexOf(name) == -1) {  // quantitative
+    CalculateQuantitativeScale(name, data.quantitative_mapping_type[name])
+  }
+  else {  // nominal
+    scale_list.set(name, data.nominal_mapping_function[name]);
   }
 }
+
+function CalculateQuantitativeScale(name, is_positive_correlation) {
+  let value_list = props.origin_records.map((record) => record[name]);
+  let min = Math.min(...value_list);
+  let max = Math.max(...value_list);
+
+  let scale = d3.scaleLinear().range([0, 1])
+  if (is_positive_correlation) {
+    scale.domain([min, max])
+  }
+  else {
+    scale.domain([max, min])
+  }
+  scale_list.set(name, scale);
+}
+
+// function CalculateScale(name) {
+//   if (nominal_attr_name.indexOf(name) == -1) {
+//     // quantitative
+//     let value_list = props.origin_records.map((record) => record[name]);
+//     let min = Math.min(...value_list);
+//     let max = Math.max(...value_list);
+
+//     // todo: user choose between negative and positive correlation
+
+//     let scale = d3.scaleLinear().range([0, 1]).domain([min, max]);
+//     scale_list.set(name, scale);
+//   } 
+//   else {
+//     // todo: nominal
+//     if (name == "direction") { // todo: just test!!!!!!!!!!
+//       let scale = function (input) {
+//         if (input.includes("南")) return 0.3
+//         else return 1
+//       }
+//       scale_list.set(name, scale);
+//     }  
+//   }
+// }
 
 function CalculateScaledRecords(name) {
   let value_list = props.origin_records.map((record) => record[name]);
@@ -213,7 +267,6 @@ function CalculateScaledRecords(name) {
       data.scaled_records[i][name] = scale_list.get(name)(value_list[i]);
     }
   }
-  // console.log("scale_records", data.scaled_records);
 }
 
 const ranking_score = computed ( () => {
@@ -233,22 +286,6 @@ const ranking_score = computed ( () => {
  scores.sort((a,b)=>{ return a.score-b.score})
   return scores
 })
-
-// function computed_ranking_score () {
-//   let scores = []
-//   for (let i=0; i<data.scaled_records.length; i++) {
-//     let record = data.scaled_records[i]
-//     let s = 0
-//     for (let j=0; j<enabled_strip.value.length; j++) {
-//       let d = enabled_strip.value[j]
-//       s += record[d.name] * d.weight
-//     }
-//     let obj = {index: i, score: s}
-//     scores.push(obj)
-//   }
-//   console.log("computed_ranking_score", scores)
-//   return scores
-// }
 
 function HandleConfirmMapping() {
   data.mapping_dialog_visible = false;
