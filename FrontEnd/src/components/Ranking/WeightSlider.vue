@@ -51,7 +51,7 @@
       <vue-draggable-next
         class="slider-ends"
         :list="data.top"
-        :group="{ name: 'all' }"
+        :group="{ name: 'all', pull: !(data.top.length == 1), put: true }"
       >
         <template v-for="c in data.top" :key="c">
           <div
@@ -75,7 +75,7 @@
       <vue-draggable-next
         class="slider-ends"
         :list="data.bottom"
-        :group="{ name: 'all' }"
+        :group="{ name: 'all', pull: !(data.bottom.length == 1), put: true }"
       >
         <template v-for="c in data.bottom" :key="c">
           <div
