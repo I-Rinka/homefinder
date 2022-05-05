@@ -1,13 +1,13 @@
 <template>
-  <div class="slider-block">
+  <div class="slider-block" v-if="top.length > 0 && bottom.length > 0">
     <div>
       <!-- other -->
       <vue-draggable-next
         class="global-weight-hinter"
-        :list="store.GetCriterisNames(include_props)"
+        :list="store.GetCriteriaNames(include_names)"
         :group="{ name: 'all' }"
       >
-        <template v-for="c in exclude_criterias()" :key="c">
+        <template v-for="c in exclude_criterias" :key="c">
           <div
             class="reserved"
             :style="{
@@ -19,13 +19,13 @@
               {{ c.name }}
             </div>
           </div>
-          <div
-            class="current"
-            :style="{
-              '--strip-width': `${100 * current_weight_overall}%`,
-            }"
-          ></div>
         </template>
+        <div
+          class="current"
+          :style="{
+            '--strip-width': `${100 * current_weight_overall}%`,
+          }"
+        ></div>
       </vue-draggable-next>
 
       <!-- slider top end -->
@@ -37,8 +37,7 @@
         <template v-for="c in top" :key="c">
           <div
             :style="{
-              backgroundColor: c.color,
-              width: `${(c.weight / top_percentage_sum) * 100}%`,
+              '--strip-width': `${(c.weight / top_percentage_sum) * 100}%`,
               '--strip-color': c.color,
             }"
           >
@@ -67,8 +66,7 @@
         <template v-for="c in bottom" :key="c">
           <div
             :style="{
-              backgroundColor: c.color,
-              width: `${(c.weight / bottom_percentage_sum) * 100}%`,
+              '--strip-width': `${(c.weight / bottom_percentage_sum) * 100}%`,
               '--strip-color': c.color,
             }"
           >
@@ -79,35 +77,43 @@
         </template>
       </vue-draggable-next>
     </div>
+    <!-- <el-button @click="PrintData">Print Data</el-button> -->
   </div>
 </template>
 
-<script lang="ts" setup>
-import { computed, reactive } from "@vue/runtime-core";
+<script setup>
+import { computed, reactive, toRaw } from "@vue/runtime-core";
 import { useStore } from "../store/weight";
 import { VueDraggableNext } from "vue-draggable-next";
 
+function PrintData() {
+  console.log(include_names.value);
+}
+
 const store = useStore();
-const props = withDefaults(
-  defineProps<{
-    topCriterias: string[];
-    bottomCriterias: string[];
-  }>(),
-  {}
-);
+const props = defineProps({
+  topCriterias: {
+    type: Array,
+  },
+  bottomCriterias: {
+    type: Array,
+  },
+});
 
 const data = reactive({
   topCriterias: props.topCriterias,
   bottomCriterias: props.bottomCriterias,
 });
 
-const include_props = computed(() =>
+const include_names = computed(() =>
   data.topCriterias.concat(data.bottomCriterias)
 );
 
 const top = computed(() => store.GetCriterias(data.topCriterias));
 const bottom = computed(() => store.GetCriterias(data.bottomCriterias));
-const exclude_criterias = () => store.GetCriterias(include_props.value);
+const exclude_criterias = computed(() =>
+  store.GetCriterias(store.GetCriteriaNames(include_names.value))
+);
 
 const current_weight_overall = computed(() => {
   let sum = 0;
@@ -122,7 +128,7 @@ const bottom_slider_percentage = computed({
     bottom.value.forEach((x) => (sum += x.weight));
     return sum / current_weight_overall.value;
   },
-  set(value: number) {
+  set(value) {
     let old_value = bottom_slider_percentage.value;
     let change = value / old_value;
 
@@ -185,6 +191,8 @@ const top_percentage_sum = computed(() => {
   z-index: 0;
   div {
     height: 3vh;
+    background-color: var(--strip-color);
+    width: var(--strip-width);
 
     div {
       font-size: 1.5vh;
@@ -223,10 +231,10 @@ const top_percentage_sum = computed(() => {
   .reserved {
     margin: 0;
     width: var(--strip-width);
+    background-color: var(--strip-color);
     height: 1vh;
     cursor: grab;
     transition-property: padding-left, padding-right;
-    background-color: var(--strip-color);
     transition: 0.5s;
     padding-left: 0;
     padding-right: 0;
