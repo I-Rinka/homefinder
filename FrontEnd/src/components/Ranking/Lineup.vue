@@ -39,7 +39,7 @@
         }}
       </div> -->
       <div class="table-content"
-        v-for="item in data.ranking_score"
+        v-for="item in ranking_score"
         :key="item.index">
         
         <div class="table-content-block">
@@ -107,7 +107,7 @@ const props = defineProps({
 const data = reactive({
   origin_bar_width: 1000,
   mapping_dialog_visible: false,
-  ranking_score: null, // todo: need to be recalculate！！！！！！！！！！！！！！！！！！！
+  // ranking_score: null, // todo: need to be recalculate！！！！！！！！！！！！！！！！！！！
   scaled_records: [], // the scaled value of each origin record
 });
 
@@ -146,7 +146,7 @@ watch(
       CalculateScale(attr);
       CalculateScaledRecords(attr);
     });
-    data.ranking_score = computed_ranking_score()
+    // data.ranking_score = computed_ranking_score()
   }
 );
 
@@ -216,8 +216,7 @@ function CalculateScaledRecords(name) {
   // console.log("scale_records", data.scaled_records);
 }
 
-
-function computed_ranking_score () {
+const ranking_score = computed ( () => {
   let scores = []
   for (let i=0; i<data.scaled_records.length; i++) {
     let record = data.scaled_records[i]
@@ -230,8 +229,26 @@ function computed_ranking_score () {
     scores.push(obj)
   }
   console.log("computed_ranking_score", scores)
+
+ scores.sort((a,b)=>{ return a.score-b.score})
   return scores
-}
+})
+
+// function computed_ranking_score () {
+//   let scores = []
+//   for (let i=0; i<data.scaled_records.length; i++) {
+//     let record = data.scaled_records[i]
+//     let s = 0
+//     for (let j=0; j<enabled_strip.value.length; j++) {
+//       let d = enabled_strip.value[j]
+//       s += record[d.name] * d.weight
+//     }
+//     let obj = {index: i, score: s}
+//     scores.push(obj)
+//   }
+//   console.log("computed_ranking_score", scores)
+//   return scores
+// }
 
 function HandleConfirmMapping() {
   data.mapping_dialog_visible = false;
