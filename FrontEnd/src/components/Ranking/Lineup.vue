@@ -239,7 +239,6 @@ function HandleConfirmMapping() {
     transform: scale(0, 0);
   }
   to {
-    transform: scale(1, 1);
   }
 }
 </style>

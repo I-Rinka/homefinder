@@ -11,14 +11,14 @@
         :top-criterias="['area']"
         :bottom-criterias="['unit_price', 'deal_price']"
       ></weight-slider>
-      <weight-slider
+      <!-- <weight-slider
         :top-criterias="['room', 'hall']"
         :bottom-criterias="['position', 'block_height']"
       ></weight-slider>
       <weight-slider
         :top-criterias="['type', 'decoration', 'area']"
         :bottom-criterias="['built_year']"
-      ></weight-slider>
+      ></weight-slider> -->
     </div>
   </div>
 </template>

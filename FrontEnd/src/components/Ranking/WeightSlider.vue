@@ -7,25 +7,26 @@
         :list="store.GetCriterisNames(include_props)"
         :group="{ name: 'all' }"
       >
-        <div
-          class="reserved"
-          v-for="c in store.GetCriterisNames(include_props)"
-          :style="{
-            '--strip-color': store.GetCriteria(c).color,
-            '--strip-width': `${100 * store.GetCriteria(c).weight}%`,
-          }"
-          :key="store.GetCriteria(c).name"
-        >
-          <div>
-            {{ store.GetCriteria(c).name }}
+        <template v-for="c in data.bottomCriterias" :key="c">
+          <div
+            class="reserved"
+            v-if="store.GetCriteria(c)"
+            :style="{
+              '--strip-color': store.GetCriteria(c).color,
+              '--strip-width': `${100 * store.GetCriteria(c).weight}%`,
+            }"
+          >
+            <div>
+              {{ store.GetCriteria(c).name }}
+            </div>
           </div>
-        </div>
-        <div
-          class="current"
-          :style="{
-            '--strip-width': `${100 * current_weight_overall}%`,
-          }"
-        ></div>
+          <div
+            class="current"
+            :style="{
+              '--strip-width': `${100 * current_weight_overall}%`,
+            }"
+          ></div>
+        </template>
       </vue-draggable-next>
 
       <!-- slider top end -->
@@ -34,21 +35,22 @@
         :list="data.topCriterias"
         :group="{ name: 'all' }"
       >
-        <div
-          v-for="c in data.topCriterias"
-          :style="{
-            backgroundColor: store.GetCriteria(c).color,
-            width: `${
-              (store.GetCriteria(c).weight / top_percentage_sum) * 100
-            }%`,
-            '--strip-color': store.GetCriteria(c).color,
-          }"
-          :key="store.GetCriteria(c).name"
-        >
-          <div>
-            {{ store.GetCriteria(c).name }}
+        <template v-for="c in data.bottomCriterias" :key="c">
+          <div
+            v-if="store.GetCriteria(c)"
+            :style="{
+              backgroundColor: store.GetCriteria(c).color,
+              width: `${
+                (store.GetCriteria(c).weight / top_percentage_sum) * 100
+              }%`,
+              '--strip-color': store.GetCriteria(c).color,
+            }"
+          >
+            <div>
+              {{ store.GetCriteria(c).name }}
+            </div>
           </div>
-        </div>
+        </template>
       </vue-draggable-next>
 
       <el-slider
@@ -66,21 +68,22 @@
         :list="data.bottomCriterias"
         :group="{ name: 'all' }"
       >
-        <div
-          v-for="c in data.bottomCriterias"
-          :style="{
-            backgroundColor: store.GetCriteria(c).color,
-            width: `${
-              (store.GetCriteria(c).weight / bottom_percentage_sum) * 100
-            }%`,
-            '--strip-color': store.GetCriteria(c).color,
-          }"
-          :key="store.GetCriteria(c).name"
-        >
-          <div>
-            {{ store.GetCriteria(c).name }}
+        <template v-for="c in data.bottomCriterias" :key="c">
+          <div
+            v-if="store.GetCriteria(c)"
+            :style="{
+              backgroundColor: store.GetCriteria(c).color,
+              width: `${
+                (store.GetCriteria(c).weight / bottom_percentage_sum) * 100
+              }%`,
+              '--strip-color': store.GetCriteria(c).color,
+            }"
+          >
+            <div>
+              {{ store.GetCriteria(c).name }}
+            </div>
           </div>
-        </div>
+        </template>
       </vue-draggable-next>
     </div>
   </div>
@@ -142,8 +145,10 @@ const bottom_slider_percentage = computed({
 const bottom_percentage_sum = computed(() => {
   let sum = 0;
   for (let i = 0; i < data.bottomCriterias.length; i++) {
-    const c = data.bottomCriterias[i];
-    sum += store.GetCriteria(c).weight;
+    const c = store.GetCriteria(data.bottomCriterias[i]);
+    if (c) {
+      sum += c.weight;
+    }
   }
   return sum;
 });
@@ -151,8 +156,10 @@ const bottom_percentage_sum = computed(() => {
 const top_percentage_sum = computed(() => {
   let sum = 0;
   for (let i = 0; i < data.topCriterias.length; i++) {
-    const c = data.topCriterias[i];
-    sum += store.GetCriteria(c).weight;
+    const c = store.GetCriteria(data.topCriterias[i]);
+    if (c) {
+      sum += c.weight;
+    }
   }
   return sum;
 });
