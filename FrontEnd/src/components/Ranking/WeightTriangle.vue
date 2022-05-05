@@ -74,6 +74,9 @@
         style="height: 25vh; width: 100%"
         viewBox="-3 0 206 174"
         xmlns="http://www.w3.org/2000/svg"
+        :style="{
+          cursor: !data.slider.pressed ? 'default' : 'move',
+        }"
       >
         <polygon
           class="triangle"
@@ -82,18 +85,60 @@
           @mousemove="MoveSlider"
           @click="PrintData"
         />
-
-        <polygon
+        <line
+          x1="100"
+          y1="8"
+          :x2="`${data.slider.x - 3}px`"
+          :y2="`${data.slider.y - 5}px`"
+          style="
+            stroke-width: 2;
+            stroke-linecap: round;
+            filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3));
+            opacity: 0.8;
+            pointer-events: none;
+          "
+          :style="{ stroke: data.tri[0].color }"
+        />
+        <line
+          x1="6"
+          :y1="`${Root3(100) - 3}`"
+          :x2="`${data.slider.x - 8}px`"
+          :y2="`${data.slider.y + 4}px`"
+          style="
+            stroke-width: 2;
+            stroke-linecap: round;
+            filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3));
+            opacity: 0.8;
+            pointer-events: none;
+          "
+          :style="{ stroke: data.tri[1].color }"
+        />
+        <line
+          x1="194"
+          :y1="`${Root3(100) - 3}`"
+          :x2="`${data.slider.x + 2}px`"
+          :y2="`${data.slider.y + 4}px`"
+          style="
+            stroke-width: 2;
+            stroke-linecap: round;
+            filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3));
+            opacity: 0.8;
+            pointer-events: none;
+          "
+          :style="{ stroke: data.tri[2].color }"
+        />
+        <circle
           class="slider"
           ref="triSlider"
-          :style="{
-            transform: `translate(${data.slider.x}px,${data.slider.y}px)`,
-          }"
-          :points="`${0 - 7.5},${Root3(5)} ${5 - 7.5},0 ${10 - 7.5},${Root3(
-            5
-          )} }`"
-          vector-effect="non-scaling-stroke"
           @pointerdown="PressSlider"
+          :style="{
+            '--slider-x': `${data.slider.x - 0.5}px`,
+            '--slider-y': `${data.slider.y + 3}px`,
+            pointerEvents: !data.slider.pressed ? 'all' : 'none',
+          }"
+          cx="-2.5"
+          cy="-2.5"
+          r="5"
         />
       </svg>
       <!-- <div class="slider-stage" @click="PrintData"></div> -->
@@ -158,12 +203,15 @@ const props = defineProps({
 
 const store = useStore();
 
+function Root3(number) {
+  return Math.sqrt(3) * number;
+}
 const data = reactive({
   tri: store.GetCriterias(props.criterias),
   slider: {
     pressed: false,
-    x: 90,
-    y: 90,
+    x: 100,
+    y: Root3((100 * 2) / 3),
   },
 });
 
@@ -178,10 +226,6 @@ const current_weight_overall = computed(() => {
   data.tri.forEach((x) => (sum += x.weight));
   return sum;
 });
-
-function Root3(number) {
-  return Math.sqrt(3) * number;
-}
 
 function ReplaceTopCriteria(d) {
   if (data.tri.length == 3) {
@@ -234,6 +278,7 @@ function ReleaseSlider() {
 
 let triSlider = ref(null);
 let triSvg = ref(null);
+
 function MoveSlider(e) {
   if (data.slider.pressed) {
     let XRatio =
@@ -242,6 +287,7 @@ function MoveSlider(e) {
     let YRatio =
       triSlider.value.getBBox().height /
       triSlider.value.getBoundingClientRect().height;
+    console.log(data.slider);
     data.slider.x = e.offsetX * XRatio;
     data.slider.y = e.offsetY * YRatio;
     data.slider.y = data.slider.y > 165 ? 165 : data.slider.y;
@@ -279,12 +325,19 @@ function MoveSlider(e) {
 
 .slider {
   stroke-linejoin: round;
-  fill: #b62422;
-  filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.8));
-  cursor: grab;
+  stroke-width: 2;
+  stroke: #be1500;
+  fill: transparent;
+  filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.2));
+  cursor: move;
+  transform: translate(var(--slider-x), var(--slider-y));
+  transition: 0.5s;
+  &:hover {
+    stroke: #f32e00;
+  }
   &:active {
-    cursor: grabbing;
-    fill: #f33726;
+    transition: 0s;
+    stroke: #f32e00;
   }
 }
 
@@ -299,6 +352,7 @@ function MoveSlider(e) {
 }
 
 .slider-ends {
+  user-select: none;
   box-shadow: 0px 0px 0px 1px grey;
   display: flex;
   height: 3vh;

@@ -12,7 +12,7 @@
         :bottom-criterias="['unit_price', 'direction']"
       ></weight-slider>
       <weight-triangle
-        :criterias="['area', 'unit_price', 'direction']"
+        :criterias="['area', 'unit_price', 'deal_price']"
       ></weight-triangle>
       <!-- <weight-slider
         :top-criterias="['room', 'hall']"

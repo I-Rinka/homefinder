@@ -195,6 +195,7 @@ const top_percentage_sum = computed(() => {
 }
 
 .slider-ends {
+  user-select: none;
   box-shadow: 0px 0px 0px 1px grey;
   display: flex;
   height: 3vh;
