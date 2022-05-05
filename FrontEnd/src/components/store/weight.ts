@@ -25,9 +25,11 @@ export const useStore = defineStore("weight", {
     };
   },
   actions: {
-    GetCriterias(expected_names: Array<string>): Criteria[] {
+    GetCriterias(expected_names: Array<string>, is_all?: boolean): Criteria[] {
       let name_s = new Set(expected_names);
-      return this.criterias.filter((x: Criteria) => name_s.has(x.name));
+      return this.criterias
+        .filter((x: Criteria) => (is_all ? true : x.enabled))
+        .filter((x: Criteria) => name_s.has(x.name));
     },
     GetCriteria(expected_name: string, is_all?: boolean): Criteria {
       const found = this.criterias

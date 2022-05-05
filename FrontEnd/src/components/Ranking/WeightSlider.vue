@@ -7,17 +7,16 @@
         :list="store.GetCriterisNames(include_props)"
         :group="{ name: 'all' }"
       >
-        <template v-for="c in data.bottomCriterias" :key="c">
+        <template v-for="c in exclude_criterias()" :key="c">
           <div
             class="reserved"
-            v-if="store.GetCriteria(c)"
             :style="{
-              '--strip-color': store.GetCriteria(c).color,
-              '--strip-width': `${100 * store.GetCriteria(c).weight}%`,
+              '--strip-color': c.color,
+              '--strip-width': `${100 * c.weight}%`,
             }"
           >
             <div>
-              {{ store.GetCriteria(c).name }}
+              {{ c.name }}
             </div>
           </div>
           <div
@@ -35,19 +34,16 @@
         :list="data.topCriterias"
         :group="{ name: 'all' }"
       >
-        <template v-for="c in data.bottomCriterias" :key="c">
+        <template v-for="c in top" :key="c">
           <div
-            v-if="store.GetCriteria(c)"
             :style="{
-              backgroundColor: store.GetCriteria(c).color,
-              width: `${
-                (store.GetCriteria(c).weight / top_percentage_sum) * 100
-              }%`,
-              '--strip-color': store.GetCriteria(c).color,
+              backgroundColor: c.color,
+              width: `${(c.weight / top_percentage_sum) * 100}%`,
+              '--strip-color': c.color,
             }"
           >
             <div>
-              {{ store.GetCriteria(c).name }}
+              {{ c.name }}
             </div>
           </div>
         </template>
@@ -68,19 +64,16 @@
         :list="data.bottomCriterias"
         :group="{ name: 'all' }"
       >
-        <template v-for="c in data.bottomCriterias" :key="c">
+        <template v-for="c in bottom" :key="c">
           <div
-            v-if="store.GetCriteria(c)"
             :style="{
-              backgroundColor: store.GetCriteria(c).color,
-              width: `${
-                (store.GetCriteria(c).weight / bottom_percentage_sum) * 100
-              }%`,
-              '--strip-color': store.GetCriteria(c).color,
+              backgroundColor: c.color,
+              width: `${(c.weight / bottom_percentage_sum) * 100}%`,
+              '--strip-color': c.color,
             }"
           >
             <div>
-              {{ store.GetCriteria(c).name }}
+              {{ c.name }}
             </div>
           </div>
         </template>
@@ -114,6 +107,7 @@ const include_props = computed(() =>
 
 const top = computed(() => store.GetCriterias(data.topCriterias));
 const bottom = computed(() => store.GetCriterias(data.bottomCriterias));
+const exclude_criterias = () => store.GetCriterias(include_props.value);
 
 const current_weight_overall = computed(() => {
   let sum = 0;

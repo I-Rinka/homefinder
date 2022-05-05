@@ -2,14 +2,14 @@
   <div class="weight-lifter">
     <div class="test">
       <div class="disabled" v-for="d in disabled" :key="d.name">
-        <el-checkbox style="z-index:-0" v-model="d.enabled"></el-checkbox>
+        <el-checkbox style="z-index: -0" v-model="d.enabled"></el-checkbox>
         {{ d.name }}
       </div>
     </div>
     <div class="sliders-container">
       <weight-slider
         :top-criterias="['area']"
-        :bottom-criterias="['unit_price', 'deal_price']"
+        :bottom-criterias="['unit_price', 'direction']"
       ></weight-slider>
       <!-- <weight-slider
         :top-criterias="['room', 'hall']"
@@ -32,7 +32,6 @@ import { computed, onMounted } from "@vue/runtime-core";
 const disabled = computed(() => store.criterias.filter((d) => !d.enabled));
 
 const store = useStore();
-
 </script>
 
 <style lang="less" scoped>
