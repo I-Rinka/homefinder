@@ -29,7 +29,7 @@ import { useStore } from "../store/weight";
 import { reactive } from "@vue/reactivity";
 import { computed, onMounted } from "@vue/runtime-core";
 
-const disabled = computed(() => store.weights.filter((d) => !d.enabled));
+const disabled = computed(() => store.criterias.filter((d) => !d.enabled));
 
 const store = useStore();
 

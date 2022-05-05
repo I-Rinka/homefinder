@@ -18,26 +18,26 @@ class Criteria {
 
 export const useStore = defineStore("weight", {
   state: () => {
-    let weights: Criteria[] = [];
+    let criterias: Criteria[] = [];
     return {
       count: 0,
-      weights: weights,
+      criterias: criterias,
     };
   },
   actions: {
     GetCriterias(expected_names: Array<string>): Criteria[] {
       let name_s = new Set(expected_names);
-      return this.weights.filter((x: Criteria) => name_s.has(x.name));
+      return this.criterias.filter((x: Criteria) => name_s.has(x.name));
     },
     GetCriteria(expected_name: string): Criteria {
-      const found = this.weights.find(
+      const found = this.criterias.find(
         (element) => element.name == expected_name
       );
-      return found as Criteria;
+      return found;
     },
     GetCriterisNames(exclude_names?: string[]) {
       let name_s = new Set(exclude_names);
-      return this.weights
+      return this.criterias
         .filter((x: Criteria) => !name_s.has(x.name))
         .map((x) => x.name);
     },
@@ -47,16 +47,25 @@ export const useStore = defineStore("weight", {
       enabled?: boolean,
       weight?: number
     ) {
-      let reduce_proportion = this.weights.length / (this.weights.length + 1);
+      this.weights.push(this.CreateCriteria(name, color, enabled, weight));
+    },
+    CreateCriteria(
+      name: string,
+      color?: string,
+      enabled?: boolean,
+      weight?: number
+    ): Criteria {
+      let reduce_proportion =
+        this.criterias.length / (this.criterias.length + 1);
 
       let w = weight;
       if (w != undefined && 0 < weight && weight < 1) {
         w = weight;
       } else {
         let sum_weights = 0;
-        for (let i = 0; i < this.weights.length; i++) {
-          this.weights[i].weight *= reduce_proportion;
-          sum_weights += this.weights[i].weight;
+        for (let i = 0; i < this.criterias.length; i++) {
+          this.criterias[i].weight *= reduce_proportion;
+          sum_weights += this.criterias[i].weight;
         }
         w = 1 - sum_weights;
       }
@@ -64,8 +73,7 @@ export const useStore = defineStore("weight", {
       let c = color ? color : "grey";
       let e = enabled ? enabled : false;
 
-      const new_criteria = new Criteria(name, c, e, w);
-      this.weights.push(new_criteria);
+      return new Criteria(name, c, e, w);
     },
   },
 });
