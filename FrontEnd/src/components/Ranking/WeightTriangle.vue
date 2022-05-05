@@ -1,10 +1,10 @@
 <template>
-  <div class="slider-block">
-    <div>
+  <div class="triangle-block">
+    <div class="top-ends">
       <vue-draggable-next
         class="global-weight-hinter"
-        :list="exclude_criterias"
         :group="{ name: 'all' }"
+        :list="exclude_criterias"
       >
         <div
           v-for="c in exclude_criterias"
@@ -43,49 +43,70 @@
           }"
         ></div>
       </vue-draggable-next>
+    </div>
 
-      <!-- slider top end -->
-      <vue-draggable-next
-        class="slider-ends"
-        :list="data.top"
-        :group="{ name: 'all', pull: !(data.top.length == 1), put: true }"
-      >
+    <!-- slider top end -->
+    <div class="top-ends">
+      <vue-draggable-next class="slider-ends" :group="{ name: 'all' }">
         <div
-          v-for="c in data.top"
-          :key="c"
+          v-if="data.tri[0]"
           :style="{
-            '--strip-width': `${(c.weight / top_percentage_sum) * 100}%`,
-            '--strip-color': c.color,
+            '--strip-width': `${100}%`,
+            '--strip-color': data.tri[0].color,
           }"
         >
-          <div :style="{ '--text-length': c.name.length }">{{ c.name }}</div>
+          <div :style="{ '--text-length': data.tri[0].length }">
+            {{ data.tri[0].name }}
+          </div>
+        </div>
+      </vue-draggable-next>
+    </div>
+
+    <div class="triangle-container">
+      <svg
+        style="height: 100%; width: 100%"
+        viewBox="-3 0 206 174"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <polygon
+          class="triangle"
+          :points="`0,${Root3(100)} 100,0 200,${Root3(100)} 0,${Root3(100)}`"
+          vector-effect="non-scaling-stroke"
+        />
+      </svg>
+    </div>
+
+    <div class="bottom-ends">
+      <vue-draggable-next
+        class="slider-ends"
+        :group="{ name: 'all', pull: false }"
+      >
+        <div
+          v-if="data.tri[1]"
+          :style="{
+            '--strip-width': `${100}%`,
+            '--strip-color': data.tri[1].color,
+          }"
+        >
+          <div :style="{ '--text-length': data.tri[1].length }">
+            {{ data.tri[1].name }}
+          </div>
         </div>
       </vue-draggable-next>
 
-      <el-slider
-        v-model="bottom_slider_percentage"
-        vertical
-        height="25vh"
-        :min="0.01"
-        :max="0.99"
-        :step="0.01"
-      />
-
       <vue-draggable-next
         class="slider-ends"
-        :list="data.bottom"
-        :group="{ name: 'all', pull: !(data.bottom.length == 1), put: true }"
+        :group="{ name: 'all', pull: false }"
       >
         <div
-          v-for="c in data.bottom"
-          :key="c"
+          v-if="data.tri[2]"
           :style="{
-            '--strip-width': `${(c.weight / bottom_percentage_sum) * 100}%`,
-            '--strip-color': c.color,
+            '--strip-width': `${100}%`,
+            '--strip-color': data.tri[2].color,
           }"
         >
-          <div :style="{ '--text-length': c.name.length }">
-            {{ c.name }}
+          <div :style="{ '--text-length': data.tri[2].length }">
+            {{ data.tri[2].name }}
           </div>
         </div>
       </vue-draggable-next>
@@ -94,94 +115,41 @@
 </template>
 
 <script setup>
-import {
-  computed,
-  onUnmounted,
-  reactive,
-  toRaw,
-  watch,
-} from "@vue/runtime-core";
+import { reactive, computed } from "@vue/reactivity";
 import { useStore } from "../store/weight";
 import { VueDraggableNext } from "vue-draggable-next";
 
-function PrintData() {
-  console.log(include_names.value);
-}
+const props = defineProps({
+  criterias: {
+    type: Array,
+  },
+});
 
 const store = useStore();
-const props = defineProps({
-  topCriterias: {
-    type: Array,
-  },
-  bottomCriterias: {
-    type: Array,
-  },
-});
 
 const data = reactive({
-  top: store.GetCriterias(props.topCriterias),
-  bottom: store.GetCriterias(props.bottomCriterias),
+  tri: store.GetCriterias(props.criterias),
 });
 
-const include_names = computed(() => {
-  let val = data.bottom.map((d) => d.name).concat(data.top.map((d) => d.name));
-  return val;
-});
+const include_names = computed(() => data.tri.map((d) => d.name));
 
 const exclude_criterias = computed(() =>
   store.GetCriterias(store.GetCriteriaNames(include_names.value))
 );
 
-watch(
-  () => store.GetCriterias([]),
-  () => {
-    data.top = data.top.filter((d) => d.enabled);
-    data.bottom = data.bottom.filter((d) => d.enabled);
-  }
-);
-
 const current_weight_overall = computed(() => {
   let sum = 0;
-  data.top.forEach((x) => (sum += x.weight));
-  data.bottom.forEach((x) => (sum += x.weight));
+  data.tri.forEach((x) => (sum += x.weight));
   return sum;
 });
 
-const bottom_slider_percentage = computed({
-  get() {
-    let sum = 0;
-    data.bottom.forEach((x) => (sum += x.weight));
-    return sum / current_weight_overall.value;
-  },
-  set(value) {
-    let old_value = bottom_slider_percentage.value;
-    let change = value / old_value;
-
-    for (let i = 0; i < data.bottom.length; i++) {
-      data.bottom[i].weight *= change;
-    }
-
-    for (let i = 0; i < data.top.length; i++) {
-      data.top[i].weight *= (1 - value) / (1 - old_value);
-    }
-  },
-});
-
-const bottom_percentage_sum = computed(() => {
-  let sum = 0;
-  data.bottom.forEach((d) => (sum += d.weight));
-  return sum;
-});
-
-const top_percentage_sum = computed(() => {
-  let sum = 0;
-  data.top.forEach((d) => (sum += d.weight));
-  return sum;
-});
+function Root3(number) {
+  return Math.sqrt(3) * number;
+}
 </script>
 
 <style lang="less" scoped>
-.slider-block {
+.triangle-block {
   align-items: center;
   margin-left: 30px;
   margin-right: 30px;
@@ -192,6 +160,19 @@ const top_percentage_sum = computed(() => {
     width: 90px;
     --el-slider-runway-bg-color: #e7eae8;
   }
+}
+.triangle-container {
+  height: 25vh;
+}
+
+.bottom-ends {
+  display: flex;
+  justify-content: space-between;
+}
+
+.top-ends {
+  display: flex;
+  justify-content: center;
 }
 
 .slider-ends {
@@ -211,6 +192,7 @@ const top_percentage_sum = computed(() => {
     background-color: var(--strip-color);
     width: var(--strip-width);
 
+    position: relative;
     div {
       text-align: right;
       position: absolute;
@@ -238,7 +220,6 @@ const top_percentage_sum = computed(() => {
 
 .global-weight-hinter {
   display: flex;
-  margin-left: 5px;
   margin-bottom: 0.9px;
   height: 1vh;
   width: 90px;
@@ -273,5 +254,12 @@ const top_percentage_sum = computed(() => {
     bottom: 0;
     z-index: -1;
   }
+}
+
+.triangle {
+  stroke-linejoin: round;
+  fill: #e7eae8;
+  stroke: gray;
+  stroke-width: 1px;
 }
 </style>
