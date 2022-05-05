@@ -49,8 +49,12 @@
         <div class="table-content-weighted" 
           v-for="d in enabled_strip"
           :key="d.name"
+          :style="{
+          '--strip-color': d.color,
+          '--strip-width': `${d.weight / strip_percentage_sum * data.scaled_records[item.index][d.name] * data.origin_bar_width}px`,
+        }"
         >
-          {{props.origin_records[item.index][d.name] + " : " + data.scaled_records[item.index][d.name] * d.weight + " ; "}}
+          {{props.origin_records[item.index][d.name]}}
         </div>
 
       </div>
@@ -101,9 +105,9 @@ const props = defineProps({
 
 // the reactive data
 const data = reactive({
-  origin_bar_width: 30,
+  origin_bar_width: 1000,
   mapping_dialog_visible: false,
-  ranking_score: null,
+  ranking_score: null, // todo: need to be recalculate！！！！！！！！！！！！！！！！！！！
   scaled_records: [], // the scaled value of each origin record
 });
 
@@ -114,9 +118,9 @@ const scale_list = new Map(); // the scale of each attr
 // name, color, enabled(default is disabled)
 let criteria = [];
 criteria.push(store.CreateCriteria("area", "#a6cee3", true));
-criteria.push(store.CreateCriteria("direction", "#ffff99", true));
+criteria.push(store.CreateCriteria("direction", "#ffff99"));
 criteria.push(store.CreateCriteria("decoration", "#1f78b4"));
-criteria.push(store.CreateCriteria("deal_price", "#b2df8a"));
+criteria.push(store.CreateCriteria("deal_price", "#b2df8a", true));
 criteria.push(store.CreateCriteria("unit_price", "#33a02c", true));
 criteria.push(store.CreateCriteria("position", "#fb9a99"));
 criteria.push(store.CreateCriteria("room", "#e31a1c"));
@@ -187,7 +191,7 @@ function CalculateScale(name) {
     // todo: nominal
     if (name == "direction") { // todo: just test!!!!!!!!!!
       let scale = function (input) {
-        if (input.includes("南")) return 0
+        if (input.includes("南")) return 0.3
         else return 1
       }
       scale_list.set(name, scale);
@@ -268,7 +272,7 @@ function HandleConfirmMapping() {
 }
 .table-content-weighted {
   height:100%;
-  overflow:hidden; 
+  // overflow:hidden; 
   white-space: nowrap; 
   padding-top: 5px;
   padding-left: 5px;
