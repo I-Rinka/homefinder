@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="slider-block"
-    v-if="data.top.length > 0 && data.bottom.length > 0"
-  >
+  <div class="slider-block">
     <div>
       <vue-draggable-next
         class="global-weight-hinter"
@@ -53,14 +50,16 @@
         :list="data.top"
         :group="{ name: 'all', pull: !(data.top.length == 1), put: true }"
       >
-        <template v-for="c in data.top" :key="c">
-          <div
-            :style="{
-              '--strip-width': `${(c.weight / top_percentage_sum) * 100}%`,
-              '--strip-color': c.color,
-            }"
-          ></div>
-        </template>
+        <div
+          v-for="c in data.top"
+          :key="c"
+          :style="{
+            '--strip-width': `${(c.weight / top_percentage_sum) * 100}%`,
+            '--strip-color': c.color,
+          }"
+        >
+          <div :style="{ '--text-length': c.name.length }">{{ c.name }}</div>
+        </div>
       </vue-draggable-next>
 
       <el-slider
@@ -77,21 +76,31 @@
         :list="data.bottom"
         :group="{ name: 'all', pull: !(data.bottom.length == 1), put: true }"
       >
-        <template v-for="c in data.bottom" :key="c">
-          <div
-            :style="{
-              '--strip-width': `${(c.weight / bottom_percentage_sum) * 100}%`,
-              '--strip-color': c.color,
-            }"
-          ></div>
-        </template>
+        <div
+          v-for="c in data.bottom"
+          :key="c"
+          :style="{
+            '--strip-width': `${(c.weight / bottom_percentage_sum) * 100}%`,
+            '--strip-color': c.color,
+          }"
+        >
+          <div :style="{ '--text-length': c.name.length }">
+            {{ c.name }}
+          </div>
+        </div>
       </vue-draggable-next>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, reactive, toRaw, watch } from "@vue/runtime-core";
+import {
+  computed,
+  onUnmounted,
+  reactive,
+  toRaw,
+  watch,
+} from "@vue/runtime-core";
 import { useStore } from "../store/weight";
 import { VueDraggableNext } from "vue-draggable-next";
 
@@ -119,11 +128,17 @@ const include_names = computed(() => {
   return val;
 });
 
-const exclude_criterias = computed(() => {
-  console.log(include_names.value);
-  console.log(store.GetCriterias(store.GetCriteriaNames(include_names.value)));
-  return store.GetCriterias(store.GetCriteriaNames(include_names.value));
-});
+const exclude_criterias = computed(() =>
+  store.GetCriterias(store.GetCriteriaNames(include_names.value))
+);
+
+watch(
+  () => store.GetCriterias([]),
+  () => {
+    data.top = data.top.filter((d) => d.enabled);
+    data.bottom = data.bottom.filter((d) => d.enabled);
+  }
+);
 
 const current_weight_overall = computed(() => {
   let sum = 0;
@@ -184,6 +199,7 @@ const top_percentage_sum = computed(() => {
 .slider-ends {
   box-shadow: 0px 0px 0px 1px grey;
   display: flex;
+  height: 3vh;
   width: 100px;
   border-radius: 5px;
   overflow: hidden;
@@ -197,21 +213,20 @@ const top_percentage_sum = computed(() => {
     div {
       font-size: 1.5vh;
       opacity: 0;
-      // position: absolute;
+      position: absolute;
       color: white;
-      transition: 0.4s;
+      transition: 0.3s;
       pointer-events: none;
-      transform: translate(0%, 25%);
-      border-radius: 3px;
+      width: calc(var(--text-length) * 1vh);
       height: 2vh;
-      padding-left: 0.5vh;
-      padding-right: 0.5vh;
+      border-radius: 5px;
+      padding: 0.5vh 0vh 0.5vh 0vh;
     }
     &:hover {
       div {
         padding: 0.5vh;
         opacity: 1;
-        transform: translate(0%, 0%);
+        text-shadow: 0px 0px 3px rgba(0, 0, 0, 0.8);
       }
     }
   }
@@ -235,7 +250,7 @@ const top_percentage_sum = computed(() => {
     background-color: var(--strip-color);
     height: 1vh;
     cursor: grab;
-    transition: 0.5s;
+    transition: 0.3s;
     transition-property: transform;
     transform: scale(1, 1);
     &:hover {
