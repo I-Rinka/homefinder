@@ -11,6 +11,9 @@
         :top-criterias="['area']"
         :bottom-criterias="['unit_price', 'direction']"
       ></weight-slider>
+      <weight-triangle
+        :criterias="['area', 'unit_price', 'direction']"
+      ></weight-triangle>
       <!-- <weight-slider
         :top-criterias="['room', 'hall']"
         :bottom-criterias="['position', 'block_height']"
@@ -25,6 +28,7 @@
 
 <script setup>
 import WeightSlider from "./WeightSlider.vue";
+import WeightTriangle from "./WeightTriangle.vue";
 import { useStore } from "../store/weight";
 import { reactive } from "@vue/reactivity";
 import { computed, onMounted } from "@vue/runtime-core";
