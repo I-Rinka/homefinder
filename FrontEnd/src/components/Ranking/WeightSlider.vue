@@ -7,36 +7,38 @@
       <!-- other -->
       <vue-draggable-next
         class="global-weight-hinter"
-        :list="store.GetCriteriaNames(include_names)"
+        :list="exclude_criterias"
         :group="{ name: 'all' }"
       >
-        <template v-for="c in exclude_criterias" :key="c">
-          <el-tooltip
-            :content="c.name"
-            :popper-options="{
-              modifiers: [
-                {
-                  name: 'offset',
-                  options: {
-                    offset: [0, 10],
-                  },
+        <!-- <el-tooltip
+          v-for="c in data.exclude_criterias"
+          :key="c"
+          :content="c.name"
+          :popper-options="{
+            modifiers: [
+              {
+                name: 'offset',
+                options: {
+                  offset: [0, 10],
                 },
-              ],
-            }"
-            placement="top"
-            effect="customized"
-            :hide-after="0"
-            popper-class="popper"
-          >
-            <div
-              class="reserved"
-              :style="{
-                '--strip-color': c.color,
-                '--strip-width': `${100 * c.weight}%`,
-              }"
-            ></div>
-          </el-tooltip>
-        </template>
+              },
+            ],
+          }"
+          placement="top"
+          effect="customized"
+          :hide-after="0"
+          popper-class="popper"
+        > -->
+        <div
+          v-for="c in exclude_criterias"
+          :key="c"
+          class="reserved"
+          :style="{
+            '--strip-color': c.color,
+            '--strip-width': `${100 * c.weight}%`,
+          }"
+        ></div>
+        <!-- </el-tooltip> -->
         <div
           class="current"
           :style="{
@@ -95,7 +97,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, toRaw } from "@vue/runtime-core";
+import { computed, reactive, toRaw, watch } from "@vue/runtime-core";
 import { useStore } from "../store/weight";
 import { VueDraggableNext } from "vue-draggable-next";
 
@@ -118,16 +120,16 @@ const data = reactive({
   bottom: store.GetCriterias(props.bottomCriterias),
 });
 
-// data.top = store.GetCriterias(props.topCriterias);
-// data.bottom = store.GetCriterias(props.bottomCriterias);
+const include_names = computed(() => {
+  let val = data.bottom.map((d) => d.name).concat(data.top.map((d) => d.name));
+  return val;
+});
 
-const include_names = computed(() =>
-  data.bottom.map((d) => d.name).concat(data.top.map((d) => d.name))
-);
-
-const exclude_criterias = computed(() =>
-  store.GetCriterias(store.GetCriteriaNames(include_names.value))
-);
+const exclude_criterias = computed(() => {
+  console.log(include_names.value);
+  console.log(store.GetCriterias(store.GetCriteriaNames(include_names.value)));
+  return store.GetCriterias(store.GetCriteriaNames(include_names.value));
+});
 
 const current_weight_overall = computed(() => {
   let sum = 0;
@@ -216,7 +218,6 @@ const top_percentage_sum = computed(() => {
         padding: 0.5vh;
         opacity: 1;
         transform: translate(0%, 0%);
-        background-color: var(--strip-color);
       }
     }
   }
