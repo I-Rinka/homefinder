@@ -4,31 +4,11 @@
     v-if="data.top.length > 0 && data.bottom.length > 0"
   >
     <div>
-      <!-- other -->
       <vue-draggable-next
         class="global-weight-hinter"
         :list="exclude_criterias"
         :group="{ name: 'all' }"
       >
-        <!-- <el-tooltip
-          v-for="c in data.exclude_criterias"
-          :key="c"
-          :content="c.name"
-          :popper-options="{
-            modifiers: [
-              {
-                name: 'offset',
-                options: {
-                  offset: [0, 10],
-                },
-              },
-            ],
-          }"
-          placement="top"
-          effect="customized"
-          :hide-after="0"
-          popper-class="popper"
-        > -->
         <div
           v-for="c in exclude_criterias"
           :key="c"
@@ -37,8 +17,28 @@
             '--strip-color': c.color,
             '--strip-width': `${100 * c.weight}%`,
           }"
-        ></div>
-        <!-- </el-tooltip> -->
+        >
+          <el-tooltip
+            :content="c.name"
+            :popper-options="{
+              modifiers: [
+                {
+                  name: 'offset',
+                  options: {
+                    offset: [0, 15],
+                  },
+                },
+              ],
+            }"
+            placement="top"
+            effect="customized"
+            :hide-after="0"
+            popper-class="popper"
+          >
+            <!-- Make the tooltip show -->
+            <div style="height: 100%; width: 100%"></div>
+          </el-tooltip>
+        </div>
         <div
           class="current"
           :style="{
@@ -59,11 +59,7 @@
               '--strip-width': `${(c.weight / top_percentage_sum) * 100}%`,
               '--strip-color': c.color,
             }"
-          >
-            <!-- <div>
-              {{ c.name }}
-            </div> -->
-          </div>
+          ></div>
         </template>
       </vue-draggable-next>
 
@@ -76,7 +72,6 @@
         :step="0.01"
       />
 
-      <!-- slider bottom end -->
       <vue-draggable-next
         class="slider-ends"
         :list="data.bottom"
@@ -92,7 +87,6 @@
         </template>
       </vue-draggable-next>
     </div>
-    <!-- <el-button @click="PrintData">Print Data</el-button> -->
   </div>
 </template>
 
@@ -241,15 +235,11 @@ const top_percentage_sum = computed(() => {
     background-color: var(--strip-color);
     height: 1vh;
     cursor: grab;
-    transition-property: padding-left, padding-right;
     transition: 0.5s;
-    padding-left: 0;
-    padding-right: 0;
+    transition-property: transform;
+    transform: scale(1, 1);
     &:hover {
-      padding-left: calc(var(--strip-width) / 4);
-      padding-right: calc(var(--strip-width) / 4);
-
-      transform: scale(1, 1.5) translate(0, -20%);
+      transform: scale(1.5, 1.5) translate(0, -20%);
     }
     &:active {
       cursor: grabbing;

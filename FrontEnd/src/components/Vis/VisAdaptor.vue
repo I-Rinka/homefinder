@@ -144,26 +144,26 @@ onMounted(() => {
         };
       }
     );
-    GetTimeAvgPrice(props.current_time.year, props.current_time.month).then(
-      () => {
-        CachePrice().then(() => {
-          // send trend view price
-          let history_records = [];
-          for (const key in data.history_cache) {
-            if (Object.hasOwnProperty.call(data.history_cache, key)) {
-              const element = data.history_cache[key];
-              let t = key.split(",");
-              history_records.push({
-                time: Date.UTC(t[0], t[1] - 1),
-                price: element,
-              });
-            }
-          }
-          history_records.sort((a, b) => a.time - b.time);
-          react_data.history_records = history_records;
-        });
-      }
-    );
+    // GetTimeAvgPrice(props.current_time.year, props.current_time.month).then(
+    //   () => {
+    //     CachePrice().then(() => {
+    //       // send trend view price
+    //       let history_records = [];
+    //       for (const key in data.history_cache) {
+    //         if (Object.hasOwnProperty.call(data.history_cache, key)) {
+    //           const element = data.history_cache[key];
+    //           let t = key.split(",");
+    //           history_records.push({
+    //             time: Date.UTC(t[0], t[1] - 1),
+    //             price: element,
+    //           });
+    //         }
+    //       }
+    //       history_records.sort((a, b) => a.time - b.time);
+    //       react_data.history_records = history_records;
+    //     });
+    //   }
+    // );
   }
 });
 
@@ -248,7 +248,10 @@ async function CachePrice() {
       let month = element.month;
       let token = year + "," + month;
 
-      if (year <= config.timeRange[1].year && month <= config.timeRange[1].month) {
+      if (
+        year <= config.timeRange[1].year &&
+        month <= config.timeRange[1].month
+      ) {
         data.history_cache[token] = element.unit_price;
       }
     }
