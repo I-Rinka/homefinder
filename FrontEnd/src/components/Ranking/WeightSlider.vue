@@ -80,6 +80,7 @@
           :style="{}"
         >
           <rect
+            ref="SliderTrack"
             class="slider-track"
             width="50"
             height="200"
@@ -112,8 +113,7 @@
       <div
         class="slider-cursor-frame"
         :style="{
-          '--slider-x': 0,
-          '--slider-y': 0,
+          '--slider-y': `${data.slider.y}vh`,
         }"
       >
         <slider-cursor
@@ -121,7 +121,7 @@
           :closable="false"
           :pressed="data.slider.pressed"
           :color="data.slider.pressed ? 'rgb(255, 50, 20)' : 'rgb(200, 26, 10)'"
-          style="transform: rotate(-90deg)"
+          style="transform: rotate(90deg)"
         ></slider-cursor>
       </div>
     </div>
@@ -131,8 +131,10 @@
 <script setup>
 import {
   computed,
+  onMounted,
   onUnmounted,
   reactive,
+  ref,
   toRaw,
   watch,
 } from "@vue/runtime-core";
@@ -159,7 +161,8 @@ const data = reactive({
   top: store.GetCriterias(props.topCriterias),
   bottom: store.GetCriterias(props.bottomCriterias),
   slider: {
-    y: 0,
+    // 0~23.4
+    y: 11.7,
     pressed: false,
   },
 });
@@ -234,11 +237,45 @@ function ReleaseSlider() {
   window.removeEventListener("mousemove", MoveSlider);
 }
 
+let SliderTrack = ref(null);
 function MoveSlider(e) {
   if (data.slider.pressed) {
-    console.log(e.clientY);
+    let rect = SliderTrack.value.getBoundingClientRect();
+    let percentage = (e.clientY - rect.y) / rect.height;
+    let y = 23.4 * percentage;
+    y = y < 0 ? 0 : y;
+    y = y > 23.4 ? 23.4 : y;
+    data.slider.y = y;
   }
 }
+
+const percentage = computed({
+  get() {
+    let p = data.slider.y / 23.4;
+    p = p <= 0.01 ? 0.01 : p;
+    p = p >= 0.99 ? 0.99 : p;
+
+    console.log(p);
+    return p;
+  },
+  set(p) {
+    let y = p * 23.4;
+    y = y < 0 ? 0 : y;
+    y = y > 23.4 ? 23.4 : y;
+    data.slider.y = y;
+  },
+});
+
+onMounted(() => {
+  percentage.value = 1 - bottom_slider_percentage.value;
+});
+
+watch(
+  () => percentage.value,
+  (v) => {
+    bottom_slider_percentage.value = 1 - v;
+  }
+);
 </script>
 
 <style lang="less" scoped>
@@ -350,10 +387,10 @@ function MoveSlider(e) {
   position: absolute;
   display: inline-block;
   top: 2.5vh;
-  left: 39px;
+  left: 50px;
   height: 55px;
   width: 10px;
-  transform: translate(var(--slider-x), var(--slider-y));
+  transform: translate(0, var(--slider-y));
   cursor: grab;
   &:active {
     cursor: grabbing;
