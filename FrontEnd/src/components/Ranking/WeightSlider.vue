@@ -62,38 +62,9 @@
         </div>
       </vue-draggable-next>
 
-      <!-- <el-slider
-        v-model="bottom_slider_percentage"
-        vertical
-        height="25vh"
-        :min="0.01"
-        :max="0.99"
-        :step="0.01"
-      /> -->
-
-      <div class="slider-container">
-        <svg
-          ref="triSvg"
-          style="height: 25vh; width: 100%"
-          viewBox="0 0 50 200"
-          xmlns="http://www.w3.org/2000/svg"
-          :style="{}"
-        >
-          <rect
-            ref="SliderTrack"
-            class="slider-track"
-            width="50"
-            height="200"
-            vector-effect="non-scaling-stroke"
-            @dblclick="TranslateSlider"
-          ></rect>
-        </svg>
-        <!-- cursor: !data.slider.pressed ? 'default' : 'move', -->
-        <!-- <div class="slider-stage" @click="PrintData"></div> -->
-      </div>
-
       <vue-draggable-next
         class="slider-ends"
+        style="position: relative; top: 25vh"
         :list="data.bottom"
         :group="{ name: 'all', pull: !(data.bottom.length == 1), put: true }"
       >
@@ -110,6 +81,14 @@
           </div>
         </div>
       </vue-draggable-next>
+
+      <div class="slider-container">
+        <div
+          ref="SliderTrack"
+          class="slider-track"
+          @dblclick="TranslateSlider"
+        ></div>
+      </div>
 
       <div
         class="slider-cursor-frame"
@@ -303,6 +282,7 @@ watch(
   margin-left: 30px;
   margin-right: 30px;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+
   .el-slider {
     position: relative;
     left: 5px;
@@ -317,12 +297,15 @@ watch(
   margin-bottom: 0.9px;
   height: 1vh;
   width: 90px;
+
   :first-child {
     border-top-left-radius: 3px;
   }
+
   :last-child {
     border-top-right-radius: 3px;
   }
+
   .reserved {
     margin: 0;
     width: var(--strip-width);
@@ -332,13 +315,16 @@ watch(
     transition: 0.3s;
     transition-property: transform;
     transform: scale(1, 1);
+
     &:hover {
       transform: scale(1.5, 1.5) translate(0, -20%);
     }
+
     &:active {
       cursor: grabbing;
     }
   }
+
   .current {
     background-color: #ffffff;
     height: 0.5vh;
@@ -359,6 +345,7 @@ watch(
   border-radius: 5px;
   overflow: hidden;
   cursor: grab;
+
   &:active {
     cursor: grabbing;
   }
@@ -383,6 +370,7 @@ watch(
       height: 2vh;
       border-radius: 5px;
     }
+
     &:hover {
       div {
         opacity: 1;
@@ -395,26 +383,33 @@ watch(
 
 .slider-container {
   height: 25vh;
-  position: relative;
+  position: absolute;
+  z-index: -1;
+  top: 4vh;
+  width: 100px;
 }
 
 .slider-track {
-  fill: #e7eae8;
-  stroke-width: 1px;
-  stroke: grey;
+  background-color: #e7eae8;
+  border: solid grey 1px;
   cursor: pointer;
+  position: relative;
+  left: 22.5px;
+  height: 100%;
+  width: 50%;
 }
 
 .slider-cursor-frame {
   position: absolute;
   display: inline-block;
   top: 2.5vh;
-  left: 50px;
-  height: 55px;
+  left: 48px;
+  height: 50px;
   width: 10px;
   transition: 0.1s;
   transform: translate(0, var(--slider-y));
   cursor: grab;
+
   &:active {
     cursor: grabbing;
   }
