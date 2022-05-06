@@ -31,7 +31,7 @@ import RankView from "./components/RankView.vue";
 
 ::-webkit-scrollbar {
   width: 10px;
-  height: 10px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-thumb {

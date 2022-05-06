@@ -71,7 +71,7 @@
     <div class="triangle-container">
       <svg
         ref="triSvg"
-        style="height: 25vh; width: 100%"
+        style="height: 25vh;"
         viewBox="-3 0 206 174"
         xmlns="http://www.w3.org/2000/svg"
         :style="{

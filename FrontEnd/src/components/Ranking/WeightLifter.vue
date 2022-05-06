@@ -1,9 +1,14 @@
 <template>
   <div class="weight-lifter">
-    <div class="test">
+    <div class="reserved-criteria">
+      <div style="font-size: 10px; padding: 2px 10px 2px 10px; color: grey;font-weight: bold;">
+        Disabled Criterias
+      </div>
       <div class="disabled" v-for="d in disabled" :key="d.name">
         <el-checkbox style="z-index: -0" v-model="d.enabled"></el-checkbox>
-        {{ d.name }}
+        <span class="disabled-name">
+          {{ d.name }}
+        </span>
       </div>
     </div>
     <div class="sliders-container">
@@ -15,6 +20,9 @@
         :top-criterias="['area']"
         :bottom-criterias="['unit_price', 'direction']"
       ></weight-slider>
+      <weight-triangle
+        :criterias="['area', 'unit_price', 'deal_price']"
+      ></weight-triangle>
       <weight-triangle
         :criterias="['area', 'unit_price', 'deal_price']"
       ></weight-triangle>
@@ -53,23 +61,42 @@ const store = useStore();
 }
 
 .sliders-container {
-  position: absolute;
-  margin: 10px;
+  position: relative;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  width: 100%;
+  overflow: scroll;
   display: flex;
 }
-.test {
+.reserved-criteria {
   display: flex;
   width: 100%;
-  border-radius: 5px;
-  overflow: hidden;
-  background-color: aliceblue;
+  overflow: scroll;
+  background-color: rgb(255, 255, 255);
 
   .disabled {
+    display: flex;
+    justify-content: space-around;
+    padding: 2px 10px 0px 10px;
     transition: 0.5s;
-    margin: 2px 5px 2px 5px;
+    margin: 0px 5px 5px 5px;
+    border-radius: 5px;
     color: white;
-    background-color: rgb(53, 53, 53);
+    background: linear-gradient(0deg, rgb(220, 220, 220), rgb(240, 240, 240));
+    border: solid gray 1px;
     animation: enter 0.5s;
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+    .el-checkbox {
+      margin-top: -3px;
+    }
+    .disabled-name {
+      margin-left: 5px;
+      padding: 5px 3px 0px 3px;
+      font-weight: 500;
+      font-size: 10px;
+      color: grey;
+      filter: drop-shadow(0px 0px 0.5px rgba(0, 0, 0, 0.5));
+    }
   }
 }
 
