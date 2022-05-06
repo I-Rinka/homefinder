@@ -42,19 +42,33 @@
         :bottom-criterias="['built_year']"
       ></weight-slider> -->
       <div class="add-button">
-        <div class="preview-top">
-          <div>
-            <el-image src="/empty_slider.png" fit="contain" />
-          </div>
-        </div>
-        <div class="preview-bottom">
-          <div>
-            <el-image src="/empty_triangle.png" fit="contain" />
-          </div>
-        </div>
-        <div class="icon-frame">
-          <circle-plus style="width: 50px; position: relative; color: grey" />
-        </div>
+        <div style="position: absolute; width: 100%;">.</div>
+        <el-popover :width="20" trigger="click">
+          <template #reference>
+            <div class="preview-top">
+              <div>
+                <el-image src="/empty_slider.png" fit="contain" />
+              </div>
+            </div>
+          </template>
+          <div>hi</div>
+        </el-popover>
+
+        <el-popover :width="20" trigger="click">
+          <template #reference>
+            <div class="preview-bottom">
+              <div>
+                <el-image src="/empty_triangle.png" fit="contain" />
+              </div>
+            </div>
+            <div class="icon-frame">
+              <circle-plus
+                style="width: 50px; position: relative; color: grey"
+              />
+            </div>
+          </template>
+          <div>hi</div>
+        </el-popover>
       </div>
     </div>
   </div>
