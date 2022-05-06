@@ -1,5 +1,6 @@
 <template>
   <div class="line-up">
+    <el-button @click="MapData">Map Nominal Data</el-button>
     <div class="weight-strip">
       <div
         class="enabled"
@@ -55,25 +56,26 @@
         </el-form-item>
       </el-form> -->
 
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="data.mapping_dialog_visible = false"
+      <map-nominal
+        @cancel="data.mapping_dialog_visible = false"
+        @confirm="HandleConfirmMapping"
+        :nominal_data="data.current_nominal_to_map"
+      ></map-nominal>
+      <!-- <el-button @click="data.mapping_dialog_visible = false"
             >Cancel</el-button
           >
           <el-button type="primary" @click="HandleConfirmMapping"
-            >Confirm</el-button
-          >
-        </span>
-      </template>
+            >Confirm</el-button -->
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { reactive } from "@vue/reactivity";
+import { reactive, ref } from "@vue/reactivity";
 import { useStore } from "../store/weight";
 import { computed, onMounted, watch } from "@vue/runtime-core";
 import * as d3 from "d3";
+import MapNominal from "./MapNominal.vue";
 
 const store = useStore();
 const props = defineProps({
@@ -86,41 +88,44 @@ const props = defineProps({
 
 // the reactive data
 const data = reactive({
+  current_nominal_to_map: [],
+
   origin_bar_width: 1000,
   mapping_dialog_visible: false,
   scaled_records: [], // the scaled value of each origin record
 
-  quantitative_mapping_type: // true: positive; false: negative 
-  // todo: user interaction
-  {
-    "area":false, 
-    "deal_price":true, 
-    "unit_price":true, 
-    "room":false, 
-    "hall":false, 
-    "block_height":false, 
-    "built_year":false
-  },  
-
-  nominal_mapping_function: // todo: user interaction
-  {
-    "direction": function (input) {
-      if (input.includes("南")) return 0.3
-      else return 1
-    }, 
-    "decoration": function (input) {
-      if (input.includes("精装")) return 0.3
-      else return 1
+  // true: positive; false: negative
+  quantitative_mapping_type:
+    // todo: user interaction
+    {
+      area: false,
+      deal_price: true,
+      unit_price: true,
+      room: false,
+      hall: false,
+      block_height: false,
+      built_year: false,
     },
-    "position":function (input) {
-      if (input.includes("中楼层")) return 0.3
-      else return 1
-    }, 
-    "type":function (input) {
-      if (input.includes("板楼")) return 0.3
-      else return 1
-    }, 
-  }
+
+  // todo: user interaction
+  nominal_mapping_function: {
+    direction: function (input) {
+      if (input.includes("南")) return 0.3;
+      else return 1;
+    },
+    decoration: function (input) {
+      if (input.includes("精装")) return 0.3;
+      else return 1;
+    },
+    position: function (input) {
+      if (input.includes("中楼层")) return 0.3;
+      else return 1;
+    },
+    type: function (input) {
+      if (input.includes("板楼")) return 0.3;
+      else return 1;
+    },
+  },
 });
 
 const nominal_attr_name = ["direction", "decoration", "position", "type"];
@@ -183,14 +188,15 @@ watch(
       // delete an attr but try to keep the calculated values, so do nothing
     }
   },
-  {deep: true}
+  { deep: true }
 );
 
 function HandleScale(name) {
-  if (nominal_attr_name.indexOf(name) == -1) {  // quantitative
-    CalculateQuantitativeScale(name, data.quantitative_mapping_type[name])
-  }
-  else {  // nominal
+  if (nominal_attr_name.indexOf(name) == -1) {
+    // quantitative
+    CalculateQuantitativeScale(name, data.quantitative_mapping_type[name]);
+  } else {
+    // nominal
     scale_list.set(name, data.nominal_mapping_function[name]);
   }
 }
@@ -200,12 +206,11 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
   let min = Math.min(...value_list);
   let max = Math.max(...value_list);
 
-  let scale = d3.scaleLinear().range([0, 1])
+  let scale = d3.scaleLinear().range([0, 1]);
   if (is_positive_correlation) {
-    scale.domain([min, max])
-  }
-  else {
-    scale.domain([max, min])
+    scale.domain([min, max]);
+  } else {
+    scale.domain([max, min]);
   }
   scale_list.set(name, scale);
 }
@@ -221,7 +226,7 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
 
 //     let scale = d3.scaleLinear().range([0, 1]).domain([min, max]);
 //     scale_list.set(name, scale);
-//   } 
+//   }
 //   else {
 //     // todo: nominal
 //     if (name == "direction") { // todo: just test!!!!!!!!!!
@@ -230,7 +235,7 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
 //         else return 1
 //       }
 //       scale_list.set(name, scale);
-//     }  
+//     }
 //   }
 // }
 
@@ -250,26 +255,51 @@ function CalculateScaledRecords(name) {
   }
 }
 
-const ranking_score = computed ( () => {
-  let scores = []
-  for (let i=0; i<data.scaled_records.length; i++) {
-    let record = data.scaled_records[i]
-    let s = 0
-    for (let j=0; j<enabled_strip.value.length; j++) {
-      let d = enabled_strip.value[j]
-      s += record[d.name] * d.weight
+const ranking_score = computed(() => {
+  let scores = [];
+  for (let i = 0; i < data.scaled_records.length; i++) {
+    let record = data.scaled_records[i];
+    let s = 0;
+    for (let j = 0; j < enabled_strip.value.length; j++) {
+      let d = enabled_strip.value[j];
+      s += record[d.name] * d.weight;
     }
-    let obj = {index: i, score: s}
-    scores.push(obj)
+    let obj = { index: i, score: s };
+    scores.push(obj);
   }
-  console.log("computed_ranking_score", scores)
+  console.log("computed_ranking_score", scores);
 
- scores.sort((a,b)=>{ return a.score-b.score})
-  return scores
-})
+  scores.sort((a, b) => {
+    return a.score - b.score;
+  });
+  return scores;
+});
 
 function HandleConfirmMapping() {
   data.mapping_dialog_visible = false;
+}
+
+/* Nominal Data mapping related */
+
+class Nominal {
+  constructor(name, default_value, enabled) {
+    this.name = name;
+    this.value = default_value;
+    this.enabled = enabled;
+  }
+}
+
+function MapData() {
+  data.mapping_dialog_visible = true;
+
+  let arr = [];
+
+  for (let i = 0; i < 5; i++) {
+    arr.push(new Nominal(i.toString() + i.toString(), 0.2 * i));
+  }
+
+  data.current_nominal_to_map = arr;
+  // show_map_widget = true;
 }
 </script>
 
@@ -296,11 +326,11 @@ function HandleConfirmMapping() {
   background-color: rgb(255, 255, 255);
 }
 .table-content-block {
-  width:15%; 
-  height:100%;
-  border-right: solid 2px #eaeaea; 
-  overflow:hidden; 
-  white-space: nowrap; 
+  width: 15%;
+  height: 100%;
+  border-right: solid 2px #eaeaea;
+  overflow: hidden;
+  white-space: nowrap;
   // padding-top: 5px;
   padding-left: 5px;
   display: inline-block;
@@ -312,7 +342,7 @@ function HandleConfirmMapping() {
   // padding-top: 5px;
   // padding-left: 5px;
   display: inline-block;
-  // border-bottom: solid 2px #eaeaea; 
+  // border-bottom: solid 2px #eaeaea;
 
   background-color: var(--strip-color);
   width: var(--strip-width);
