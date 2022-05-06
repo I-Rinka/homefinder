@@ -1,7 +1,14 @@
 <template>
   <div class="weight-lifter">
     <div class="reserved-criteria">
-      <div style="font-size: 10px; padding: 2px 10px 2px 10px; color: grey;font-weight: bold;">
+      <div
+        style="
+          font-size: 10px;
+          padding: 2px 10px 2px 10px;
+          color: grey;
+          font-weight: bold;
+        "
+      >
         Disabled Criterias
       </div>
       <div class="disabled" v-for="d in disabled" :key="d.name">
@@ -12,10 +19,10 @@
       </div>
     </div>
     <div class="sliders-container">
-      <weight-slider
+      <!-- <weight-slider
         :top-criterias="['area']"
         :bottom-criterias="['unit_price', 'direction']"
-      ></weight-slider>
+      ></weight-slider> -->
       <weight-slider
         :top-criterias="['area']"
         :bottom-criterias="['unit_price', 'direction']"
@@ -23,9 +30,9 @@
       <weight-triangle
         :criterias="['area', 'unit_price', 'deal_price']"
       ></weight-triangle>
-      <weight-triangle
+      <!-- <weight-triangle
         :criterias="['area', 'unit_price', 'deal_price']"
-      ></weight-triangle>
+      ></weight-triangle> -->
       <!-- <weight-slider
         :top-criterias="['room', 'hall']"
         :bottom-criterias="['position', 'block_height']"
@@ -34,6 +41,11 @@
         :top-criterias="['type', 'decoration', 'area']"
         :bottom-criterias="['built_year']"
       ></weight-slider> -->
+      <div class="add-button">
+        <div>
+          <circle-plus style="width: 50px; position: relative; color: grey" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -44,6 +56,7 @@ import WeightTriangle from "./WeightTriangle.vue";
 import { useStore } from "../store/weight";
 import { reactive } from "@vue/reactivity";
 import { computed, onMounted } from "@vue/runtime-core";
+import { CirclePlus } from "@element-plus/icons-vue";
 
 const disabled = computed(() => store.criterias.filter((d) => !d.enabled));
 
@@ -106,6 +119,33 @@ const store = useStore();
   }
   to {
     transform: scale(1, 1);
+  }
+}
+
+.add-button {
+  position: relative;
+  padding: 0 20px 0 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+  display: inline-block;
+  border-radius: 10px;
+  height: 32vh;
+  opacity: 0.8;
+  background: linear-gradient(-2deg, rgb(220, 220, 220), rgb(240, 240, 240));
+  border: dashed #808080 2px;
+  cursor: pointer;
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.8));
+  div {
+    position: relative;
+    top: 13vh;
+    transition: 0.5s;
+    width: 80px;
+  }
+
+  &:hover {
+    div {
+      transform: scale(1.2, 1.2);
+    }
   }
 }
 </style>
