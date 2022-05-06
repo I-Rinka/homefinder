@@ -243,7 +243,6 @@ const percentage = computed({
     let p = data.slider.y / 23.4;
     p = p <= 0.01 ? 0.01 : p;
     p = p >= 0.99 ? 0.99 : p;
-
     console.log(p);
     return p;
   },

@@ -11,6 +11,10 @@
         :top-criterias="['area']"
         :bottom-criterias="['unit_price', 'direction']"
       ></weight-slider>
+      <weight-slider
+        :top-criterias="['area']"
+        :bottom-criterias="['unit_price', 'direction']"
+      ></weight-slider>
       <weight-triangle
         :criterias="['area', 'unit_price', 'deal_price']"
       ></weight-triangle>

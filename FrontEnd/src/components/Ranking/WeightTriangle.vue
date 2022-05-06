@@ -210,6 +210,7 @@
 import { reactive, computed, toRaw, ref } from "@vue/reactivity";
 import { useStore } from "../store/weight";
 import { VueDraggableNext } from "vue-draggable-next";
+import { onMounted, watch } from "@vue/runtime-core";
 
 function PrintData(d) {
   console.log(d);
@@ -285,6 +286,39 @@ function ReplaceBottomCriteria1(d) {
     }
   }
 }
+
+watch(
+  () => data.tri[0].weight,
+  () => {
+    if (!data.slider.pressed) {
+      point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
+      data.slider.x = point.x;
+      data.slider.y = point.y;
+    }
+  }
+);
+
+watch(
+  () => data.tri[1].weight,
+  () => {
+    if (!data.slider.pressed) {
+      point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
+      data.slider.x = point.x;
+      data.slider.y = point.y;
+    }
+  }
+);
+
+watch(
+  () => data.tri[2].weight,
+  () => {
+    if (!data.slider.pressed) {
+      point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
+      data.slider.x = point.x;
+      data.slider.y = point.y;
+    }
+  }
+);
 
 function PressSlider() {
   data.slider.pressed = true;
@@ -432,6 +466,12 @@ function MoveSlider(e) {
     }
   }
 }
+
+onMounted(() => {
+  point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
+  data.slider.x = point.x;
+  data.slider.y = point.y;
+});
 </script>
 
 <style lang="less" scoped>
@@ -477,6 +517,7 @@ function MoveSlider(e) {
 
   &:active {
     stroke: #f32e00;
+    transition: 0s;
   }
 }
 
