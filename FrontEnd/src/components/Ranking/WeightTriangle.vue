@@ -299,17 +299,35 @@ function GetABC(point1, point2) {
     point1.y - point2.y,
     point2.x - point1.x,
     point1.y * (point1.x - point2.x) - point1.x * (point1.y - point2.y),
-
-    // 1 / (point2.x - point1.x),
-    // 1 / (point1.y - point2.y),
-    // point1.y / (point2.y - point1.y) - point1.x / (point2.x - point1.x),
   ];
-  // B=1
 }
 
 function GetDistance(line_point1, line_point2, point) {
   let [A, B, C] = GetABC(line_point1, line_point2);
   return (A * point.x + B * point.y + C) / Math.sqrt(A * A + B * B);
+}
+
+function GetOverallDistance() {
+  let point = { x: tri_point[1].x, y: tri_point[0] / 2 };
+  let d1 = GetDistance(tri_point[2], tri_point[0], point);
+  let d2 = GetDistance(tri_point[1], tri_point[2], point);
+  let d3 = GetDistance(tri_point[0], tri_point[1], point);
+  return d1 + d2 + d3;
+}
+
+function WeightToPoint(weights) {
+  let [w2, w3] = [weights[1], weights[2]];
+  let d1 = w2 * GetOverallDistance();
+  let d2 = w3 * GetOverallDistance();
+
+  let [a1, b1, c1] = GetABC(tri_point[0], tri_point[2]);
+  let [a2, b2, c2] = GetABC(tri_point[0], tri_point[1]);
+  let k1 = Math.sqrt(a1 * a1 + b1 * b1);
+  let k2 = Math.sqrt(a2 * a2 + b2 * b2);
+
+  let y = ((d1 * k1 - c1) * a2 - (d2 * k2 - c2) * a1) / (b1 * a2 - b2 * a1);
+  let x = ((d1 * k1 - c1) / b1 - (d2 * k2 - c2) / b2) / (a1 / b1 - a2 / b2);
+  return { x, y };
 }
 
 function MoveSlider(e) {
@@ -320,25 +338,20 @@ function MoveSlider(e) {
     let YRatio =
       triSlider.value.getBBox().height /
       triSlider.value.getBoundingClientRect().height;
-    // console.log(data.slider);
     data.slider.x = e.offsetX * XRatio;
     data.slider.y = e.offsetY * YRatio;
-    // data.slider.y = data.slider.y > 165 ? 165 : data.slider.y;
 
     let point = { x: data.slider.x - 3, y: data.slider.y + 0.5 };
-
+    // console.log(point);
     let d1 = GetDistance(tri_point[2], tri_point[0], point);
     let d2 = GetDistance(tri_point[1], tri_point[2], point);
     let d3 = GetDistance(tri_point[0], tri_point[1], point);
-    console.log(
-      "distance1:",
-      d1.toFixed(1),
-      "distance2:",
-      d2.toFixed(1),
-      "distance3:",
-      d3.toFixed(1),
-      d1 + d2 + d3
-    );
+    let overall = d1 + d2 + d3;
+    let w1 = (d1 / overall).toFixed(2);
+    let w2 = (d2 / overall).toFixed(2);
+    let w3 = (d3 / overall).toFixed(2);
+    // console.log(w1, w2, w3);
+    console.log(point, WeightToPoint([w1, w2, w3]));
   }
 }
 </script>
