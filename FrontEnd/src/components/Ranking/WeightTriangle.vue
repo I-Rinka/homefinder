@@ -49,22 +49,27 @@
         }">
         <polygon class="triangle" :points="`0,${Root3(100)} 100,0 200,${Root3(100)} 0,${Root3(100)}`"
           vector-effect="non-scaling-stroke" @mousemove="MoveSlider" @click="PrintData" />
-        <line x1="100" y1="8" :x2="`${data.slider.x - 3}px`" :y2="`${data.slider.y - 5}px`" style="
-            stroke-width: 2;
+        <line :x1="`${data.slider.x - 3}px`" :y1="`${Root3(100) - 1.5}`" :x2="`${data.slider.x - 3}px`"
+          :y2="`${data.slider.y + 7}px`" style="
+            stroke-width: 3;
             stroke-linecap: round;
             filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3));
             opacity: 0.8;
             pointer-events: none;
           " :style="{ stroke: data.tri[0].color }" />
-        <line x1="6" :y1="`${Root3(100) - 3}`" :x2="`${data.slider.x - 8}px`" :y2="`${data.slider.y + 4}px`" style="
-            stroke-width: 2;
+        <line :x1="`${((data.slider.x - 0.5) + Root3(1) * (data.slider.y + 3) + 300) / 4 - 3}`"
+          :y1="`${(Root3(1) * (data.slider.x - 0.5) + 3 * (data.slider.y + 3) - Root3(100)) / 4 - 3}`"
+          :x2="`${data.slider.x + 3}px`" :y2="`${data.slider.y - 3}px`" style="
+            stroke-width: 3;
             stroke-linecap: round;
             filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3));
             opacity: 0.8;
             pointer-events: none;
           " :style="{ stroke: data.tri[1].color }" />
-        <line x1="194" :y1="`${Root3(100) - 3}`" :x2="`${data.slider.x + 2}px`" :y2="`${data.slider.y + 4}px`" style="
-            stroke-width: 2;
+        <line :x1="`${((data.slider.x - 0.5) - Root3(1) * (data.slider.y + 3) + 300) / 4 + 3}`"
+          :y1="`${(-Root3(1) * (data.slider.x - 0.5) + 3 * (data.slider.y + 3) + Root3(100)) / 4 - 3}`"
+          :x2="`${data.slider.x - 9}px`" :y2="`${data.slider.y - 3}px`" style="
+            stroke-width: 3;
             stroke-linecap: round;
             filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3));
             opacity: 0.8;
