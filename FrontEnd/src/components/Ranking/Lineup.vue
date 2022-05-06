@@ -327,6 +327,18 @@ function HandleConfirmMapping() {
 .table-content-weighted {
   height:100%;
   overflow:hidden; 
+  overflow:hidden; 
+    overflow:hidden; 
+  overflow:hidden; 
+    overflow:hidden; 
+  overflow:hidden; 
+    overflow:hidden; 
+    white-space: nowrap; 
+  white-space: nowrap; 
+    white-space: nowrap; 
+  white-space: nowrap; 
+    white-space: nowrap; 
+  white-space: nowrap; 
   white-space: nowrap; 
   // padding-top: 5px;
   // padding-left: 5px;
