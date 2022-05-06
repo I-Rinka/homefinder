@@ -85,6 +85,7 @@
             width="50"
             height="200"
             vector-effect="non-scaling-stroke"
+            @dblclick="TranslateSlider"
           ></rect>
         </svg>
         <!-- cursor: !data.slider.pressed ? 'default' : 'move', -->
@@ -249,6 +250,15 @@ function MoveSlider(e) {
   }
 }
 
+function TranslateSlider(e) {
+  let rect = SliderTrack.value.getBoundingClientRect();
+  let percentage = (e.clientY - rect.y) / rect.height;
+  let y = 23.4 * percentage;
+  y = y < 0 ? 0 : y;
+  y = y > 23.4 ? 23.4 : y;
+  data.slider.y = y;
+}
+
 const percentage = computed({
   get() {
     let p = data.slider.y / 23.4;
@@ -392,6 +402,7 @@ watch(
   fill: #e7eae8;
   stroke-width: 1px;
   stroke: grey;
+  cursor: pointer;
 }
 
 .slider-cursor-frame {
