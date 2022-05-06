@@ -62,14 +62,33 @@
         </div>
       </vue-draggable-next>
 
-      <el-slider
+      <!-- <el-slider
         v-model="bottom_slider_percentage"
         vertical
         height="25vh"
         :min="0.01"
         :max="0.99"
         :step="0.01"
-      />
+      /> -->
+
+      <div class="slider-container">
+        <svg
+          ref="triSvg"
+          style="height: 25vh; width: 100%"
+          viewBox="0 0 50 200"
+          xmlns="http://www.w3.org/2000/svg"
+          :style="{}"
+        >
+          <rect
+            class="slider-track"
+            width="50"
+            height="200"
+            vector-effect="non-scaling-stroke"
+          ></rect>
+        </svg>
+        <!-- cursor: !data.slider.pressed ? 'default' : 'move', -->
+        <!-- <div class="slider-stage" @click="PrintData"></div> -->
+      </div>
 
       <vue-draggable-next
         class="slider-ends"
@@ -89,6 +108,22 @@
           </div>
         </div>
       </vue-draggable-next>
+
+      <div
+        class="slider-cursor-frame"
+        :style="{
+          '--slider-x': 0,
+          '--slider-y': 0,
+        }"
+      >
+        <slider-cursor
+          @pointerdown="PressSlider"
+          :closable="false"
+          :pressed="data.slider.pressed"
+          :color="data.slider.pressed ? 'rgb(255, 50, 20)' : 'rgb(200, 26, 10)'"
+          style="transform: rotate(-90deg)"
+        ></slider-cursor>
+      </div>
     </div>
   </div>
 </template>
@@ -103,6 +138,8 @@ import {
 } from "@vue/runtime-core";
 import { useStore } from "../store/weight";
 import { VueDraggableNext } from "vue-draggable-next";
+
+import SliderCursor from "../TimeLine/SliderCursor.vue";
 
 function PrintData() {
   console.log(include_names.value);
@@ -121,6 +158,10 @@ const props = defineProps({
 const data = reactive({
   top: store.GetCriterias(props.topCriterias),
   bottom: store.GetCriterias(props.bottomCriterias),
+  slider: {
+    y: 0,
+    pressed: false,
+  },
 });
 
 const include_names = computed(() => {
@@ -178,6 +219,26 @@ const top_percentage_sum = computed(() => {
   data.top.forEach((d) => (sum += d.weight));
   return sum;
 });
+
+// slider stuff
+
+function PressSlider() {
+  data.slider.pressed = true;
+  window.addEventListener("mouseup", ReleaseSlider);
+  window.addEventListener("mousemove", MoveSlider);
+}
+
+function ReleaseSlider() {
+  data.slider.pressed = false;
+  window.removeEventListener("mouseup", ReleaseSlider);
+  window.removeEventListener("mousemove", MoveSlider);
+}
+
+function MoveSlider(e) {
+  if (data.slider.pressed) {
+    console.log(e.clientY);
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -191,6 +252,45 @@ const top_percentage_sum = computed(() => {
     left: 5px;
     width: 90px;
     --el-slider-runway-bg-color: #e7eae8;
+  }
+}
+
+.global-weight-hinter {
+  display: flex;
+  margin-left: 5px;
+  margin-bottom: 0.9px;
+  height: 1vh;
+  width: 90px;
+  :first-child {
+    border-top-left-radius: 3px;
+  }
+  :last-child {
+    border-top-right-radius: 3px;
+  }
+  .reserved {
+    margin: 0;
+    width: var(--strip-width);
+    background-color: var(--strip-color);
+    height: 1vh;
+    cursor: grab;
+    transition: 0.3s;
+    transition-property: transform;
+    transform: scale(1, 1);
+    &:hover {
+      transform: scale(1.5, 1.5) translate(0, -20%);
+    }
+    &:active {
+      cursor: grabbing;
+    }
+  }
+  .current {
+    background-color: #ffffff;
+    height: 0.5vh;
+    position: relative;
+    width: var(--strip-width);
+    top: 0.5vh;
+    bottom: 0;
+    z-index: -1;
   }
 }
 
@@ -237,42 +337,26 @@ const top_percentage_sum = computed(() => {
   }
 }
 
-.global-weight-hinter {
-  display: flex;
-  margin-left: 5px;
-  margin-bottom: 0.9px;
-  height: 1vh;
-  width: 90px;
-  :first-child {
-    border-top-left-radius: 3px;
-  }
-  :last-child {
-    border-top-right-radius: 3px;
-  }
-  .reserved {
-    margin: 0;
-    width: var(--strip-width);
-    background-color: var(--strip-color);
-    height: 1vh;
-    cursor: grab;
-    transition: 0.3s;
-    transition-property: transform;
-    transform: scale(1, 1);
-    &:hover {
-      transform: scale(1.5, 1.5) translate(0, -20%);
-    }
-    &:active {
-      cursor: grabbing;
-    }
-  }
-  .current {
-    background-color: #ffffff;
-    height: 0.5vh;
-    position: relative;
-    width: var(--strip-width);
-    top: 0.5vh;
-    bottom: 0;
-    z-index: -1;
+.slider-container {
+  height: 25vh;
+  position: relative;
+}
+.slider-track {
+  fill: #e7eae8;
+  stroke-width: 1px;
+  stroke: grey;
+}
+.slider-cursor-frame {
+  position: absolute;
+  display: inline-block;
+  top: 2.5vh;
+  left: 39px;
+  height: 55px;
+  width: 10px;
+  transform: translate(var(--slider-x), var(--slider-y));
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
   }
 }
 </style>
