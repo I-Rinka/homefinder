@@ -46,4 +46,8 @@ import RankView from "./components/RankView.vue";
 ::-webkit-scrollbar-corner {
   display: none;
 }
+
+.el-dialog{
+  border-radius: 10px !important;
+}
 </style>
