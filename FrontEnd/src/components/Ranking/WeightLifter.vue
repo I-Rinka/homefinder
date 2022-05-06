@@ -42,8 +42,16 @@
         :bottom-criterias="['built_year']"
       ></weight-slider> -->
       <div class="add-button">
-        <div class="preview-top"></div>
-        <div class="preview-bottom"></div>
+        <div class="preview-top">
+          <div>
+            <el-image src="/empty_slider.png" fit="contain" />
+          </div>
+        </div>
+        <div class="preview-bottom">
+          <div>
+            <el-image src="/empty_triangle.png" fit="contain" />
+          </div>
+        </div>
         <div class="icon-frame">
           <circle-plus style="width: 50px; position: relative; color: grey" />
         </div>
@@ -142,27 +150,63 @@ const store = useStore();
     top: 0%;
     left: 0;
     position: absolute;
-    background-color: aqua;
     width: 100%;
     height: 50%;
-    z-index: 10;
+    z-index: 12;
 
     transition: 0.5s;
     transition-delay: 0.2s;
     opacity: 0;
+
+    border-radius: 7px;
+    div {
+      opacity: 0;
+      border-radius: 7px;
+      position: relative;
+      pointer-events: none;
+      top: 0%;
+      transition: 0.5s;
+    }
+
+    &:hover {
+      div {
+        opacity: 1;
+        padding: 10% 0 10% 0;
+        top: 0%;
+        background-color: white;
+      }
+    }
   }
   .preview-bottom {
     top: 50%;
     left: 0;
     position: absolute;
-    background-color: aquamarine;
     width: 100%;
     height: 50%;
     z-index: 10;
-
     transition: 0.5s;
     transition-delay: 0.2s;
     opacity: 0;
+
+    border-radius: 7px;
+    div {
+      opacity: 0;
+      border-radius: 7px;
+      position: relative;
+      pointer-events: none;
+      padding: 0% 0 0% 0;
+      top: 0vh;
+      transition: 0.5s;
+    }
+
+    &:hover {
+      div {
+        opacity: 1;
+        padding: 40% 0 30% 0;
+        top: -100%;
+        background-color: white;
+      }
+    }
   }
 
   .icon-frame {
