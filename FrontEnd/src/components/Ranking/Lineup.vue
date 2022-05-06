@@ -1,6 +1,5 @@
 <template>
   <div class="line-up">
-    <el-button @click="MapData">Map Nominal Data</el-button>
     <div class="weight-strip">
       <div
         class="enabled"
@@ -11,11 +10,21 @@
           '--strip-width': `${(100 * d.weight) / strip_percentage_sum}%`,
         }"
       >
-        <!-- backgroundColor: d.color, -->
-        <div style="overflow:hidden; white-space: nowrap;">
-          <el-checkbox v-model="d.enabled"></el-checkbox>
-          {{ d.name }}
-        </div>
+        <el-row>
+          <!-- mapping -->
+          <div style="padding-right:10px; padding-top:4px">
+            <el-button :icon="Edit" size="small" :circle="true"
+              @click="HandleMapData(d.name)"
+            > </el-button>
+          </div>
+
+          <!-- enable -->
+          <div style="overflow:hidden; white-space: nowrap">
+            <el-checkbox v-model="d.enabled"></el-checkbox>
+            {{ d.name }}
+          </div>
+        </el-row>
+
       </div>
     </div>
 
@@ -76,6 +85,7 @@ import { useStore } from "../store/weight";
 import { computed, onMounted, watch } from "@vue/runtime-core";
 import * as d3 from "d3";
 import MapNominal from "./MapNominal.vue";
+import { Edit } from '@element-plus/icons-vue'
 
 const store = useStore();
 const props = defineProps({
@@ -90,7 +100,6 @@ const props = defineProps({
 const data = reactive({
   current_nominal_to_map: [],
 
-  origin_bar_width: 1000,
   mapping_dialog_visible: false,
   scaled_records: [], // the scaled value of each origin record
 
@@ -288,19 +297,45 @@ class Nominal {
     this.enabled = enabled;
   }
 }
+function HandleMapData(name) {
+  if (nominal_attr_name.includes(name)) {
+    MapNominalData(name)
+  }
+  else {
+    MapQuantitativeData(name)
+  }
+}
 
-function MapData() {
+function MapNominalData(attr) {
   data.mapping_dialog_visible = true;
 
   let arr = [];
 
-  for (let i = 0; i < 5; i++) {
-    arr.push(new Nominal(i.toString() + i.toString(), 0.2 * i));
-  }
+  // for (let i = 0; i < 5; i++) {
+  //   arr.push(new Nominal(i.toString() + i.toString(), 0.2 * i));
+  // }
+
+  let value_list = props.origin_records.map((record) => record[attr]);
+  let value_set = new Set(value_list)
+  value_list = Array.from(value_set)
 
   data.current_nominal_to_map = arr;
   // show_map_widget = true;
 }
+
+function MapQuantitativeData(attr) {
+  data.mapping_dialog_visible = true;
+
+  // let arr = [];
+
+  // for (let i = 0; i < 5; i++) {
+  //   arr.push(new Nominal(i.toString() + i.toString(), 0.2 * i));
+  // }
+
+  // data.current_nominal_to_map = arr;
+  // show_map_widget = true;
+}
+
 </script>
 
 <style lang="less" scoped>
