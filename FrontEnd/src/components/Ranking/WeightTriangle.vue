@@ -1,66 +1,40 @@
 <template>
   <div class="triangle-block">
     <div class="top-ends">
-      <vue-draggable-next
-        class="global-weight-hinter"
-        :group="{ name: 'tri' }"
-        :list="exclude_criterias"
-      >
-        <div
-          v-for="c in exclude_criterias"
-          :key="c"
-          class="reserved"
-          :style="{
-            '--strip-color': c.color,
-            '--strip-width': `${100 * c.weight}%`,
-          }"
-        >
-          <el-tooltip
-            :content="c.name"
-            :popper-options="{
-              modifiers: [
-                {
-                  name: 'offset',
-                  options: {
-                    offset: [0, 15],
-                  },
+      <vue-draggable-next class="global-weight-hinter" :group="{ name: 'tri' }" :list="exclude_criterias">
+        <div v-for="c in exclude_criterias" :key="c" class="reserved" :style="{
+          '--strip-color': c.color,
+          '--strip-width': `${100 * c.weight}%`,
+        }">
+          <el-tooltip :content="c.name" :popper-options="{
+            modifiers: [
+              {
+                name: 'offset',
+                options: {
+                  offset: [0, 15],
                 },
-              ],
-            }"
-            placement="top"
-            effect="customized"
-            :hide-after="0"
-            popper-class="popper"
-          >
+              },
+            ],
+          }" placement="top" effect="customized" :hide-after="0" popper-class="popper">
             <!-- Make the tooltip show -->
             <div style="height: 100%; width: 100%"></div>
           </el-tooltip>
         </div>
-        <div
-          class="current"
-          :style="{
-            '--strip-width': `${100 * current_weight_overall}%`,
-          }"
-        ></div>
+        <div class="current" :style="{
+          '--strip-width': `${100 * current_weight_overall}%`,
+        }"></div>
       </vue-draggable-next>
     </div>
 
     <!-- slider top end -->
     <div class="top-ends">
-      <vue-draggable-next
-        class="slider-ends"
-        :list="data.tri"
-        :group="{ name: 'tri', pull: false }"
-        @add="ReplaceTopCriteria"
-      >
+      <vue-draggable-next class="slider-ends" :list="data.tri" :group="{ name: 'tri', pull: false }"
+        @add="ReplaceTopCriteria">
         <!-- :move="PrintData" -->
-        <div
-          v-if="data.tri[0]"
-          :style="{
-            '--strip-width': `${100}%`,
-            '--strip-color': data.tri[0].color,
-          }"
-        >
+        <div v-if="data.tri[0]" :style="{
+          '--strip-width': `${100}%`,
+          '--strip-color': data.tri[0].color,
+        }">
           <div :style="{ '--text-length': data.tri[0].length }">
             {{ data.tri[0].name }}
           </div>
@@ -69,77 +43,38 @@
     </div>
 
     <div class="triangle-container">
-      <svg
-        ref="triSvg"
-        style="height: 25vh; width: 100%"
-        viewBox="-3 0 206 174"
-        xmlns="http://www.w3.org/2000/svg"
+      <svg ref="triSvg" style="height: 25vh; width: 100%" viewBox="-3 0 206 174" xmlns="http://www.w3.org/2000/svg"
         :style="{
           cursor: !data.slider.pressed ? 'default' : 'move',
-        }"
-      >
-        <polygon
-          class="triangle"
-          :points="`0,${Root3(100)} 100,0 200,${Root3(100)} 0,${Root3(100)}`"
-          vector-effect="non-scaling-stroke"
-          @mousemove="MoveSlider"
-          @click="PrintData"
-        />
-        <line
-          x1="100"
-          y1="8"
-          :x2="`${data.slider.x - 3}px`"
-          :y2="`${data.slider.y - 5}px`"
-          style="
+        }">
+        <polygon class="triangle" :points="`0,${Root3(100)} 100,0 200,${Root3(100)} 0,${Root3(100)}`"
+          vector-effect="non-scaling-stroke" @mousemove="MoveSlider" @click="PrintData" />
+        <line x1="100" y1="8" :x2="`${data.slider.x - 3}px`" :y2="`${data.slider.y - 5}px`" style="
             stroke-width: 2;
             stroke-linecap: round;
             filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3));
             opacity: 0.8;
             pointer-events: none;
-          "
-          :style="{ stroke: data.tri[0].color }"
-        />
-        <line
-          x1="6"
-          :y1="`${Root3(100) - 3}`"
-          :x2="`${data.slider.x - 8}px`"
-          :y2="`${data.slider.y + 4}px`"
-          style="
+          " :style="{ stroke: data.tri[0].color }" />
+        <line x1="6" :y1="`${Root3(100) - 3}`" :x2="`${data.slider.x - 8}px`" :y2="`${data.slider.y + 4}px`" style="
             stroke-width: 2;
             stroke-linecap: round;
             filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3));
             opacity: 0.8;
             pointer-events: none;
-          "
-          :style="{ stroke: data.tri[1].color }"
-        />
-        <line
-          x1="194"
-          :y1="`${Root3(100) - 3}`"
-          :x2="`${data.slider.x + 2}px`"
-          :y2="`${data.slider.y + 4}px`"
-          style="
+          " :style="{ stroke: data.tri[1].color }" />
+        <line x1="194" :y1="`${Root3(100) - 3}`" :x2="`${data.slider.x + 2}px`" :y2="`${data.slider.y + 4}px`" style="
             stroke-width: 2;
             stroke-linecap: round;
             filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3));
             opacity: 0.8;
             pointer-events: none;
-          "
-          :style="{ stroke: data.tri[2].color }"
-        />
-        <circle
-          class="slider"
-          ref="triSlider"
-          @pointerdown="PressSlider"
-          :style="{
-            '--slider-x': `${data.slider.x - 0.5}px`,
-            '--slider-y': `${data.slider.y + 3}px`,
-            pointerEvents: !data.slider.pressed ? 'all' : 'none',
-          }"
-          cx="-2.5"
-          cy="-2.5"
-          r="5"
-        />
+          " :style="{ stroke: data.tri[2].color }" />
+        <circle class="slider" ref="triSlider" @pointerdown="PressSlider" :style="{
+          '--slider-x': `${data.slider.x - 0.5}px`,
+          '--slider-y': `${data.slider.y + 3}px`,
+          pointerEvents: !data.slider.pressed ? 'all' : 'none',
+        }" cx="-2.5" cy="-2.5" r="5" />
 
         <!-- <circle
           :style="{
@@ -154,38 +89,24 @@
     </div>
 
     <div class="bottom-ends">
-      <vue-draggable-next
-        :list="data.tri"
-        class="slider-ends"
-        :group="{ name: 'tri', pull: false }"
-        @add="ReplaceBottomCriteria0"
-      >
-        <div
-          v-if="data.tri[1]"
-          :style="{
-            '--strip-width': `${100}%`,
-            '--strip-color': data.tri[1].color,
-          }"
-        >
+      <vue-draggable-next :list="data.tri" class="slider-ends" :group="{ name: 'tri', pull: false }"
+        @add="ReplaceBottomCriteria0">
+        <div v-if="data.tri[1]" :style="{
+          '--strip-width': `${100}%`,
+          '--strip-color': data.tri[1].color,
+        }">
           <div :style="{ '--text-length': data.tri[1].length }">
             {{ data.tri[1].name }}
           </div>
         </div>
       </vue-draggable-next>
 
-      <vue-draggable-next
-        :list="data.tri"
-        class="slider-ends"
-        :group="{ name: 'tri', pull: false }"
-        @add="ReplaceBottomCriteria1"
-      >
-        <div
-          v-if="data.tri[2]"
-          :style="{
-            '--strip-width': `${100}%`,
-            '--strip-color': data.tri[2].color,
-          }"
-        >
+      <vue-draggable-next :list="data.tri" class="slider-ends" :group="{ name: 'tri', pull: false }"
+        @add="ReplaceBottomCriteria1">
+        <div v-if="data.tri[2]" :style="{
+          '--strip-width': `${100}%`,
+          '--strip-color': data.tri[2].color,
+        }">
           <div :style="{ '--text-length': data.tri[2].length }">
             {{ data.tri[2].name }}
           </div>
@@ -286,13 +207,61 @@ function ReleaseSlider() {
 }
 
 let triSlider = ref(null);
-let triSvg = ref(null);
 
 const tri_point = [
   { x: 0, y: Root3(100) },
   { x: 100, y: 0 },
   { x: 200, y: Root3(100) },
 ];
+
+const overall_weight = computed(() =>
+  data.tri[0].weight + data.tri[1].weight + data.tri[2].weight
+)
+
+const wp0 = computed({
+  get() {
+    return data.tri[0].weight / overall_weight.value;
+  },
+  set(value) {
+    let overall = overall_weight.value;
+    let old_12 = data.tri[1].weight + data.tri[2].weight;
+    let v = value < 0.01 ? 0.01 : value;
+    v = value > 0.99 ? 0.99 : v;
+    data.tri[0].weight = overall * v;
+    data.tri[1].weight *= (1 - v) / old_12 * overall;
+    data.tri[2].weight *= (1 - v) / old_12 * overall;
+  }
+})
+
+const wp1 = computed({
+  get() {
+    return data.tri[1].weight / overall_weight.value;
+  },
+  set(value) {
+    let overall = overall_weight.value;
+    let old_12 = data.tri[0].weight + data.tri[2].weight;
+    let v = value < 0.01 ? 0.01 : value;
+    v = value > 0.99 ? 0.99 : v;
+    data.tri[1].weight = overall * v;
+    data.tri[0].weight *= (1 - v) / old_12 * overall;
+    data.tri[2].weight *= (1 - v) / old_12 * overall;
+  }
+})
+
+const wp2 = computed({
+  get() {
+    return data.tri[2].weight / overall_weight.value;
+  },
+  set(value) {
+    let overall = overall_weight.value;
+    let old_12 = data.tri[0].weight + data.tri[1].weight;
+    let v = value < 0.01 ? 0.01 : value;
+    v = value > 0.99 ? 0.99 : v;
+    data.tri[2].weight = overall * v;
+    data.tri[1].weight *= (1 - v) / old_12 * overall;
+    data.tri[0].weight *= (1 - v) / old_12 * overall;
+  }
+})
 
 function GetABC(point1, point2) {
   return [
@@ -307,29 +276,16 @@ function GetDistance(line_point1, line_point2, point) {
   return (A * point.x + B * point.y + C) / Math.sqrt(A * A + B * B);
 }
 
-function GetOverallDistance() {
-  let point = { x: tri_point[1].x, y: tri_point[0] / 2 };
-  let d1 = GetDistance(tri_point[2], tri_point[0], point);
-  let d2 = GetDistance(tri_point[1], tri_point[2], point);
-  let d3 = GetDistance(tri_point[0], tri_point[1], point);
-  return d1 + d2 + d3;
-}
-
 function WeightToPoint(weights) {
-  let [w2, w3] = [weights[1], weights[2]];
-  let d1 = w2 * GetOverallDistance();
-  let d2 = w3 * GetOverallDistance();
-
-  let [a1, b1, c1] = GetABC(tri_point[0], tri_point[2]);
-  let [a2, b2, c2] = GetABC(tri_point[0], tri_point[1]);
-  let k1 = Math.sqrt(a1 * a1 + b1 * b1);
-  let k2 = Math.sqrt(a2 * a2 + b2 * b2);
-
-  let y = ((d1 * k1 - c1) * a2 - (d2 * k2 - c2) * a1) / (b1 * a2 - b2 * a1);
-  let x = ((d1 * k1 - c1) / b1 - (d2 * k2 - c2) / b2) / (a1 / b1 - a2 / b2);
+  let [w1, w2, w3] = weights;
+  let y = (1 - w1) * Root3(100);
+  let x = 100 * w1 + 200 * (1 - w1) * w3 / (w2 + w3);
   return { x, y };
 }
 
+
+let moveslider_timeout = null;
+let point = null;
 function MoveSlider(e) {
   if (data.slider.pressed) {
     let XRatio =
@@ -338,20 +294,33 @@ function MoveSlider(e) {
     let YRatio =
       triSlider.value.getBBox().height /
       triSlider.value.getBoundingClientRect().height;
-    data.slider.x = e.offsetX * XRatio;
-    data.slider.y = e.offsetY * YRatio;
+    let x = e.offsetX * XRatio;
+    let y = e.offsetY * YRatio;
+    point = { x: x - 3, y: y + 0.5 };
 
-    let point = { x: data.slider.x - 3, y: data.slider.y + 0.5 };
-    // console.log(point);
-    let d1 = GetDistance(tri_point[2], tri_point[0], point);
-    let d2 = GetDistance(tri_point[1], tri_point[2], point);
-    let d3 = GetDistance(tri_point[0], tri_point[1], point);
-    let overall = d1 + d2 + d3;
-    let w1 = (d1 / overall).toFixed(2);
-    let w2 = (d2 / overall).toFixed(2);
-    let w3 = (d3 / overall).toFixed(2);
-    // console.log(w1, w2, w3);
-    console.log(point, WeightToPoint([w1, w2, w3]));
+    if (moveslider_timeout === null) {
+      moveslider_timeout = setTimeout(() => {
+
+        let d1 = GetDistance(tri_point[2], tri_point[0], point);
+        let d2 = GetDistance(tri_point[1], tri_point[2], point);
+        let d3 = GetDistance(tri_point[0], tri_point[1], point);
+
+        let overall = d1 + d2 + d3;
+        let v1 = (d1 / overall);
+        let v2 = (d2 / overall);
+        let v3 = (d3 / overall);
+
+        wp0.value = v1;
+        wp1.value = v2;
+        wp2.value = v3;
+
+        point = WeightToPoint([wp0.value, wp1.value, wp2.value])
+        data.slider.x = point.x;
+        data.slider.y = point.y;
+
+        moveslider_timeout = null;
+      }, 30);
+    }
   }
 }
 </script>
@@ -391,11 +360,13 @@ function MoveSlider(e) {
   fill: transparent;
   filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.2));
   cursor: move;
+  transition: 0.1s;
   transform: translate(var(--slider-x), var(--slider-y));
-  transition: 0.5s;
+
   &:hover {
     stroke: #f32e00;
   }
+
   &:active {
     transition: 0s;
     stroke: #f32e00;
@@ -421,6 +392,7 @@ function MoveSlider(e) {
   border-radius: 5px;
   overflow: hidden;
   cursor: grab;
+
   &:active {
     cursor: grabbing;
   }
@@ -431,6 +403,7 @@ function MoveSlider(e) {
     width: var(--strip-width);
 
     position: relative;
+
     div {
       text-align: right;
       position: absolute;
@@ -446,6 +419,7 @@ function MoveSlider(e) {
       height: 2vh;
       border-radius: 5px;
     }
+
     &:hover {
       div {
         opacity: 1;
@@ -461,12 +435,15 @@ function MoveSlider(e) {
   margin-bottom: 0.9px;
   height: 1vh;
   width: 90px;
+
   :first-child {
     border-top-left-radius: 3px;
   }
+
   :last-child {
     border-top-right-radius: 3px;
   }
+
   .reserved {
     margin: 0;
     width: var(--strip-width);
@@ -476,13 +453,16 @@ function MoveSlider(e) {
     transition: 0.3s;
     transition-property: transform;
     transform: scale(1, 1);
+
     &:hover {
       transform: scale(1.5, 1.5) translate(0, -20%);
     }
+
     &:active {
       cursor: grabbing;
     }
   }
+
   .current {
     background-color: #ffffff;
     height: 0.5vh;
