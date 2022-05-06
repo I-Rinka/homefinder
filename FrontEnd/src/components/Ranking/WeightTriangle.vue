@@ -140,6 +140,15 @@
           cy="-2.5"
           r="5"
         />
+
+        <!-- <circle
+          :style="{
+            transform: `translate(${data.slider.x}px,${data.slider.y}px)`,
+          }"
+          r="3"
+          cx="-3"
+          cy="0.5"
+        /> -->
       </svg>
       <!-- <div class="slider-stage" @click="PrintData"></div> -->
     </div>
@@ -279,6 +288,30 @@ function ReleaseSlider() {
 let triSlider = ref(null);
 let triSvg = ref(null);
 
+const tri_point = [
+  { x: 0, y: Root3(100) },
+  { x: 100, y: 0 },
+  { x: 200, y: Root3(100) },
+];
+
+function GetABC(point1, point2) {
+  return [
+    point1.y - point2.y,
+    point2.x - point1.x,
+    point1.y * (point1.x - point2.x) - point1.x * (point1.y - point2.y),
+
+    // 1 / (point2.x - point1.x),
+    // 1 / (point1.y - point2.y),
+    // point1.y / (point2.y - point1.y) - point1.x / (point2.x - point1.x),
+  ];
+  // B=1
+}
+
+function GetDistance(line_point1, line_point2, point) {
+  let [A, B, C] = GetABC(line_point1, line_point2);
+  return (A * point.x + B * point.y + C) / Math.sqrt(A * A + B * B);
+}
+
 function MoveSlider(e) {
   if (data.slider.pressed) {
     let XRatio =
@@ -287,10 +320,25 @@ function MoveSlider(e) {
     let YRatio =
       triSlider.value.getBBox().height /
       triSlider.value.getBoundingClientRect().height;
-    console.log(data.slider);
+    // console.log(data.slider);
     data.slider.x = e.offsetX * XRatio;
     data.slider.y = e.offsetY * YRatio;
-    data.slider.y = data.slider.y > 165 ? 165 : data.slider.y;
+    // data.slider.y = data.slider.y > 165 ? 165 : data.slider.y;
+
+    let point = { x: data.slider.x - 3, y: data.slider.y + 0.5 };
+
+    let d1 = GetDistance(tri_point[2], tri_point[0], point);
+    let d2 = GetDistance(tri_point[1], tri_point[2], point);
+    let d3 = GetDistance(tri_point[0], tri_point[1], point);
+    console.log(
+      "distance1:",
+      d1.toFixed(1),
+      "distance2:",
+      d2.toFixed(1),
+      "distance3:",
+      d3.toFixed(1),
+      d1 + d2 + d3
+    );
   }
 }
 </script>
