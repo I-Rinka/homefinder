@@ -270,10 +270,19 @@ onMounted(() => {
   percentage.value = 1 - bottom_slider_percentage.value;
 });
 
+let weight_change_timeout = null;
+let weight_v = percentage.value;
 watch(
   () => percentage.value,
   (v) => {
-    bottom_slider_percentage.value = 1 - v;
+    weight_v = v;
+    // weight_v= bottom_slider_percentage.value = 1 - v;
+    if (weight_change_timeout === null) {
+      weight_change_timeout = setTimeout(() => {
+        bottom_slider_percentage.value = 1 - weight_v;
+        weight_change_timeout = null;
+      }, 100);
+    }
   }
 );
 </script>
@@ -378,11 +387,13 @@ watch(
   height: 25vh;
   position: relative;
 }
+
 .slider-track {
   fill: #e7eae8;
   stroke-width: 1px;
   stroke: grey;
 }
+
 .slider-cursor-frame {
   position: absolute;
   display: inline-block;
@@ -390,6 +401,7 @@ watch(
   left: 50px;
   height: 55px;
   width: 10px;
+  transition: 0.1s;
   transform: translate(0, var(--slider-y));
   cursor: grab;
   &:active {
