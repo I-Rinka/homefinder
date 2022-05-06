@@ -30,9 +30,9 @@
       <weight-triangle
         :criterias="['area', 'unit_price', 'deal_price']"
       ></weight-triangle>
-      <!-- <weight-triangle
+      <weight-triangle
         :criterias="['area', 'unit_price', 'deal_price']"
-      ></weight-triangle> -->
+      ></weight-triangle>
       <!-- <weight-slider
         :top-criterias="['room', 'hall']"
         :bottom-criterias="['position', 'block_height']"
@@ -42,7 +42,9 @@
         :bottom-criterias="['built_year']"
       ></weight-slider> -->
       <div class="add-button">
-        <div>
+        <div class="preview-top"></div>
+        <div class="preview-bottom"></div>
+        <div class="icon-frame">
           <circle-plus style="width: 50px; position: relative; color: grey" />
         </div>
       </div>
@@ -135,7 +137,35 @@ const store = useStore();
   border: dashed #808080 2px;
   cursor: pointer;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.8));
-  div {
+
+  .preview-top {
+    top: 0%;
+    left: 0;
+    position: absolute;
+    background-color: aqua;
+    width: 100%;
+    height: 50%;
+    z-index: 10;
+
+    transition: 0.5s;
+    transition-delay: 0.2s;
+    opacity: 0;
+  }
+  .preview-bottom {
+    top: 50%;
+    left: 0;
+    position: absolute;
+    background-color: aquamarine;
+    width: 100%;
+    height: 50%;
+    z-index: 10;
+
+    transition: 0.5s;
+    transition-delay: 0.2s;
+    opacity: 0;
+  }
+
+  .icon-frame {
     position: relative;
     top: 13vh;
     transition: 0.5s;
@@ -143,8 +173,16 @@ const store = useStore();
   }
 
   &:hover {
-    div {
+    .icon-frame {
       transform: scale(1.2, 1.2);
+    }
+
+    .preview-top {
+      opacity: 1;
+    }
+
+    .preview-bottom {
+      opacity: 1;
     }
   }
 }
