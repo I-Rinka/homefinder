@@ -11,55 +11,36 @@
         }"
       >
         <!-- backgroundColor: d.color, -->
-        <div>
+        <div style="overflow:hidden; white-space: nowrap;">
           <el-checkbox v-model="d.enabled"></el-checkbox>
           {{ d.name }}
         </div>
       </div>
     </div>
 
-    <div class="table">
-      <!-- <div
-        class="table-content"
-        v-for="record in props.origin_records"
-        :key="record._id"
-      >
-        {{
-          record._id +
-          " , " +
-          record.block +
-          " , " +
-          record.area +
-          " , " +
-          record.direction +
-          " , " +
-          record.decoration +
-          " , " +
-          record.deal_price
-        }}
-      </div> -->
-      <div class="table-content"
-        v-for="item in ranking_score"
-        :key="item.index">
-        
-        <div class="table-content-block">
-          <span > {{props.origin_records[item.index].block}}  </span>
-        </div>
+    <!-- <div class="table"> -->
+      <TransitionGroup tag="div" name="fade" class="table">
+        <div class="table-content"
+          v-for="item in ranking_score"
+          :key="item.index">
+          
+          <div class="table-content-block">
+            <span > {{props.origin_records[item.index].block}}  </span>
+          </div>
 
-        <div class="table-content-weighted" 
-          v-for="d in enabled_strip"
-          :key="d.name"
-          :style="{
-          '--strip-color': d.color,
-          '--strip-width': `${d.weight / strip_percentage_sum * data.scaled_records[item.index][d.name] * data.origin_bar_width}px`,
-        }"
-        >
-          {{props.origin_records[item.index][d.name]}}
+          <div class="table-content-weighted" 
+            v-for="d in enabled_strip"
+            :key="d.name"
+            :style="{
+            '--strip-color': d.color,
+            '--strip-width': `${d.weight / strip_percentage_sum * data.scaled_records[item.index][d.name] * 100 * 0.90}%`,
+          }"
+          >
+            {{props.origin_records[item.index][d.name]}}
+          </div>
         </div>
-
-      </div>
-      
-    </div>
+      </TransitionGroup>
+    <!-- </div> -->
 
     <el-dialog v-model="data.mapping_dialog_visible" title="Data Mapping">
       <!-- <el-form :model="form">
@@ -327,18 +308,6 @@ function HandleConfirmMapping() {
 .table-content-weighted {
   height:100%;
   overflow:hidden; 
-  overflow:hidden; 
-    overflow:hidden; 
-  overflow:hidden; 
-    overflow:hidden; 
-  overflow:hidden; 
-    overflow:hidden; 
-    white-space: nowrap; 
-  white-space: nowrap; 
-    white-space: nowrap; 
-  white-space: nowrap; 
-    white-space: nowrap; 
-  white-space: nowrap; 
   white-space: nowrap; 
   // padding-top: 5px;
   // padding-left: 5px;
@@ -352,6 +321,7 @@ function HandleConfirmMapping() {
   display: flex;
   width: 100%;
   overflow: hidden;
+  white-space: nowrap; 
   background-color: aliceblue;
   .enabled {
     border-radius: 5px;
@@ -365,6 +335,11 @@ function HandleConfirmMapping() {
     background-color: var(--strip-color);
     width: var(--strip-width);
   }
+}
+
+.fade-move {
+  transition: transform 0.2s;
+  // transition-delay: 0.5s;
 }
 
 @keyframes enter {
