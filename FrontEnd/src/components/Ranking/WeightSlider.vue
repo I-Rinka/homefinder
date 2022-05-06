@@ -93,7 +93,7 @@
       <div
         class="slider-cursor-frame"
         :style="{
-          '--slider-y': `${data.slider.y}vh`,
+          '--slider-y': `${slider_y}vh`,
         }"
       >
         <slider-cursor
@@ -177,7 +177,11 @@ const bottom_slider_percentage = computed({
     data.bottom.forEach((x) => (sum += x.weight));
     return sum / current_weight_overall.value;
   },
-  set(value) {
+  set(v) {
+    let value = v >= 0.99 ? 0.99 : v;
+    value = v <= 0.01 ? 0.01 : v;
+
+    console.log("slider value:", value);
     let old_value = bottom_slider_percentage.value;
     let change = value / old_value;
 
@@ -223,56 +227,57 @@ function MoveSlider(e) {
     let rect = SliderTrack.value.getBoundingClientRect();
     let percentage = (e.clientY - rect.y) / rect.height;
     let y = 23.4 * percentage;
-    y = y < 0 ? 0 : y;
-    y = y > 23.4 ? 23.4 : y;
-    data.slider.y = y;
+    slider_y.value = y;
   }
 }
+
+let weight_change_timeout = null;
+let weight_v = 0;
+const slider_y = computed({
+  get() {
+    if (data.slider.pressed) {
+      return data.slider.y;
+    }
+    data.slider.y = 23.4 * (1 - bottom_slider_percentage.value);
+    return data.slider.y;
+  },
+  set(value) {
+    let y = value < 0 ? 0 : value;
+    y = y > 23.4 ? 23.4 : y;
+    data.slider.y = y;
+
+    weight_v = y / 23.4;
+
+    if (weight_change_timeout === null) {
+      weight_change_timeout = setTimeout(() => {
+        if (1 - weight_v >= 0.99) {
+          console.log("surpassed");
+          bottom_slider_percentage.value = 0.99;
+        } else if (1 - weight_v <= 0.01) {
+          console.log("surpassed");
+          bottom_slider_percentage.value = 0.01;
+        } else {
+          console.log("no problem");
+          bottom_slider_percentage.value = 1 - weight_v;
+        }
+        weight_change_timeout = null;
+      }, 100);
+    }
+
+    return data.slider.y;
+  },
+});
 
 function TranslateSlider(e) {
   let rect = SliderTrack.value.getBoundingClientRect();
   let percentage = (e.clientY - rect.y) / rect.height;
   let y = 23.4 * percentage;
-  y = y < 0 ? 0 : y;
-  y = y > 23.4 ? 23.4 : y;
-  data.slider.y = y;
+  slider_y.value = y;
 }
 
-const percentage = computed({
-  get() {
-    let p = data.slider.y / 23.4;
-    p = p <= 0.01 ? 0.01 : p;
-    p = p >= 0.99 ? 0.99 : p;
-    console.log(p);
-    return p;
-  },
-  set(p) {
-    let y = p * 23.4;
-    y = y < 0 ? 0 : y;
-    y = y > 23.4 ? 23.4 : y;
-    data.slider.y = y;
-  },
-});
-
 onMounted(() => {
-  percentage.value = 1 - bottom_slider_percentage.value;
+  // percentage.value = 1 - bottom_slider_percentage.value;
 });
-
-let weight_change_timeout = null;
-let weight_v = percentage.value;
-watch(
-  () => percentage.value,
-  (v) => {
-    weight_v = v;
-    // weight_v= bottom_slider_percentage.value = 1 - v;
-    if (weight_change_timeout === null) {
-      weight_change_timeout = setTimeout(() => {
-        bottom_slider_percentage.value = 1 - weight_v;
-        weight_change_timeout = null;
-      }, 100);
-    }
-  }
-);
 </script>
 
 <style lang="less" scoped>
