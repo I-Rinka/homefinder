@@ -1,6 +1,9 @@
 <template>
   <div class="weight-lifter">
     <div class="reserved-criteria">
+      <div style="font-size: 10px; padding: 2px 10px 2px 10px; color: grey;font-weight: bold;">
+        Disabled Criterias
+      </div>
       <div class="disabled" v-for="d in disabled" :key="d.name">
         <el-checkbox style="z-index: -0" v-model="d.enabled"></el-checkbox>
         <span class="disabled-name">
@@ -17,6 +20,9 @@
         :top-criterias="['area']"
         :bottom-criterias="['unit_price', 'direction']"
       ></weight-slider>
+      <weight-triangle
+        :criterias="['area', 'unit_price', 'deal_price']"
+      ></weight-triangle>
       <weight-triangle
         :criterias="['area', 'unit_price', 'deal_price']"
       ></weight-triangle>
@@ -55,8 +61,11 @@ const store = useStore();
 }
 
 .sliders-container {
-  position: absolute;
-  margin: 10px;
+  position: relative;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  width: 100%;
+  overflow: scroll;
   display: flex;
 }
 .reserved-criteria {
