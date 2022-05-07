@@ -285,7 +285,7 @@ onMounted(() => {
   align-items: center;
   margin-left: 30px;
   margin-right: 30px;
-  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.3));
 
   .el-slider {
     position: relative;

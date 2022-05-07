@@ -19,36 +19,29 @@
       </div>
     </div>
     <div class="sliders-container">
-      <!-- <weight-slider
-        :top-criterias="['area']"
-        :bottom-criterias="['unit_price', 'direction']"
-      ></weight-slider> -->
-      <weight-slider
-        :top-criterias="['area']"
-        :bottom-criterias="['unit_price', 'direction']"
-      ></weight-slider>
-      <weight-triangle
-        :criterias="['area', 'unit_price', 'deal_price']"
-      ></weight-triangle>
-
-      <!-- <weight-slider
-        :top-criterias="['room', 'hall']"
-        :bottom-criterias="['position', 'block_height']"
-      ></weight-slider>
-      <weight-slider
-        :top-criterias="['type', 'decoration', 'area']"
-        :bottom-criterias="['built_year']"
-      ></weight-slider> -->
-      <template v-for="tweaker in data.tweakers" :key="tweaker">
-        <weight-triangle
-          v-if="tweaker.type === 'tri'"
-          :criterias="tweaker.data"
-        ></weight-triangle>
+      <div class="tweaker">
         <weight-slider
-          v-if="tweaker.type === 'sli'"
-          :top-criterias="tweaker.data.top"
-          :bottom-criterias="tweaker.data.bottom"
+          :top-criterias="['area']"
+          :bottom-criterias="['unit_price', 'direction']"
         ></weight-slider>
+      </div>
+      <div class="tweaker">
+        <weight-triangle
+          :criterias="['area', 'unit_price', 'deal_price']"
+        ></weight-triangle>
+      </div>
+      <template v-for="tweaker in data.tweakers" :key="tweaker">
+        <div class="tweaker">
+          <weight-triangle
+            v-if="tweaker.type === 'tri'"
+            :criterias="tweaker.data"
+          ></weight-triangle>
+          <weight-slider
+            v-if="tweaker.type === 'sli'"
+            :top-criterias="tweaker.data.top"
+            :bottom-criterias="tweaker.data.bottom"
+          ></weight-slider>
+        </div>
       </template>
 
       <div class="add-button">
@@ -242,8 +235,7 @@ function Root3(number) {
 
 .sliders-container {
   position: relative;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-left:20px;
   width: 100%;
   overflow: scroll;
   display: flex;
@@ -316,11 +308,13 @@ function Root3(number) {
 }
 
 .add-button {
+  position: relative;
+  top: 2vh;
   padding: 0 20px 0 20px;
   margin-left: 40px;
   margin-right: 40px;
   border-radius: 10px;
-  height: 32vh;
+  height: 32.5vh;
   width: 100px;
   opacity: 0.8;
   // background-color: whitesmoke;
@@ -328,8 +322,6 @@ function Root3(number) {
   border: dashed #808080 2px;
   cursor: pointer;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.8));
-  position: static;
-
   .preview-frame {
     position: absolute;
     top: 0;
@@ -423,6 +415,20 @@ function Root3(number) {
     .preview-bottom {
       opacity: 1;
     }
+  }
+}
+.tweaker {
+  height: 32vh;
+  padding: 1.5vh;
+  margin: 10px;
+  filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.3));
+  transition: 0.5s;
+  border-radius: 7px;
+  background-color: whitesmoke;
+    transform: scale(0.95,0.95);
+  &:hover {
+    background-color: rgb(255, 255, 255);
+    transform: scale(1,1);
   }
 }
 </style>
