@@ -91,7 +91,7 @@
               <!-- nominal -->
               <el-checkbox-group v-if="nominal_attr_name.includes(d.name)"
                 v-model="data.nominal_filter[d.name]">
-                <el-checkbox v-for="item in data.nominal_attr_set[d.name]" :label="item"> </el-checkbox>
+                <el-checkbox v-for="item in data.nominal_attr_set[d.name]" :key="item.index" :label="item"> </el-checkbox>
               </el-checkbox-group>
 
             </el-popover>
@@ -352,16 +352,24 @@ function CalculateScaledRecords(name) {
 }
 function CheckFilter(index) {
   let record = props.origin_records[index]
-  enabled_strip.value.forEach((d) => {
-    let attr = d.name
+  let flag = true
+  for (let i=0; i< enabled_strip.value.length; i++) {
+    let attr = enabled_strip.value[i].name
     if (nominal_attr_name.includes(attr)) { // nominal
-      if (!data.nominal_filter[attr].includes(record[attr])) return false
+      if (!data.nominal_filter[attr].includes(record[attr])) {
+        flag = false
+        break
+      }
     }
     else {  // quantitative
-      if (!(data.quantitative_filter[attr][0] <= record[attr] && data.quantitative_filter[attr][1] >= record[attr])) return false
+      if (!(data.quantitative_filter[attr][0] <= record[attr] && data.quantitative_filter[attr][1] >= record[attr])) {
+        flag = false
+        break
+      }
     }
-  })
-  return true
+  }
+  if (flag) return true
+  else return false
 }
 const ranking_score = computed(() => {
   let scores = [];
