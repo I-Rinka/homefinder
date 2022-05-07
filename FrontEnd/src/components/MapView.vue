@@ -473,10 +473,24 @@ function Play(zoom) {
     // geo=index.getClusters(currentExtent,SC_zoom.value);
     let geo = supercluster.getClusters(currentExtent, zoom);
 
+    const features=[];
+    for (let i = 0; i < geo.length; i++) {
+      const element = geo[i];
+      // supercluster.getLeaves(element.properties.cluster_id)
+      if (element.properties.cluster) {
+        features.push(supercluster.getLeaves(element.properties.cluster_id)[0])
+        // console.log(supercluster.getLeaves(element.properties.cluster_id));
+      }
+      else {
+        features.push(element)
+      }
+    }
+
     let vectorSource = new VectorSource({
       features: new GeoJSON().readFeatures({
         type: "FeatureCollection",
-        features: geo,
+        // features: geo,
+        features: features,
       }),
     });
     TestLayer.setSource(vectorSource);
@@ -507,6 +521,7 @@ function Play(zoom) {
           features: geo,
         }),
       });
+      console.log(geo);
       // console.log(index);
 
       TestLayer.setSource(vectorSource);
