@@ -30,19 +30,19 @@
             :icon="Close"
             circle
             size="small"
-            @click="CloseTweaker(index)"
+            @click="CloseTweaker(tweaker)"
           />
 
           <weight-triangle
             v-if="tweaker.type === 'tri'"
             :criterias="tweaker.data"
-            @close="CloseTweaker(index)"
+            @close="CloseTweaker(tweaker)"
           ></weight-triangle>
           <weight-slider
             v-if="tweaker.type === 'sli'"
             :top-criterias="tweaker.data.top"
             :bottom-criterias="tweaker.data.bottom"
-            @close="CloseTweaker(index)"
+            @close="CloseTweaker(tweaker)"
           ></weight-slider>
         </div>
       </template>
@@ -187,8 +187,9 @@ const enabled = computed(() => {
   return store.criterias.filter((d) => d.enabled);
 });
 
-function CloseTweaker(index) {
-  data.tweakers.splice(index, 1);
+function CloseTweaker(tweaker) {
+  data.tweakers=data.tweakers.filter((d)=>d!=tweaker);
+  // data.tweakers.splice(index, 1);
 }
 
 function ApplySlider() {
