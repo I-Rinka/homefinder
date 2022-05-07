@@ -165,11 +165,11 @@ const scale_list = new Map(); // the scale of each attr
 // name, color, enabled(default is disabled)
 let criteria = [];
 criteria.push(store.CreateCriteria("area", "#8dd3c7", true));
-criteria.push(store.CreateCriteria("direction", "#ffffb3", true));
-criteria.push(store.CreateCriteria("decoration", "#bebada", true));
-criteria.push(store.CreateCriteria("deal_price", "#fb8072", ));
+criteria.push(store.CreateCriteria("direction", "#ffffb3" ));
+criteria.push(store.CreateCriteria("decoration", "#fb8072"));
+criteria.push(store.CreateCriteria("deal_price", "#bebada", true));
 criteria.push(store.CreateCriteria("unit_price", "#80b1d3", true));
-criteria.push(store.CreateCriteria("position", "#fdb462", true));
+criteria.push(store.CreateCriteria("position", "#fdb462"));
 criteria.push(store.CreateCriteria("room", "#b3de69"));
 criteria.push(store.CreateCriteria("hall", "#fccde5"));
 criteria.push(store.CreateCriteria("block_height", "#ffed6f"));
