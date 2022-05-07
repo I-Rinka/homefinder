@@ -62,7 +62,7 @@
             <template #reference>
               <div class="preview-bottom">
                 <div>
-                  <el-image src="/empty_triangle.png" fit="cover" />
+                  <el-image src="/empty_triangle.png" fit="contain" />
                 </div>
               </div>
             </template>
@@ -187,15 +187,18 @@ const store = useStore();
       opacity: 0;
       position: relative;
       pointer-events: none;
-      top: 0%;
+      height: 16vh;
+      top: 0;
       transition: 0.5s;
+    }
+    .el-image {
+      width: 100%;
     }
 
     &:hover {
       div {
         opacity: 1;
-        padding: 20% 0 30% 0;
-        top: 0%;
+        height: 32vh;
         background-color: white;
       }
     }
@@ -210,12 +213,13 @@ const store = useStore();
     transition-delay: 0.2s;
     opacity: 0;
     .el-image {
+      margin-top: 16vh;
       width: 100%;
     }
     div {
       opacity: 0;
+      height: 16vh;
       position: relative;
-      padding: 50% 0 50% 0;
       top: 0;
       transition: 0.5s;
     }
@@ -223,7 +227,8 @@ const store = useStore();
     &:hover {
       div {
         opacity: 1;
-        top: -100%;
+        height: 32vh;
+        top: -16vh;
         background-color: white;
       }
     }
