@@ -855,7 +855,7 @@ function UnRegShiftKey() {
 
 <style lang="less">
 .timeline {
-  height: 100px;
+  height: 95px;
   width: 100%;
   margin-bottom: 0px;
   position: relative;
@@ -988,7 +988,7 @@ function UnRegShiftKey() {
 .el-popper.is-customized {
   /* Set padding to ensure the height is 32px */
   padding: 6px 12px;
-  pointer-events: none;
+  // pointer-events: none;
   background: linear-gradient(90deg, rgb(230, 230, 230), rgb(255, 255, 255));
 
   span {
@@ -1005,7 +1005,7 @@ function UnRegShiftKey() {
   // pointer-events: none;
   position: absolute;
   width: 100%;
-  top: 15%;
+  top: 20%;
   color: gray;
   font-weight: bolder;
   font-size: 1.5vh;

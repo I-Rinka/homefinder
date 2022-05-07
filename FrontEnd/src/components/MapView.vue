@@ -412,6 +412,7 @@ function GetOnScreenFeatures() {
 <style lang="less">
 #MapView {
   position: relative;
+  top:8px;
   height: 50vh;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
 }

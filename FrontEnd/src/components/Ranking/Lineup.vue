@@ -10,45 +10,61 @@
           '--strip-width': `${(100 * d.weight) / strip_percentage_sum}%`,
         }"
       >
-        <el-row>
+        <div class="strip">
           <!-- mapping -->
-          <div style="padding-right:10px; padding-top:4px">
-            <el-button :icon="Edit" size="small" :circle="true"
-              @click="HandleMapData(d.name)"
-            > </el-button>
-          </div>
 
           <!-- enable -->
-          <div style="overflow:hidden; white-space: nowrap">
+          <div style="overflow: hidden; white-space: nowrap">
             <el-checkbox v-model="d.enabled"></el-checkbox>
             {{ d.name }}
           </div>
-        </el-row>
-
+          <div style="padding-left: 5px; padding-top: 7px">
+            <Edit
+              color="grey"
+              style="
+                height: 16px;
+                margin-top: 1.5px;
+                cursor: pointer;
+                padding: 2px;
+                border-radius: 5px;
+              "
+              @click="HandleMapData(d.name)"
+            ></Edit>
+          </div>
+        </div>
       </div>
     </div>
 
-    <TransitionGroup tag="div" name="fade" class="table">
-      <div class="table-content"
+    <!-- <div class="table"> -->
+    <TransitionGroup tag="div" name="list-complete" class="table">
+      <div
+        class="table-content"
         v-for="item in ranking_score"
-        :key="item.index">
-        
+        :key="item.index"
+      >
         <div class="table-content-block">
-          <span > {{props.origin_records[item.index].block}}  </span>
+          <span> {{ props.origin_records[item.index].block }} </span>
         </div>
 
-        <div class="table-content-weighted" 
+        <div
+          class="table-content-weighted"
           v-for="d in enabled_strip"
           :key="d.name"
           :style="{
-          '--strip-color': d.color,
-          '--strip-width': `${d.weight / strip_percentage_sum * data.scaled_records[item.index][d.name] * 100 * 0.90}%`,
-        }"
+            '--strip-color': d.color,
+            '--strip-width': `${
+              (d.weight / strip_percentage_sum) *
+              data.scaled_records[item.index][d.name] *
+              100 *
+              0.9
+            }%`,
+          }"
         >
-          {{props.origin_records[item.index][d.name]}}
+          {{ props.origin_records[item.index][d.name] }}
         </div>
       </div>
     </TransitionGroup>
+    <!-- </div> -->
 
     <el-dialog v-model="data.mapping_dialog_visible" title="Data Mapping">
       <!-- <el-form :model="form">
@@ -84,7 +100,7 @@ import { useStore } from "../store/weight";
 import { computed, onMounted, watch } from "@vue/runtime-core";
 import * as d3 from "d3";
 import MapNominal from "./MapNominal.vue";
-import { Edit } from '@element-plus/icons-vue'
+import { Edit } from "@element-plus/icons-vue";
 
 const store = useStore();
 const props = defineProps({
@@ -304,10 +320,9 @@ class Nominal {
 }
 function HandleMapData(name) {
   if (nominal_attr_name.includes(name)) {
-    MapNominalData(name)
-  }
-  else {
-    MapQuantitativeData(name)
+    MapNominalData(name);
+  } else {
+    MapQuantitativeData(name);
   }
 }
 
@@ -315,8 +330,8 @@ function MapNominalData(attr) {
   let arr = [];
 
   let value_list = props.origin_records.map((record) => record[attr]);
-  let value_set = new Set(value_list)
-  value_list = Array.from(value_set)
+  let value_set = new Set(value_list);
+  value_list = Array.from(value_set);
 
   let cur_scale = data.nominal_mapping_map[attr]
 
@@ -343,7 +358,6 @@ function MapQuantitativeData(attr) {
   // data.current_nominal_to_map = arr;
   // show_map_widget = true;
 }
-
 </script>
 
 <style lang="less" scoped>
@@ -361,6 +375,8 @@ function MapQuantitativeData(attr) {
   overflow: scroll;
 }
 .table-content {
+  transition-delay: 0.2s;
+  transition: 0.5s;
   text-align: left;
   height: 30px;
   border-bottom: solid #eaeaea 2px;
@@ -379,9 +395,9 @@ function MapQuantitativeData(attr) {
   display: inline-block;
 }
 .table-content-weighted {
-  height:100%;
-  overflow:hidden; 
-  white-space: nowrap; 
+  height: 100%;
+  overflow: hidden;
+  white-space: nowrap;
   // padding-top: 5px;
   // padding-left: 5px;
   display: inline-block;
@@ -393,26 +409,48 @@ function MapQuantitativeData(attr) {
 .weight-strip {
   display: flex;
   width: 100%;
+  height: 40px;
   overflow: hidden;
-  white-space: nowrap; 
-  background-color: aliceblue;
+  white-space: nowrap;
+  background-color: rgb(255, 255, 255);
   .enabled {
+    height: 23px;
     border-radius: 5px;
-    margin: 2px 5px 2px 5px;
-    padding: 2px 20px 2px 20px;
-    background-color: rgb(158, 158, 158);
+    margin: 0px 5px 2px 5px;
+    padding: 0px 20px 5px 20px;
+    background-color: rgb(207, 100, 100);
     animation: enter 0.5s;
-    transition: 0.5s;
+    transition: 0.4s;
     color: white;
-
+    font-size: 15px;
+    font-weight: 600;
     background-color: var(--strip-color);
     width: var(--strip-width);
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+    // border: solid gray 1px;
+  }
+  .el-checkbox {
+    position: relative;
+    top: 3px;
+  }
+
+  .strip {
+    position: relative;
+    top: -4px;
+    display: flex;
+    flex-wrap: nowrap;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
   }
 }
 
-.fade-move {
-  transition: transform 0.2s;
-  // transition-delay: 0.5s;
+.list-complete-enter, .list-complete-leave-to
+/* .list-complete-leave-active below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateY(30px);
+}
+.list-complete-leave-active {
+  position: absolute;
 }
 
 @keyframes enter {

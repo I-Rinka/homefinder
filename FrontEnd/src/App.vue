@@ -15,6 +15,11 @@ import RankView from "./components/RankView.vue";
 </template>
 
 <style>
+body {
+  margin: 8;
+  height: 100vh;
+  overflow: hidden;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -27,6 +32,7 @@ import RankView from "./components/RankView.vue";
   --el-color-primary: #487cc6;
   --el-border-color: grey;
   --el-border-color-light: grey;
+  --el-popover-border-radius: 5px;
 }
 
 ::-webkit-scrollbar {
@@ -47,7 +53,7 @@ import RankView from "./components/RankView.vue";
   display: none;
 }
 
-.el-dialog{
-  border-radius: 10px !important;
+.el-dialog {
+  border-radius: 5px !important;
 }
 </style>

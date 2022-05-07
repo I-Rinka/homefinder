@@ -123,9 +123,7 @@ import { VueDraggableNext } from "vue-draggable-next";
 
 import SliderCursor from "../TimeLine/SliderCursor.vue";
 
-function PrintData() {
-  console.log(include_names.value);
-}
+const emits = defineEmits(["close"]);
 
 const store = useStore();
 const props = defineProps({
@@ -161,6 +159,10 @@ watch(
   () => {
     data.top = data.top.filter((d) => d.enabled);
     data.bottom = data.bottom.filter((d) => d.enabled);
+    if (data.top.length <= 0 || data.bottom.length <= 0) {
+      emits("close");
+      console.log("close");
+    }
   }
 );
 
@@ -285,7 +287,7 @@ onMounted(() => {
   align-items: center;
   margin-left: 30px;
   margin-right: 30px;
-  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.3));
 
   .el-slider {
     position: relative;
