@@ -77,7 +77,6 @@
                     padding: 2px;
                     border-radius: 5px;
                   "
-                  @click="HandleFilter(d.name)"
                 ></Filter>
               </template>
               
@@ -284,15 +283,15 @@ watch(
   { deep: true }
 );
 
-function HandleFilter(name) {
-  // data.filter_popover_visible[name] = true
-  if (nominal_attr_name.includes(name)) { // nominal
+// function HandleFilter(name) {
+//   // data.filter_popover_visible[name] = true
+//   if (nominal_attr_name.includes(name)) { // nominal
 
-  }
-  else {  // quantitative
+//   }
+//   else {  // quantitative
     
-  }
-}
+//   }
+// }
 
 function HandleScale(name) {
   if (!nominal_attr_name.includes(name)) {
@@ -305,9 +304,12 @@ function HandleScale(name) {
 }
 
 function CalculateQuantitativeScale(name, is_positive_correlation) {
-  let min = data.quantitative_attr_range[name].min
-  let max = data.quantitative_attr_range[name].max
+  // let min = data.quantitative_attr_range[name].min
+  // let max = data.quantitative_attr_range[name].max
 
+  let min = data.quantitative_filter[name][0]
+  let max = data.quantitative_filter[name][1]
+  
   let scale = d3.scaleLinear().range([0, 1]);
   if (is_positive_correlation) {
     scale.domain([min, max]);
@@ -397,7 +399,10 @@ function HandleConfirmMapping(mapping_data, attr) {
   data.mapping_dialog_visible = false;
   console.log(mapping_data)
 
-  data.nominal_mapping_map[attr] = mapping_data
+  for (let [key, value] of mapping_data) {
+    data.nominal_mapping_map[attr].set(key, value)
+  }
+  // data.nominal_mapping_map[attr] = mapping_data
   
   // recalculate scaled data
   HandleScale(attr);
@@ -419,7 +424,7 @@ function MapNominalData(attr) {
 
   let value_list = props.origin_records.map((record) => record[attr]);
   let value_set = new Set(value_list);
-  value_list = Array.from(value_set);
+  value_list = Array.from(value_set).filter((d) => data.nominal_filter[attr].includes(d));
 
   let cur_scale = data.nominal_mapping_map[attr]
 
