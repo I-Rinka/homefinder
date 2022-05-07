@@ -29,7 +29,7 @@
     </div>
 
     <!-- <div class="table"> -->
-      <TransitionGroup tag="div" name="fade" class="table">
+      <TransitionGroup tag="div" name="list-complete" class="table">
         <div class="table-content"
           v-for="item in ranking_score"
           :key="item.index">
@@ -353,6 +353,8 @@ function MapQuantitativeData(attr) {
   overflow: scroll;
 }
 .table-content {
+  transition-delay: 0.2s;
+  transition: 0.5s;
   text-align: left;
   height: 30px;
   border-bottom: solid #eaeaea 2px;
@@ -402,9 +404,13 @@ function MapQuantitativeData(attr) {
   }
 }
 
-.fade-move {
-  transition: transform 0.2s;
-  // transition-delay: 0.5s;
+.list-complete-enter, .list-complete-leave-to
+/* .list-complete-leave-active below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateY(30px);
+}
+.list-complete-leave-active {
+  position: absolute;
 }
 
 @keyframes enter {
