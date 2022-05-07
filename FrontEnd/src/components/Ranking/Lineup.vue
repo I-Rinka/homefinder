@@ -11,14 +11,15 @@
         }"
       >
         <div class="strip">
-          <!-- mapping -->
-
           <!-- enable -->
           <div style="overflow: hidden; white-space: nowrap">
             <el-checkbox v-model="d.enabled"></el-checkbox>
             {{ d.name }}
           </div>
-          <div style="padding-left: 5px; padding-top: 7px">
+
+          <!-- mapping -->
+          <div v-if="nominal_attr_name.includes(d.name)"
+            style="padding-left: 5px; padding-top: 7px; cursor: pointer;">
             <Edit
               color="grey"
               style="
@@ -28,9 +29,40 @@
                 padding: 2px;
                 border-radius: 5px;
               "
-              @click="HandleMapData(d.name)"
+              @click="MapNominalData(d.name)"
             ></Edit>
           </div>
+
+          <div v-if="!nominal_attr_name.includes(d.name) && data.quantitative_mapping_type[d.name]"
+            style="padding-left: 5px; padding-top: 7px; cursor: pointer;">
+            <TopRight
+              color="grey"
+              style="
+                height: 16px;
+                margin-top: 1.5px;
+                cursor: pointer;
+                padding: 2px;
+                border-radius: 5px;
+              "
+              @click="MapQuantitativeData(d.name)"
+            ></TopRight>
+          </div>
+          <div v-if="!nominal_attr_name.includes(d.name) && !data.quantitative_mapping_type[d.name]"
+            style="padding-left: 5px; padding-top: 7px; cursor: pointer;">
+            <BottomRight
+              color="grey"
+              style="
+                height: 16px;
+                margin-top: 1.5px;
+                cursor: pointer;
+                padding: 2px;
+                border-radius: 5px;
+              "
+              @click="MapQuantitativeData(d.name)"
+            ></BottomRight>
+          </div>
+
+
         </div>
       </div>
     </div>
@@ -100,7 +132,7 @@ import { useStore } from "../store/weight";
 import { computed, onMounted, watch } from "@vue/runtime-core";
 import * as d3 from "d3";
 import MapNominal from "./MapNominal.vue";
-import { Edit } from "@element-plus/icons-vue";
+import { Edit, TopRight, BottomRight } from "@element-plus/icons-vue";
 
 const store = useStore();
 const props = defineProps({
@@ -318,13 +350,13 @@ class Nominal {
     this.enabled = enabled;
   }
 }
-function HandleMapData(name) {
-  if (nominal_attr_name.includes(name)) {
-    MapNominalData(name);
-  } else {
-    MapQuantitativeData(name);
-  }
-}
+// function HandleMapData(name) {
+//   if (nominal_attr_name.includes(name)) {
+//     MapNominalData(name);
+//   } else {
+//     MapQuantitativeData(name);
+//   }
+// }
 
 function MapNominalData(attr) {
   let arr = [];
@@ -347,16 +379,10 @@ function MapNominalData(attr) {
 }
 
 function MapQuantitativeData(attr) {
-  data.mapping_dialog_visible = true;
+  data.quantitative_mapping_type[attr] = !data.quantitative_mapping_type[attr]
 
-  // let arr = [];
-
-  // for (let i = 0; i < 5; i++) {
-  //   arr.push(new Nominal(i.toString() + i.toString(), 0.2 * i));
-  // }
-
-  // data.current_nominal_to_map = arr;
-  // show_map_widget = true;
+  HandleScale(attr);
+  CalculateScaledRecords(attr);
 }
 </script>
 
