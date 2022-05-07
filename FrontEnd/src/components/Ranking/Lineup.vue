@@ -28,29 +28,27 @@
       </div>
     </div>
 
-    <!-- <div class="table"> -->
-      <TransitionGroup tag="div" name="fade" class="table">
-        <div class="table-content"
-          v-for="item in ranking_score"
-          :key="item.index">
-          
-          <div class="table-content-block">
-            <span > {{props.origin_records[item.index].block}}  </span>
-          </div>
-
-          <div class="table-content-weighted" 
-            v-for="d in enabled_strip"
-            :key="d.name"
-            :style="{
-            '--strip-color': d.color,
-            '--strip-width': `${d.weight / strip_percentage_sum * data.scaled_records[item.index][d.name] * 100 * 0.90}%`,
-          }"
-          >
-            {{props.origin_records[item.index][d.name]}}
-          </div>
+    <TransitionGroup tag="div" name="fade" class="table">
+      <div class="table-content"
+        v-for="item in ranking_score"
+        :key="item.index">
+        
+        <div class="table-content-block">
+          <span > {{props.origin_records[item.index].block}}  </span>
         </div>
-      </TransitionGroup>
-    <!-- </div> -->
+
+        <div class="table-content-weighted" 
+          v-for="d in enabled_strip"
+          :key="d.name"
+          :style="{
+          '--strip-color': d.color,
+          '--strip-width': `${d.weight / strip_percentage_sum * data.scaled_records[item.index][d.name] * 100 * 0.90}%`,
+        }"
+        >
+          {{props.origin_records[item.index][d.name]}}
+        </div>
+      </div>
+    </TransitionGroup>
 
     <el-dialog v-model="data.mapping_dialog_visible" title="Data Mapping">
       <!-- <el-form :model="form">
@@ -69,6 +67,7 @@
         @cancel="data.mapping_dialog_visible = false"
         @confirm="HandleConfirmMapping"
         :nominal_data="data.current_nominal_to_map"
+        :attr="data.current_nominal_attr_name"
       ></map-nominal>
       <!-- <el-button @click="data.mapping_dialog_visible = false"
             >Cancel</el-button
@@ -99,6 +98,7 @@ const props = defineProps({
 // the reactive data
 const data = reactive({
   current_nominal_to_map: [],
+  current_nominal_attr_name: null,
 
   mapping_dialog_visible: false,
   scaled_records: [], // the scaled value of each origin record
@@ -116,26 +116,20 @@ const data = reactive({
       built_year: false,
     },
 
-  // todo: user interaction
-  nominal_mapping_function: {
-    direction: function (input) {
-      if (input.includes("南")) return 0.3;
-      else return 1;
-    },
-    decoration: function (input) {
-      if (input.includes("精装")) return 0.3;
-      else return 1;
-    },
-    position: function (input) {
-      if (input.includes("中楼层")) return 0.3;
-      else return 1;
-    },
-    type: function (input) {
-      if (input.includes("板楼")) return 0.3;
-      else return 1;
-    },
+  nominal_mapping_map: {
+    direction: new Map,
+    decoration: new Map,
+    position: new Map,
+    type: new Map,
   },
 });
+
+function GenDefaultNominalMap(name) {
+  let value_list = props.origin_records.map((record) => record[name]);
+  let value_set = new Set(value_list)
+  value_list = Array.from(value_set)
+  value_list.forEach((v) => {data.nominal_mapping_map[name].set(v, 0.5)}) // default value
+}
 
 const nominal_attr_name = ["direction", "decoration", "position", "type"];
 const scale_list = new Map(); // the scale of each attr
@@ -172,6 +166,8 @@ watch(
       HandleScale(attr);
       CalculateScaledRecords(attr);
     });
+
+    nominal_attr_name.forEach((attr) => GenDefaultNominalMap(attr))
   }
 );
 
@@ -206,7 +202,7 @@ function HandleScale(name) {
     CalculateQuantitativeScale(name, data.quantitative_mapping_type[name]);
   } else {
     // nominal
-    scale_list.set(name, data.nominal_mapping_function[name]);
+    scale_list.set(name, data.nominal_mapping_map[name]);
   }
 }
 
@@ -224,43 +220,32 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
   scale_list.set(name, scale);
 }
 
-// function CalculateScale(name) {
-//   if (nominal_attr_name.indexOf(name) == -1) {
-//     // quantitative
-//     let value_list = props.origin_records.map((record) => record[name]);
-//     let min = Math.min(...value_list);
-//     let max = Math.max(...value_list);
-
-//     // todo: user choose between negative and positive correlation
-
-//     let scale = d3.scaleLinear().range([0, 1]).domain([min, max]);
-//     scale_list.set(name, scale);
-//   }
-//   else {
-//     // todo: nominal
-//     if (name == "direction") { // todo: just test!!!!!!!!!!
-//       let scale = function (input) {
-//         if (input.includes("南")) return 0.3
-//         else return 1
-//       }
-//       scale_list.set(name, scale);
-//     }
-//   }
-// }
-
 function CalculateScaledRecords(name) {
   let value_list = props.origin_records.map((record) => record[name]);
   if (data.scaled_records.length == 0) {
     // the first time to calculate, create
     for (let i = 0; i < value_list.length; i++) {
       let obj = new Object();
-      obj[name] = scale_list.get(name)(value_list[i]);
+      if (nominal_attr_name.includes(name)) { // nominal:map
+        obj[name] = scale_list.get(name).get(value_list[i]);
+      }
+      else {  // quantitative: scale
+        obj[name] = scale_list.get(name)(value_list[i]);
+      }
       data.scaled_records.push(obj);
     }
   } else {
-    for (let i = 0; i < value_list.length; i++) {
-      data.scaled_records[i][name] = scale_list.get(name)(value_list[i]);
+    if (nominal_attr_name.includes(name)) { // nominal:map
+      for (let i = 0; i < value_list.length; i++) {
+        data.scaled_records[i][name] = scale_list.get(name).get(value_list[i]);
+      }
     }
+    else {  // quantitative: map
+      for (let i = 0; i < value_list.length; i++) {
+        data.scaled_records[i][name] = scale_list.get(name)(value_list[i]);
+      }
+    }
+    
   }
 }
 
@@ -284,8 +269,28 @@ const ranking_score = computed(() => {
   return scores;
 });
 
-function HandleConfirmMapping() {
+function HandleConfirmMapping(mapping_data, attr) {
   data.mapping_dialog_visible = false;
+  console.log(mapping_data)
+
+  data.nominal_mapping_map[attr] = mapping_data
+  
+  // for (let [key,value] of mapping_data ) {
+  //   data.nominal_mapping_map[attr].set(key, value)
+  // }
+  // // mapping_data.forEach(([key,value]) => {
+  // //   data.nominal_mapping_map[attr].set(key, value)
+  // // })
+  // // data.nominal_mapping_map[attr] = new Map(mapping_data)
+
+  // data.nominal_mapping_map[attr] = (input) => {
+    
+  //   return data.nominal_mapping_map[attr][input]
+  // }
+
+  // recalculate scaled data
+  HandleScale(attr);
+  CalculateScaledRecords(attr);
 }
 
 /* Nominal Data mapping related */
@@ -307,20 +312,23 @@ function HandleMapData(name) {
 }
 
 function MapNominalData(attr) {
-  data.mapping_dialog_visible = true;
-
   let arr = [];
-
-  // for (let i = 0; i < 5; i++) {
-  //   arr.push(new Nominal(i.toString() + i.toString(), 0.2 * i));
-  // }
 
   let value_list = props.origin_records.map((record) => record[attr]);
   let value_set = new Set(value_list)
   value_list = Array.from(value_set)
 
+  let cur_scale = data.nominal_mapping_map[attr]
+
+  value_list.forEach((v) => {
+    let cur_value = cur_scale.get(v)
+    arr.push(new Nominal(v, cur_value))
+  })
+
   data.current_nominal_to_map = arr;
-  // show_map_widget = true;
+  data.current_nominal_attr_name = attr;
+
+  data.mapping_dialog_visible = true;
 }
 
 function MapQuantitativeData(attr) {

@@ -30,15 +30,35 @@
 
 <script setup>
 import { reactive } from "@vue/reactivity";
+import { watch } from "@vue/runtime-core";
 
 const props = defineProps({
   nominal_data: {
     type: Array,
     require: true,
   },
+  attr: {
+    type: String,
+    require: true,
+  }
 });
 
+watch(
+  () => props.nominal_data,
+  (val) => {
+    data.mapping_data = val
+    ReSort()
+  }
+)
+watch(
+  () => props.attr,
+  (val) => {
+    data.mapping_attr = val
+  }
+)
+
 const data = reactive({
+  mapping_attr: props.attr,
   mapping_data: props.nominal_data,
 });
 
@@ -53,7 +73,11 @@ function Cancel() {
 }
 
 function Confirm() {
-  emits("confirm", data.mapping_data);
+  let transmit_data = new Map
+  data.mapping_data.forEach((d) => {
+    transmit_data.set(d.name, d.value)
+  })
+  emits("confirm", transmit_data, data.mapping_attr);
 }
 </script>
 
@@ -75,6 +99,7 @@ function Confirm() {
 }
 
 .nominal-name {
+  width: 5%;
   user-select: none;
   font-size: 14px;
   line-height: 44px;
@@ -117,7 +142,7 @@ function Confirm() {
 .good {
   position: absolute;
   top: 60%;
-  left: 105px;
+  left: 15%;
 }
 .bad {
   position: absolute;
