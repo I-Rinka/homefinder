@@ -988,7 +988,7 @@ function UnRegShiftKey() {
 .el-popper.is-customized {
   /* Set padding to ensure the height is 32px */
   padding: 6px 12px;
-  pointer-events: none;
+  // pointer-events: none;
   background: linear-gradient(90deg, rgb(230, 230, 230), rgb(255, 255, 255));
 
   span {

@@ -30,9 +30,7 @@
       <weight-triangle
         :criterias="['area', 'unit_price', 'deal_price']"
       ></weight-triangle>
-      <weight-triangle
-        :criterias="['area', 'unit_price', 'deal_price']"
-      ></weight-triangle>
+
       <!-- <weight-slider
         :top-criterias="['room', 'hall']"
         :bottom-criterias="['position', 'block_height']"
@@ -41,13 +39,32 @@
         :top-criterias="['type', 'decoration', 'area']"
         :bottom-criterias="['built_year']"
       ></weight-slider> -->
+      <template v-for="tweaker in data.tweakers" :key="tweaker">
+        <weight-triangle
+          v-if="tweaker.type === 'tri'"
+          :criterias="tweaker.data"
+        ></weight-triangle>
+        <!-- <weight-slider
+          
+          :top-criterias="['area']"
+          :bottom-criterias="['unit_price', 'direction']"
+        ></weight-slider> -->
+      </template>
+
       <div class="add-button">
         <div class="icon-frame">
           <circle-plus style="width: 50px; position: relative; color: grey" />
         </div>
 
         <div class="preview-frame">
-          <el-popover :width="20" trigger="click">
+          <el-popover
+            placement="left"
+            effect="customized"
+            :width="320"
+            :hide-after="0"
+            popper-class="popper"
+            trigger="hover"
+          >
             <template #reference>
               <div class="preview-top">
                 <div>
@@ -55,10 +72,46 @@
                 </div>
               </div>
             </template>
-            <div>hi</div>
+
+            <div class="choice-text">Select Criterias (3 at least):</div>
+            <div class="choice-group">
+              <el-checkbox-group
+                :max="3"
+                :min="3"
+                class="enabled"
+                v-model="data.using_tri"
+                text-color="black"
+                fill="white"
+              >
+                <div
+                  v-for="d in enabled"
+                  :key="d.name"
+                  class="enabled-name"
+                  :style="{ '--strip-color': d.color }"
+                >
+                  <el-checkbox :label="d.name"> </el-checkbox>
+                </div>
+              </el-checkbox-group>
+            </div>
+
+            <el-row justify="end">
+              <el-button
+                type="primary"
+                :disabled="data.using_tri.length < 3"
+                @click="ApplyTriangle"
+                >Apply</el-button
+              >
+            </el-row>
           </el-popover>
 
-          <el-popover :width="20" trigger="click">
+          <el-popover
+            placement="left"
+            :width="320"
+            :hide-after="0"
+            trigger="hover"
+            popper-class="popper"
+            effect="customized"
+          >
             <template #reference>
               <div class="preview-bottom">
                 <div>
@@ -66,7 +119,36 @@
                 </div>
               </div>
             </template>
-            <div>hi</div>
+
+            <div class="choice-text">Select Criterias (3 at least):</div>
+            <div class="choice-group">
+              <el-checkbox-group
+                :max="3"
+                :min="3"
+                class="enabled"
+                v-model="data.using_tri"
+                text-color="black"
+                fill="white"
+              >
+                <div
+                  v-for="d in enabled"
+                  :key="d.name"
+                  class="enabled-name"
+                  :style="{ '--strip-color': d.color }"
+                >
+                  <el-checkbox :label="d.name"> </el-checkbox>
+                </div>
+              </el-checkbox-group>
+            </div>
+
+            <el-row justify="end">
+              <el-button
+                type="primary"
+                :disabled="data.using_tri.length < 3"
+                @click="ApplyTriangle"
+                >Apply</el-button
+              >
+            </el-row>
           </el-popover>
         </div>
       </div>
@@ -83,8 +165,27 @@ import { computed, onMounted } from "@vue/runtime-core";
 import { CirclePlus } from "@element-plus/icons-vue";
 
 const disabled = computed(() => store.criterias.filter((d) => !d.enabled));
+const enabled = computed(() => {
+  data.using_tri = [];
+  return store.criterias.filter((d) => d.enabled);
+});
+
+function ApplyTriangle() {
+  data.tweakers.push({ type: "tri", data: data.using_tri });
+  console.log(data.tweakers);
+  data.using_tri = [];
+}
 
 const store = useStore();
+
+const data = reactive({
+  using_tri: [],
+  tweakers: [],
+});
+
+function Root3(number) {
+  return Math.sqrt(3) * number;
+}
 </script>
 
 <style lang="less" scoped>
@@ -92,9 +193,6 @@ const store = useStore();
   height: 100%;
   width: 40%;
   background-color: rgb(255, 255, 255);
-
-  // background-image: url("http://localhost:3000/weighlifter.jpg");
-  // background-size: contain;
 }
 
 .sliders-container {
@@ -136,6 +234,30 @@ const store = useStore();
     }
   }
 }
+.choice-text {
+  margin: 5px;
+}
+.choice-group {
+  pointer-events: all;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  .enabled {
+    display: flex;
+    flex-wrap: wrap;
+    // justify-content: end;
+    filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+    .enabled-name {
+      border-radius: 5px;
+      padding: 0px 10px 0px 5px;
+      margin: 5px;
+      font-size: 4px;
+      background-color: var(--strip-color);
+    }
+    .el-button {
+      margin-top: 10px;
+    }
+  }
+}
 
 @keyframes enter {
   from {
@@ -154,7 +276,8 @@ const store = useStore();
   height: 32vh;
   width: 100px;
   opacity: 0.8;
-  background: linear-gradient(-2deg, rgb(220, 220, 220), rgb(240, 240, 240));
+  // background-color: whitesmoke;
+  background: linear-gradient(-2deg, rgb(230, 230, 230), rgb(255, 255, 255));
   border: dashed #808080 2px;
   cursor: pointer;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.8));
