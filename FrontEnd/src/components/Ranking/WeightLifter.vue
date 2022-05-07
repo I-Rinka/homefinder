@@ -119,7 +119,7 @@
           <el-popover
             placement="left"
             :width="320"
-            :hide-after="0"
+            :hide-after="100"
             trigger="hover"
             popper-class="popper"
             effect="customized"
@@ -250,13 +250,14 @@ function Root3(number) {
     display: flex;
     justify-content: space-around;
     transition: 0.5s;
+    user-select: none;
     height: 25px;
     padding-left: 10px;
     padding-right: 10px;
     margin: 0px 5px 5px 5px;
     border-radius: 5px;
     color: white;
-    background: linear-gradient(0deg, rgb(220, 220, 220), rgb(240, 240, 240));
+    // background: linear-gradient(0deg, rgb(220, 220, 220), rgb(240, 240, 240));
     border: solid gray 1px;
     animation: enter 0.5s;
     filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
@@ -360,7 +361,7 @@ function Root3(number) {
     &:hover {
       div {
         opacity: 1;
-        height: 32vh;
+        height: 33vh;
         background-color: white;
       }
     }
@@ -389,7 +390,7 @@ function Root3(number) {
     &:hover {
       div {
         opacity: 1;
-        height: 32vh;
+        height: 33vh;
         top: -16vh;
         background-color: white;
       }
