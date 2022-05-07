@@ -58,7 +58,7 @@
 </template>
 
 <script setup>
-import { reactive, toRaw } from "@vue/reactivity";
+import { reactive, ref, toRaw } from "@vue/reactivity";
 import { computed, onMounted } from "@vue/runtime-core";
 import { LocationFilled } from "@element-plus/icons-vue";
 import * as d3 from "d3";
@@ -102,6 +102,9 @@ import PointerInteraction from "ol/interaction/Pointer";
 import { viewport } from "@popperjs/core";
 import VectorLayer from "ol/layer/Vector";
 
+import Supercluster from "supercluster";
+import VectorSource from "ol/source/Vector";
+import GeoJSON from "ol/format/GeoJSON";
 // the configuration
 const config = {
   zoom: 10,
@@ -337,6 +340,8 @@ overlaySource.on(["addfeature", "removefeature"], function (evt) {
     evt.type === "addfeature" ? "pointer" : "";
 });
 
+const TestLayer = new VectorLayer();
+
 function AddPoint() {
   // GetRegions().then((res) => {
   //   console.log(res);
@@ -344,11 +349,7 @@ function AddPoint() {
 
   GetBlocks().then((res) => {
     console.log(res);
-    map.addLayer(
-      new VectorLayer({
-        source: GetBlockSource(res),
-      })
-    );
+    map.addLayer(TestLayer);
   });
   // GetBlocks().then((res) => {
   //   map.addLayer(GetCluster(res));
@@ -404,6 +405,7 @@ function ChangeView() {
     data.zoom = new_percentage_zoom;
   }
   ChangeClusterView(data.zoom);
+  Play(zoom - 2);
   GetOnScreenFeatures();
 }
 
@@ -444,6 +446,71 @@ function GetOnScreenFeatures() {
       const feature = features_dic[key];
       data.features.push(feature);
     }
+  }
+}
+
+// test
+function Geo(name, lat, lng) {
+  return {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [lng, lat],
+    },
+    properties: {
+      name: name,
+    },
+  };
+}
+
+let SC_zoom = ref(0);
+let supercluster = null;
+function Play(zoom) {
+  if (supercluster) {
+    let view_port = [map.getSize()[0], map.getSize()[1]];
+    let currentExtent = map.getView().calculateExtent(view_port);
+
+    // geo=index.getClusters(currentExtent,SC_zoom.value);
+    let geo = supercluster.getClusters(currentExtent, zoom);
+
+    let vectorSource = new VectorSource({
+      features: new GeoJSON().readFeatures({
+        type: "FeatureCollection",
+        features: geo,
+      }),
+    });
+    TestLayer.setSource(vectorSource);
+  } else {
+    GetBlocks().then((res) => {
+      let geo = [];
+      for (let i = 0; i < res.length; i++) {
+        const element = res[i];
+        geo.push(Geo(element.block, element.lat, element.lng));
+      }
+      const index = new Supercluster({
+        radius: 40,
+        maxZoom: 16,
+      });
+      index.load(geo);
+
+      supercluster = index;
+
+      let view_port = [map.getSize()[0], map.getSize()[1]];
+      let currentExtent = map.getView().calculateExtent(view_port);
+
+      // geo=index.getClusters(currentExtent,SC_zoom.value);
+      geo = index.getClusters(currentExtent, zoom);
+
+      let vectorSource = new VectorSource({
+        features: new GeoJSON().readFeatures({
+          type: "FeatureCollection",
+          features: geo,
+        }),
+      });
+      // console.log(index);
+
+      TestLayer.setSource(vectorSource);
+    });
   }
 }
 </script>
