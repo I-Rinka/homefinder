@@ -67,7 +67,6 @@
       </div>
     </div>
 
-    <!-- <div class="table"> -->
     <TransitionGroup tag="div" name="list-complete" class="table">
       <div
         class="table-content"
@@ -96,32 +95,14 @@
         </div>
       </div>
     </TransitionGroup>
-    <!-- </div> -->
 
     <el-dialog v-model="data.mapping_dialog_visible" title="Data Mapping">
-      <!-- <el-form :model="form">
-        <el-form-item label="Promotion name" :label-width="formLabelWidth">
-          <el-input v-model="form.name" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="Zones" :label-width="formLabelWidth">
-          <el-select v-model="form.region" placeholder="Please select a zone">
-            <el-option label="Zone No.1" value="shanghai" />
-            <el-option label="Zone No.2" value="beijing" />
-          </el-select>
-        </el-form-item>
-      </el-form> -->
-
       <map-nominal
         @cancel="data.mapping_dialog_visible = false"
         @confirm="HandleConfirmMapping"
         :nominal_data="data.current_nominal_to_map"
         :attr="data.current_nominal_attr_name"
       ></map-nominal>
-      <!-- <el-button @click="data.mapping_dialog_visible = false"
-            >Cancel</el-button
-          >
-          <el-button type="primary" @click="HandleConfirmMapping"
-            >Confirm</el-button -->
     </el-dialog>
   </div>
 </template>
@@ -151,9 +132,7 @@ const data = reactive({
   mapping_dialog_visible: false,
   scaled_records: [], // the scaled value of each origin record
 
-  // true: positive; false: negative
-  quantitative_mapping_type:
-    // todo: user interaction
+  quantitative_mapping_type: // true: positive; false: negative
     {
       area: false,
       deal_price: true,
@@ -176,7 +155,7 @@ function GenDefaultNominalMap(name) {
   let value_list = props.origin_records.map((record) => record[name]);
   let value_set = new Set(value_list)
   value_list = Array.from(value_set)
-  value_list.forEach((v) => {data.nominal_mapping_map[name].set(v, 0.5)}) // default value
+  value_list.forEach((v) => {data.nominal_mapping_map[name].set(v, 0.5)}) // default value=0.5
 }
 
 const nominal_attr_name = ["direction", "decoration", "position", "type"];
@@ -323,19 +302,6 @@ function HandleConfirmMapping(mapping_data, attr) {
 
   data.nominal_mapping_map[attr] = mapping_data
   
-  // for (let [key,value] of mapping_data ) {
-  //   data.nominal_mapping_map[attr].set(key, value)
-  // }
-  // // mapping_data.forEach(([key,value]) => {
-  // //   data.nominal_mapping_map[attr].set(key, value)
-  // // })
-  // // data.nominal_mapping_map[attr] = new Map(mapping_data)
-
-  // data.nominal_mapping_map[attr] = (input) => {
-    
-  //   return data.nominal_mapping_map[attr][input]
-  // }
-
   // recalculate scaled data
   HandleScale(attr);
   CalculateScaledRecords(attr);
@@ -350,13 +316,6 @@ class Nominal {
     this.enabled = enabled;
   }
 }
-// function HandleMapData(name) {
-//   if (nominal_attr_name.includes(name)) {
-//     MapNominalData(name);
-//   } else {
-//     MapQuantitativeData(name);
-//   }
-// }
 
 function MapNominalData(attr) {
   let arr = [];
