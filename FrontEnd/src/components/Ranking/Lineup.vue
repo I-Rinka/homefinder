@@ -188,13 +188,12 @@ const strip_percentage_sum = computed(() => {
 watch(
   () => props.origin_records, // calculate the scaled value of the default attr list, can't use onMounted because props is slower
   () => {
+    nominal_attr_name.forEach((attr) => GenDefaultNominalMap(attr))
     let default_attr_list = enabled_strip.value.map((s) => s.name);
     default_attr_list.forEach((attr) => {
       HandleScale(attr);
       CalculateScaledRecords(attr);
     });
-
-    nominal_attr_name.forEach((attr) => GenDefaultNominalMap(attr))
   }
 );
 
