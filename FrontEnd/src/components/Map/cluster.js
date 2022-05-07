@@ -17,6 +17,30 @@ let RegionCluster = null;
 let NormalCluster = null;
 let point_features = null;
 
+export function GetBlockSource(blocks) {
+  if (point_features !== null) {
+    return new VectorSource({
+      features: point_features,
+    });
+  } else {
+    point_features = [];
+    for (let i = 0; i < blocks.length; i++) {
+      const element = blocks[i];
+      let point_feature = new Feature({
+        block: element.block,
+        region: element.region,
+        sub_region: element.sub_region,
+      });
+      let point_geom = new Point([element.lng, element.lat]);
+      point_feature.setGeometry(point_geom);
+      point_features.push(point_feature);
+    }
+    return new VectorSource({
+      features: point_features,
+    });
+  }
+}
+
 export function GetPointFeatures(blocks) {
   if (point_features !== null) {
     return point_features;
@@ -115,7 +139,7 @@ export function GetCluster(blocks) {
 
     NormalCluster = new VectorLayer({
       source: cluster,
-      style: new Style()
+      style: new Style(),
     });
     return NormalCluster;
   }

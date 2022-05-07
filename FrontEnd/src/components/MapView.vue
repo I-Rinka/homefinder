@@ -6,11 +6,23 @@
     </div>
 
     <div class="zoom-slider">
-      <el-button @click="ResetPosition" :icon="LocationFilled" style="margin-bottom: 1vh" circle>
+      <el-button
+        @click="ResetPosition"
+        :icon="LocationFilled"
+        style="margin-bottom: 1vh"
+        circle
+      >
       </el-button>
       <!-- @click="ResetPosition"
         @input="SetZoom" -->
-      <el-slider v-model="data.zoom" :step="1" :max="100" :min="0" @input="ChangeZoom" vertical>
+      <el-slider
+        v-model="data.zoom"
+        :step="1"
+        :max="100"
+        :min="0"
+        @input="ChangeZoom"
+        vertical
+      >
       </el-slider>
     </div>
     <div id="view-choice">
@@ -20,14 +32,26 @@
       </el-radio-group>
     </div>
     <div>
-      <vis-adaptor v-for="feature in data.features" :key="feature.getGeometry().getCoordinates().toString()" :map="map"
-        :feature="feature" :markArray="data.user_marks" :price_mode="data.price_view" :current_time="data.current_time"
-        :selection_time="data.selection_time"></vis-adaptor>
+      <vis-adaptor
+        v-for="feature in data.features"
+        :key="feature.getGeometry().getCoordinates().toString()"
+        :map="map"
+        :feature="feature"
+        :markArray="data.user_marks"
+        :price_mode="data.price_view"
+        :current_time="data.current_time"
+        :selection_time="data.selection_time"
+      ></vis-adaptor>
     </div>
   </div>
-  <time-line @changeCurrentTime="ChangeCurrentTime" @changeSubtractor="ChangeSubtractor"
-    @changeSelection="ChangeSelection" @changeSubtractorSelection="ChangeSubtractorSelection"
-    @changeSubtractorMode="ChangeSubtracorMode" @changeSelectMode="ChangeSelectMode">
+  <time-line
+    @changeCurrentTime="ChangeCurrentTime"
+    @changeSubtractor="ChangeSubtractor"
+    @changeSelection="ChangeSelection"
+    @changeSubtractorSelection="ChangeSubtractorSelection"
+    @changeSubtractorMode="ChangeSubtracorMode"
+    @changeSelectMode="ChangeSelectMode"
+  >
   </time-line>
 
   <!-- <el-button @click="GetPixels">Get Pixel</el-button> -->
@@ -47,7 +71,7 @@ import {
 } from "../database/query.js";
 import { mapboxlayer } from "./Map/mapbox_layer";
 import { beijingLayer } from "./Map/vector_layer";
-import { GetCluster } from "./Map/cluster";
+import { GetCluster, GetBlockSource } from "./Map/cluster";
 import {
   GetNewMarkFeature,
   MarkSource,
@@ -76,6 +100,7 @@ import {
 import { shiftKeyOnly } from "ol/events/condition";
 import PointerInteraction from "ol/interaction/Pointer";
 import { viewport } from "@popperjs/core";
+import VectorLayer from "ol/layer/Vector";
 
 // the configuration
 const config = {
@@ -140,10 +165,12 @@ function GetPixels() {
   let h = currentExtent[3] - currentExtent[1];
   let w = currentExtent[2] - currentExtent[0];
   let re = map.getView().getResolution();
-  h = (h / re * 1000 * 145).toFixed(2)
-  w = (w / re * 1000 * 111).toFixed(2)
-  let rec = document.getElementsByClassName("ol-layer")[0].getBoundingClientRect()
-  console.log(rec)
+  h = ((h / re) * 1000 * 145).toFixed(2);
+  w = ((w / re) * 1000 * 111).toFixed(2);
+  let rec = document
+    .getElementsByClassName("ol-layer")[0]
+    .getBoundingClientRect();
+  console.log(rec);
   console.log("h:", h, "w:", w);
   // console.log(map.getView().getResolutionForExtent(currentExtent));
 }
@@ -311,12 +338,24 @@ overlaySource.on(["addfeature", "removefeature"], function (evt) {
 });
 
 function AddPoint() {
-  GetBlocks().then((res) => {
-    map.addLayer(GetCluster(res));
-    GetCluster().on("change", () => GetOnScreenFeatures());
+  // GetRegions().then((res) => {
+  //   console.log(res);
+  // });
 
-    ChangeClusterView(data.zoom);
+  GetBlocks().then((res) => {
+    console.log(res);
+    map.addLayer(
+      new VectorLayer({
+        source: GetBlockSource(res),
+      })
+    );
   });
+  // GetBlocks().then((res) => {
+  //   map.addLayer(GetCluster(res));
+  //   GetCluster().on("change", () => GetOnScreenFeatures());
+
+  //   ChangeClusterView(data.zoom);
+  // });
 }
 
 function ResetPosition() {
@@ -412,7 +451,7 @@ function GetOnScreenFeatures() {
 <style lang="less">
 #MapView {
   position: relative;
-  top:8px;
+  top: 8px;
   height: 50vh;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
 }
@@ -504,7 +543,7 @@ function GetOnScreenFeatures() {
 }
 
 .ol-layer {
-  >canvas {
+  > canvas {
     border-radius: 11px;
   }
 }
@@ -528,7 +567,7 @@ function GetOnScreenFeatures() {
   cursor: default;
   filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
 
-  >div {
+  > div {
     height: 20vh;
 
     .el-slider__runway {
