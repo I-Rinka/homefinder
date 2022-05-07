@@ -62,6 +62,40 @@
             ></BottomRight>
           </div>
 
+          <!-- filter -->
+          <div style="padding-left: 5px; padding-top: 7px; cursor: pointer;">
+            <el-popover placement="top" :width="160" trigger="hover" title="filter"
+            popper-style="box-shadow: rgb(14 18 22 / 35%) 0px 10px 38px -10px, rgb(14 18 22 / 20%) 0px 10px 20px -15px; 
+              padding: 20px; border: grey">
+              <template #reference>
+                <Filter
+                  color="grey"
+                  style="
+                    height: 16px;
+                    margin-top: 1.5px;
+                    cursor: pointer;
+                    padding: 2px;
+                    border-radius: 5px;
+                  "
+                  @click="HandleFilter(d.name)"
+                ></Filter>
+              </template>
+              
+              <!-- quantitative -->
+              <el-slider v-if="!nominal_attr_name.includes(d.name)"
+                range v-model="data.quantitative_filter[d.name]"
+                :min="data.quantitative_attr_range[d.name]== null ? 0 : data.quantitative_attr_range[d.name].min" 
+                :max="data.quantitative_attr_range[d.name]== null ? 0 : data.quantitative_attr_range[d.name].max">
+              </el-slider>
+
+              <!-- nominal -->
+              <el-checkbox-group v-if="nominal_attr_name.includes(d.name)"
+                v-model="data.nominal_filter[d.name]">
+                <el-checkbox v-for="item in data.nominal_attr_set[d.name]" :label="item"> </el-checkbox>
+              </el-checkbox-group>
+
+            </el-popover>
+          </div>
 
         </div>
       </div>
@@ -113,7 +147,7 @@ import { useStore } from "../store/weight";
 import { computed, onMounted, watch } from "@vue/runtime-core";
 import * as d3 from "d3";
 import MapNominal from "./MapNominal.vue";
-import { Edit, TopRight, BottomRight } from "@element-plus/icons-vue";
+import { Edit, TopRight, BottomRight, Filter } from "@element-plus/icons-vue";
 
 const store = useStore();
 const props = defineProps({
@@ -132,33 +166,23 @@ const data = reactive({
   mapping_dialog_visible: false,
   scaled_records: [], // the scaled value of each origin record
 
-  quantitative_mapping_type: // true: positive; false: negative
-    {
-      area: false,
-      deal_price: true,
-      unit_price: true,
-      room: false,
-      hall: false,
-      block_height: false,
-      built_year: false,
-    },
-
-  nominal_mapping_map: {
-    direction: new Map,
-    decoration: new Map,
-    position: new Map,
-    type: new Map,
-  },
+  quantitative_attr_range: {},
+  quantitative_filter: {},
+  quantitative_mapping_type:{},  // true: positive; false: negative
+  
+  nominal_attr_set: {},
+  nominal_mapping_map: {},
+  nominal_filter: 
+  {
+    direction: [],
+    decoration: [],
+    position: [],
+    type: [],
+  }
 });
 
-function GenDefaultNominalMap(name) {
-  let value_list = props.origin_records.map((record) => record[name]);
-  let value_set = new Set(value_list)
-  value_list = Array.from(value_set)
-  value_list.forEach((v) => {data.nominal_mapping_map[name].set(v, 0.5)}) // default value=0.5
-}
-
 const nominal_attr_name = ["direction", "decoration", "position", "type"];
+const quantitative_attr_name = ["area", "deal_price","unit_price", "room", "hall", "block_height", "built_year"];
 const scale_list = new Map(); // the scale of each attr
 
 // Add default criteria, this should be name of records criteria. Like price, area etc.
@@ -187,15 +211,52 @@ const strip_percentage_sum = computed(() => {
 
 watch(
   () => props.origin_records, // calculate the scaled value of the default attr list, can't use onMounted because props is slower
-  () => {
-    nominal_attr_name.forEach((attr) => GenDefaultNominalMap(attr))
-    let default_attr_list = enabled_strip.value.map((s) => s.name);
-    default_attr_list.forEach((attr) => {
-      HandleScale(attr);
-      CalculateScaledRecords(attr);
-    });
-  }
+  () => PreProcess()
 );
+
+function PreProcess() {
+  nominal_attr_name.forEach((attr) => {
+    data.nominal_mapping_map[attr] = new Map
+    let res = GenDefaultNominalMap(attr)
+    data.nominal_attr_set[attr] = res
+    data.nominal_filter[attr] = res
+  })
+  quantitative_attr_name.forEach((attr) => {
+    let res = CalculateQuanAttrRange(attr)
+    data.quantitative_attr_range[attr] = res
+    data.quantitative_filter[attr] = [res.min, res.max]
+    data.quantitative_mapping_type[attr] = ["deal_price", "unit_price"].includes(attr) ? true : false
+
+    // data.quantitative_details[attr] = {}
+    // data.quantitative_details[attr].origin_range = res
+    // data.quantitative_details[attr].mapping_type = ["deal_price", "unit_price"].includes(attr) ? true : false
+    // data.quantitative_details[attr].filter = [res.min, res.max]
+  })
+
+  let default_attr_list = enabled_strip.value.map((s) => s.name);
+  default_attr_list.forEach((attr) => {
+    HandleScale(attr);
+    CalculateScaledRecords(attr);
+  })
+}
+
+function CalculateQuanAttrRange(attr) {
+  let value_list = props.origin_records.map((record) => {return Number(record[attr])})
+  let min = Math.min(...value_list);
+  let max = Math.max(...value_list);
+  // data.quantitative_attr_range[attr] = {min:min, max:max}
+  // console.log(data.quantitative_attr_range[attr])
+  return {min:min, max:max}
+}
+
+function GenDefaultNominalMap(name) {
+  let value_list = props.origin_records.map((record) => record[name]);
+  let value_set = new Set(value_list)
+  value_list = Array.from(value_set)
+  value_list.forEach((v) => {data.nominal_mapping_map[name].set(v, 0.5)}) // default value=0.5
+
+  return value_list
+}
 
 watch(
   () => enabled_strip.value,
@@ -206,6 +267,7 @@ watch(
       // add a new attr, calculate scaled value
       for (let i = 0; i < new_list.length; i++) {
         if (old_list.indexOf(new_list[i]) != i) {
+          // data.filter_popover_visible[new_list[i]] = false
           if (scale_list.has(new_list[i])) {
           } // already have scale, don't calculate again
           else {
@@ -222,8 +284,18 @@ watch(
   { deep: true }
 );
 
+function HandleFilter(name) {
+  // data.filter_popover_visible[name] = true
+  if (nominal_attr_name.includes(name)) { // nominal
+
+  }
+  else {  // quantitative
+    
+  }
+}
+
 function HandleScale(name) {
-  if (nominal_attr_name.indexOf(name) == -1) {
+  if (!nominal_attr_name.includes(name)) {
     // quantitative
     CalculateQuantitativeScale(name, data.quantitative_mapping_type[name]);
   } else {
@@ -233,9 +305,8 @@ function HandleScale(name) {
 }
 
 function CalculateQuantitativeScale(name, is_positive_correlation) {
-  let value_list = props.origin_records.map((record) => record[name]);
-  let min = Math.min(...value_list);
-  let max = Math.max(...value_list);
+  let min = data.quantitative_attr_range[name].min
+  let max = data.quantitative_attr_range[name].max
 
   let scale = d3.scaleLinear().range([0, 1]);
   if (is_positive_correlation) {
@@ -247,7 +318,12 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
 }
 
 function CalculateScaledRecords(name) {
-  let value_list = props.origin_records.map((record) => record[name]);
+  let value_list = props.origin_records.map((record) => {
+    if (name == "built_year")
+      return Number(record[name])
+    else 
+      return record[name]
+  });
   if (data.scaled_records.length == 0) {
     // the first time to calculate, create
     for (let i = 0; i < value_list.length; i++) {
@@ -274,10 +350,24 @@ function CalculateScaledRecords(name) {
     
   }
 }
-
+function CheckFilter(index) {
+  let record = props.origin_records[index]
+  enabled_strip.value.forEach((d) => {
+    let attr = d.name
+    if (nominal_attr_name.includes(attr)) { // nominal
+      if (!data.nominal_filter[attr].includes(record[attr])) return false
+    }
+    else {  // quantitative
+      if (!(data.quantitative_filter[attr][0] <= record[attr] && data.quantitative_filter[attr][1] >= record[attr])) return false
+    }
+  })
+  return true
+}
 const ranking_score = computed(() => {
   let scores = [];
   for (let i = 0; i < data.scaled_records.length; i++) {
+    if (!CheckFilter(i)) continue  // filtering
+
     let record = data.scaled_records[i];
     let s = 0;
     for (let j = 0; j < enabled_strip.value.length; j++) {
