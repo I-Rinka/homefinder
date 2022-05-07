@@ -42,33 +42,33 @@
         :bottom-criterias="['built_year']"
       ></weight-slider> -->
       <div class="add-button">
-        <div style="position: absolute; width: 100%;">.</div>
-        <el-popover :width="20" trigger="click">
-          <template #reference>
-            <div class="preview-top">
-              <div>
-                <el-image src="/empty_slider.png" fit="contain" />
-              </div>
-            </div>
-          </template>
-          <div>hi</div>
-        </el-popover>
+        <div class="icon-frame">
+          <circle-plus style="width: 50px; position: relative; color: grey" />
+        </div>
 
-        <el-popover :width="20" trigger="click">
-          <template #reference>
-            <div class="preview-bottom">
-              <div>
-                <el-image src="/empty_triangle.png" fit="contain" />
+        <div class="preview-frame">
+          <el-popover :width="20" trigger="click">
+            <template #reference>
+              <div class="preview-top">
+                <div>
+                  <el-image src="/empty_slider.png" fit="contain" />
+                </div>
               </div>
-            </div>
-            <div class="icon-frame">
-              <circle-plus
-                style="width: 50px; position: relative; color: grey"
-              />
-            </div>
-          </template>
-          <div>hi</div>
-        </el-popover>
+            </template>
+            <div>hi</div>
+          </el-popover>
+
+          <el-popover :width="20" trigger="click">
+            <template #reference>
+              <div class="preview-bottom">
+                <div>
+                  <el-image src="/empty_triangle.png" fit="cover" />
+                </div>
+              </div>
+            </template>
+            <div>hi</div>
+          </el-popover>
+        </div>
       </div>
     </div>
   </div>
@@ -147,18 +147,28 @@ const store = useStore();
 }
 
 .add-button {
-  position: relative;
   padding: 0 20px 0 20px;
   margin-left: 20px;
   margin-right: 20px;
-  display: inline-block;
   border-radius: 10px;
   height: 32vh;
+  width: 100px;
   opacity: 0.8;
   background: linear-gradient(-2deg, rgb(220, 220, 220), rgb(240, 240, 240));
   border: dashed #808080 2px;
   cursor: pointer;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.8));
+  position: static;
+
+  .preview-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 7px;
+  }
 
   .preview-top {
     top: 0%;
@@ -175,7 +185,6 @@ const store = useStore();
     border-radius: 7px;
     div {
       opacity: 0;
-      border-radius: 7px;
       position: relative;
       pointer-events: none;
       top: 0%;
@@ -185,7 +194,7 @@ const store = useStore();
     &:hover {
       div {
         opacity: 1;
-        padding: 10% 0 10% 0;
+        padding: 20% 0 30% 0;
         top: 0%;
         background-color: white;
       }
@@ -193,30 +202,27 @@ const store = useStore();
   }
   .preview-bottom {
     top: 50%;
-    left: 0;
-    position: absolute;
+    position: relative;
     width: 100%;
     height: 50%;
     z-index: 10;
     transition: 0.5s;
     transition-delay: 0.2s;
     opacity: 0;
-
-    border-radius: 7px;
+    .el-image {
+      width: 100%;
+    }
     div {
       opacity: 0;
-      border-radius: 7px;
       position: relative;
-      pointer-events: none;
-      padding: 0% 0 0% 0;
-      top: 0vh;
+      padding: 50% 0 50% 0;
+      top: 0;
       transition: 0.5s;
     }
 
     &:hover {
       div {
         opacity: 1;
-        padding: 40% 0 30% 0;
         top: -100%;
         background-color: white;
       }
@@ -227,7 +233,7 @@ const store = useStore();
     position: relative;
     top: 13vh;
     transition: 0.5s;
-    width: 80px;
+    width: 100px;
   }
 
   &:hover {
