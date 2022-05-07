@@ -18,15 +18,18 @@
             <el-checkbox v-model="d.enabled"></el-checkbox>
             {{ d.name }}
           </div>
-
-          <div style="padding-left: 7px; padding-top: 7px">
-            <el-button
-              :icon="Edit"
-              size="small"
-              :circle="true"
+          <div style="padding-left: 5px; padding-top: 7px">
+            <Edit
+              color="grey"
+              style="
+                height: 16px;
+                margin-top: 1.5px;
+                cursor: pointer;
+                padding: 2px;
+                border-radius: 5px;
+              "
               @click="HandleMapData(d.name)"
-            >
-            </el-button>
+            ></Edit>
           </div>
         </div>
       </div>
@@ -396,27 +399,34 @@ function MapQuantitativeData(attr) {
 .weight-strip {
   display: flex;
   width: 100%;
+  height: 40px;
   overflow: hidden;
   white-space: nowrap;
-  background-color: aliceblue;
+  background-color: rgb(255, 255, 255);
   .enabled {
+    height: 23px;
     border-radius: 5px;
-    margin: 2px 5px 2px 5px;
+    margin: 0px 5px 2px 5px;
     padding: 0px 20px 5px 20px;
     background-color: rgb(207, 100, 100);
     animation: enter 0.5s;
-    transition: 0.5s;
+    transition: 0.4s;
     color: white;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 600;
     background-color: var(--strip-color);
     width: var(--strip-width);
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+    // border: solid gray 1px;
   }
   .el-checkbox {
     position: relative;
-    transform: translateY(2px);
+    top: 3px;
   }
 
   .strip {
+    position: relative;
+    top: -4px;
     display: flex;
     flex-wrap: nowrap;
     text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);

@@ -855,7 +855,7 @@ function UnRegShiftKey() {
 
 <style lang="less">
 .timeline {
-  height: 100px;
+  height: 95px;
   width: 100%;
   margin-bottom: 0px;
   position: relative;
@@ -1005,7 +1005,7 @@ function UnRegShiftKey() {
   // pointer-events: none;
   position: absolute;
   width: 100%;
-  top: 15%;
+  top: 20%;
   color: gray;
   font-weight: bolder;
   font-size: 1.5vh;

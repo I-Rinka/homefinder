@@ -242,8 +242,8 @@ function Root3(number) {
 
 .sliders-container {
   position: relative;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   width: 100%;
   overflow: scroll;
   display: flex;
@@ -257,8 +257,10 @@ function Root3(number) {
   .disabled {
     display: flex;
     justify-content: space-around;
-    padding: 2px 10px 0px 10px;
     transition: 0.5s;
+    height: 25px;
+    padding-left: 10px;
+    padding-right: 10px;
     margin: 0px 5px 5px 5px;
     border-radius: 5px;
     color: white;
