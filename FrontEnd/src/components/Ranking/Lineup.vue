@@ -84,7 +84,8 @@
               <el-slider v-if="!nominal_attr_name.includes(d.name)"
                 range v-model="data.quantitative_filter[d.name]"
                 :min="data.quantitative_attr_range[d.name]== null ? 0 : data.quantitative_attr_range[d.name].min" 
-                :max="data.quantitative_attr_range[d.name]== null ? 0 : data.quantitative_attr_range[d.name].max">
+                :max="data.quantitative_attr_range[d.name]== null ? 0 : data.quantitative_attr_range[d.name].max"
+                @change="HandleQuanFilterChange(d.name)">
               </el-slider>
 
               <!-- nominal -->
@@ -303,19 +304,23 @@ function HandleScale(name) {
   }
 }
 
-watch( // 非常丑陋
-  data.quantitative_filter,
-  (new_val, old_val) => {
-    console.log("comp", new_val["area"][1], old_val["area"][1])
-    quantitative_attr_name.forEach((attr) => {
-      if (new_val[attr] != old_val[attr]) {
-        HandleScale(attr)
-        CalculateScaledRecords(attr)
-      }
-    })
-  },
-  {deep: true}
-)
+// watch( // 非常丑陋
+//   data.quantitative_filter,
+//   (new_val, old_val) => {
+//     console.log("comp", new_val["area"][1], old_val["area"][1])
+//     quantitative_attr_name.forEach((attr) => {
+//       if (new_val[attr] != old_val[attr]) {
+//         HandleScale(attr)
+//         CalculateScaledRecords(attr)
+//       }
+//     })
+//   },
+//   {deep: true}
+// )
+function HandleQuanFilterChange(attr) {
+  HandleScale(attr)
+  CalculateScaledRecords(attr)
+}
 
 function CalculateQuantitativeScale(name, is_positive_correlation) {
   // let min = data.quantitative_attr_range[name].min
