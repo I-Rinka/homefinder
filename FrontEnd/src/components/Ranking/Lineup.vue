@@ -18,8 +18,10 @@
           </div>
 
           <!-- mapping -->
-          <div v-if="nominal_attr_name.includes(d.name)"
-            style="padding-left: 5px; padding-top: 7px; cursor: pointer;">
+          <div
+            v-if="nominal_attr_name.includes(d.name)"
+            style="padding-left: 5px; padding-top: 7px; cursor: pointer"
+          >
             <Edit
               color="grey"
               style="
@@ -33,8 +35,13 @@
             ></Edit>
           </div>
 
-          <div v-if="!nominal_attr_name.includes(d.name) && data.quantitative_mapping_type[d.name]"
-            style="padding-left: 5px; padding-top: 7px; cursor: pointer;">
+          <div
+            v-if="
+              !nominal_attr_name.includes(d.name) &&
+              data.quantitative_mapping_type[d.name]
+            "
+            style="padding-left: 5px; padding-top: 7px; cursor: pointer"
+          >
             <TopRight
               color="grey"
               style="
@@ -47,8 +54,13 @@
               @click="MapQuantitativeData(d.name)"
             ></TopRight>
           </div>
-          <div v-if="!nominal_attr_name.includes(d.name) && !data.quantitative_mapping_type[d.name]"
-            style="padding-left: 5px; padding-top: 7px; cursor: pointer;">
+          <div
+            v-if="
+              !nominal_attr_name.includes(d.name) &&
+              !data.quantitative_mapping_type[d.name]
+            "
+            style="padding-left: 5px; padding-top: 7px; cursor: pointer"
+          >
             <BottomRight
               color="grey"
               style="
@@ -63,10 +75,16 @@
           </div>
 
           <!-- filter -->
-          <div style="padding-left: 5px; padding-top: 7px; cursor: pointer;">
-            <el-popover placement="top" :width="160" trigger="hover" title="filter"
-            popper-style="box-shadow: rgb(14 18 22 / 35%) 0px 10px 38px -10px, rgb(14 18 22 / 20%) 0px 10px 20px -15px; 
-              padding: 20px; border: grey">
+          <div style="padding-left: 5px; padding-top: 7px; cursor: pointer">
+            <el-popover
+              placement="top"
+              :width="160"
+              trigger="hover"
+              title="filter"
+              effect="customized"
+              popper-style="box-shadow: rgb(14 18 22 / 35%) 0px 10px 38px -10px, rgb(14 18 22 / 20%) 0px 10px 20px -15px; 
+              padding: 20px; border: grey"
+            >
               <template #reference>
                 <Filter
                   color="grey"
@@ -79,7 +97,7 @@
                   "
                 ></Filter>
               </template>
-              
+
               <!-- quantitative -->
               <el-slider v-if="!nominal_attr_name.includes(d.name)"
                 range v-model="data.quantitative_filter[d.name]"
@@ -89,14 +107,19 @@
               </el-slider>
 
               <!-- nominal -->
-              <el-checkbox-group v-if="nominal_attr_name.includes(d.name)"
-                v-model="data.nominal_filter[d.name]">
-                <el-checkbox v-for="item in data.nominal_attr_set[d.name]" :key="item.index" :label="item"> </el-checkbox>
+              <el-checkbox-group
+                v-if="nominal_attr_name.includes(d.name)"
+                v-model="data.nominal_filter[d.name]"
+              >
+                <el-checkbox
+                  v-for="item in data.nominal_attr_set[d.name]"
+                  :key="item.index"
+                  :label="item"
+                >
+                </el-checkbox>
               </el-checkbox-group>
-
             </el-popover>
           </div>
-
         </div>
       </div>
     </div>
@@ -168,28 +191,35 @@ const data = reactive({
 
   quantitative_attr_range: {},
   quantitative_filter: {},
-  quantitative_mapping_type:{},  // true: positive; false: negative
-  
+  quantitative_mapping_type: {}, // true: positive; false: negative
+
   nominal_attr_set: {},
   nominal_mapping_map: {},
-  nominal_filter: 
-  {
+  nominal_filter: {
     direction: [],
     decoration: [],
     position: [],
     type: [],
-  }
+  },
 });
 
 const nominal_attr_name = ["direction", "decoration", "position", "type"];
-const quantitative_attr_name = ["area", "deal_price","unit_price", "room", "hall", "block_height", "built_year"];
+const quantitative_attr_name = [
+  "area",
+  "deal_price",
+  "unit_price",
+  "room",
+  "hall",
+  "block_height",
+  "built_year",
+];
 const scale_list = new Map(); // the scale of each attr
 
 // Add default criteria, this should be name of records criteria. Like price, area etc.
 // name, color, enabled(default is disabled)
 let criteria = [];
 criteria.push(store.CreateCriteria("area", "#8dd3c7", true));
-criteria.push(store.CreateCriteria("direction", "#ffffb3" ));
+criteria.push(store.CreateCriteria("direction", "#ffffb3"));
 criteria.push(store.CreateCriteria("decoration", "#fb8072"));
 criteria.push(store.CreateCriteria("deal_price", "#bebada", true));
 criteria.push(store.CreateCriteria("unit_price", "#80b1d3", true));
@@ -216,46 +246,55 @@ watch(
 
 function PreProcess() {
   nominal_attr_name.forEach((attr) => {
-    data.nominal_mapping_map[attr] = new Map
-    let res = GenDefaultNominalMap(attr)
-    data.nominal_attr_set[attr] = res
-    data.nominal_filter[attr] = res
-  })
+    data.nominal_mapping_map[attr] = new Map();
+    let res = GenDefaultNominalMap(attr);
+    data.nominal_attr_set[attr] = res;
+    data.nominal_filter[attr] = res;
+  });
   quantitative_attr_name.forEach((attr) => {
-    let res = CalculateQuanAttrRange(attr)
-    data.quantitative_attr_range[attr] = res
-    data.quantitative_filter[attr] = [res.min, res.max]
-    data.quantitative_mapping_type[attr] = ["deal_price", "unit_price"].includes(attr) ? true : false
+    let res = CalculateQuanAttrRange(attr);
+    data.quantitative_attr_range[attr] = res;
+    data.quantitative_filter[attr] = [res.min, res.max];
+    data.quantitative_mapping_type[attr] = [
+      "deal_price",
+      "unit_price",
+    ].includes(attr)
+      ? true
+      : false;
 
     // data.quantitative_details[attr] = {}
     // data.quantitative_details[attr].origin_range = res
     // data.quantitative_details[attr].mapping_type = ["deal_price", "unit_price"].includes(attr) ? true : false
     // data.quantitative_details[attr].filter = [res.min, res.max]
-  })
+  });
 
   let default_attr_list = enabled_strip.value.map((s) => s.name);
   default_attr_list.forEach((attr) => {
     HandleScale(attr);
     CalculateScaledRecords(attr);
-  })
+  });
 }
 
 function CalculateQuanAttrRange(attr) {
-  let value_list = props.origin_records.map((record) => {return Number(record[attr])})
+  let value_list = props.origin_records.map((record) => {
+    return Number(record[attr]);
+  });
   let min = Math.min(...value_list);
   let max = Math.max(...value_list);
   // data.quantitative_attr_range[attr] = {min:min, max:max}
   // console.log(data.quantitative_attr_range[attr])
-  return {min:min, max:max}
+  return { min: min, max: max };
 }
 
 function GenDefaultNominalMap(name) {
   let value_list = props.origin_records.map((record) => record[name]);
-  let value_set = new Set(value_list)
-  value_list = Array.from(value_set)
-  value_list.forEach((v) => {data.nominal_mapping_map[name].set(v, 0.5)}) // default value=0.5
+  let value_set = new Set(value_list);
+  value_list = Array.from(value_set);
+  value_list.forEach((v) => {
+    data.nominal_mapping_map[name].set(v, 0.5);
+  }); // default value=0.5
 
-  return value_list
+  return value_list;
 }
 
 watch(
@@ -290,7 +329,7 @@ watch(
 
 //   }
 //   else {  // quantitative
-    
+
 //   }
 // }
 
@@ -326,9 +365,9 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
   // let min = data.quantitative_attr_range[name].min
   // let max = data.quantitative_attr_range[name].max
 
-  let min = data.quantitative_filter[name][0]
-  let max = data.quantitative_filter[name][1]
-  
+  let min = data.quantitative_filter[name][0];
+  let max = data.quantitative_filter[name][1];
+
   let scale = d3.scaleLinear().range([0, 1]);
   if (is_positive_correlation) {
     scale.domain([min, max]);
@@ -341,19 +380,18 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
 
 function CalculateScaledRecords(name) {
   let value_list = props.origin_records.map((record) => {
-    if (name == "built_year")
-      return Number(record[name])
-    else 
-      return record[name]
+    if (name == "built_year") return Number(record[name]);
+    else return record[name];
   });
   if (data.scaled_records.length == 0) {
     // the first time to calculate, create
     for (let i = 0; i < value_list.length; i++) {
       let obj = new Object();
-      if (nominal_attr_name.includes(name)) { // nominal:map
+      if (nominal_attr_name.includes(name)) {
+        // nominal:map
         obj[name] = scale_list.get(name).get(value_list[i]);
-      }
-      else {  // quantitative: scale
+      } else {
+        // quantitative: scale
         obj[name] = scale_list.get(name)(value_list[i]);
       }
       data.scaled_records.push(obj);
@@ -364,40 +402,45 @@ function CalculateScaledRecords(name) {
       for (let i = 0; i < value_list.length; i++) {
         data.scaled_records[i][name] = scale_list.get(name).get(value_list[i]);
       }
-    }
-    else {  // quantitative: map
+    } else {
+      // quantitative: map
       for (let i = 0; i < value_list.length; i++) {
         data.scaled_records[i][name] = scale_list.get(name)(value_list[i]);
       }
     }
-    
   }
 }
 function CheckFilter(index) {
-  let record = props.origin_records[index]
-  let flag = true
-  for (let i=0; i< enabled_strip.value.length; i++) {
-    let attr = enabled_strip.value[i].name
-    if (nominal_attr_name.includes(attr)) { // nominal
+  let record = props.origin_records[index];
+  let flag = true;
+  for (let i = 0; i < enabled_strip.value.length; i++) {
+    let attr = enabled_strip.value[i].name;
+    if (nominal_attr_name.includes(attr)) {
+      // nominal
       if (!data.nominal_filter[attr].includes(record[attr])) {
-        flag = false
-        break
+        flag = false;
+        break;
       }
-    }
-    else {  // quantitative
-      if (!(data.quantitative_filter[attr][0] <= record[attr] && data.quantitative_filter[attr][1] >= record[attr])) {
-        flag = false
-        break
+    } else {
+      // quantitative
+      if (
+        !(
+          data.quantitative_filter[attr][0] <= record[attr] &&
+          data.quantitative_filter[attr][1] >= record[attr]
+        )
+      ) {
+        flag = false;
+        break;
       }
     }
   }
-  if (flag) return true
-  else return false
+  if (flag) return true;
+  else return false;
 }
 const ranking_score = computed(() => {
   let scores = [];
   for (let i = 0; i < data.scaled_records.length; i++) {
-    if (!CheckFilter(i)) continue  // filtering
+    if (!CheckFilter(i)) continue; // filtering
 
     let record = data.scaled_records[i];
     let s = 0;
@@ -418,13 +461,13 @@ const ranking_score = computed(() => {
 
 function HandleConfirmMapping(mapping_data, attr) {
   data.mapping_dialog_visible = false;
-  console.log(mapping_data)
+  console.log(mapping_data);
 
   for (let [key, value] of mapping_data) {
-    data.nominal_mapping_map[attr].set(key, value)
+    data.nominal_mapping_map[attr].set(key, value);
   }
   // data.nominal_mapping_map[attr] = mapping_data
-  
+
   // recalculate scaled data
   HandleScale(attr);
   CalculateScaledRecords(attr);
@@ -445,14 +488,16 @@ function MapNominalData(attr) {
 
   let value_list = props.origin_records.map((record) => record[attr]);
   let value_set = new Set(value_list);
-  value_list = Array.from(value_set).filter((d) => data.nominal_filter[attr].includes(d));
+  value_list = Array.from(value_set).filter((d) =>
+    data.nominal_filter[attr].includes(d)
+  );
 
-  let cur_scale = data.nominal_mapping_map[attr]
+  let cur_scale = data.nominal_mapping_map[attr];
 
   value_list.forEach((v) => {
-    let cur_value = cur_scale.get(v)
-    arr.push(new Nominal(v, cur_value))
-  })
+    let cur_value = cur_scale.get(v);
+    arr.push(new Nominal(v, cur_value));
+  });
 
   data.current_nominal_to_map = arr;
   data.current_nominal_attr_name = attr;
@@ -461,7 +506,7 @@ function MapNominalData(attr) {
 }
 
 function MapQuantitativeData(attr) {
-  data.quantitative_mapping_type[attr] = !data.quantitative_mapping_type[attr]
+  data.quantitative_mapping_type[attr] = !data.quantitative_mapping_type[attr];
 
   HandleScale(attr);
   CalculateScaledRecords(attr);

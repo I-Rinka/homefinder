@@ -441,7 +441,7 @@ function Root3(number) {
 }
 .tweaker {
   height: 32vh;
-  padding: 1.5vh;
+  padding: 1vh;
   margin: 10px;
   position: relative;
 
