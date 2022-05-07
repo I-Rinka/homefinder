@@ -71,7 +71,7 @@
     <div class="triangle-container">
       <svg
         ref="triSvg"
-        style="height: 25vh;"
+        style="height: 25vh"
         viewBox="-3 0 206 174"
         xmlns="http://www.w3.org/2000/svg"
         :style="{
@@ -125,6 +125,7 @@
           :style="{ stroke: data.tri[1].color }"
         />
         <line
+          v-if="data.tri[2]"
           class="slider-height-line"
           :x1="`${
             (data.slider.x - 0.5 - Root3(1) * (data.slider.y + 3) + 300) / 4 + 3
@@ -212,9 +213,7 @@ import { useStore } from "../store/weight";
 import { VueDraggableNext } from "vue-draggable-next";
 import { onMounted, watch } from "@vue/runtime-core";
 
-function PrintData(d) {
-  console.log(d);
-}
+const emits = defineEmits(["close"]);
 
 const props = defineProps({
   criterias: {
@@ -227,14 +226,17 @@ const store = useStore();
 function Root3(number) {
   return Math.sqrt(3) * number;
 }
+
 const data = reactive({
-  tri: store.GetCriterias(props.criterias),
+  tri: [],
   slider: {
     pressed: false,
     x: 100,
     y: Root3((100 * 2) / 3),
   },
 });
+
+data.tri = store.GetCriterias(props.criterias);
 
 const include_names = computed(() => data.tri.map((d) => d.name));
 
@@ -288,6 +290,15 @@ function ReplaceBottomCriteria1(d) {
 }
 
 watch(
+  () => data.tri.filter((d) => d.enabled),
+  () => {
+    if (data.tri.filter((d) => d.enabled).length < 3) {
+      emits("close");
+    }
+  }
+);
+
+watch(
   () => data.tri[0].weight,
   () => {
     if (!data.slider.pressed) {
@@ -310,7 +321,7 @@ watch(
 );
 
 watch(
-  () => data.tri[2].weight,
+  () => (data.tri[2] ? data.tri[2].weight : undefined),
   () => {
     if (!data.slider.pressed) {
       point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
@@ -338,9 +349,11 @@ const tri_point = [
   { x: 200, y: Root3(100) },
 ];
 
-const overall_weight = computed(
-  () => data.tri[0].weight + data.tri[1].weight + data.tri[2].weight
-);
+const overall_weight = computed(() => {
+  if (data.tri[2]) {
+    return data.tri[0].weight + data.tri[1].weight + data.tri[2].weight;
+  } else return 1;
+});
 
 const wp0 = computed({
   get() {
@@ -374,7 +387,10 @@ const wp1 = computed({
 
 const wp2 = computed({
   get() {
-    return data.tri[2].weight / overall_weight.value;
+    if (data.tri[2]) {
+      return data.tri[2].weight / overall_weight.value;
+    }
+    return 0.01;
   },
   set(value) {
     let overall = overall_weight.value;

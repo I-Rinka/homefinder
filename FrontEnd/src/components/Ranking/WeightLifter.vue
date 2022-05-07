@@ -18,28 +18,31 @@
         </span>
       </div>
     </div>
+
     <div class="sliders-container">
-      <div class="tweaker">
-        <weight-slider
-          :top-criterias="['area']"
-          :bottom-criterias="['unit_price', 'direction']"
-        ></weight-slider>
-      </div>
-      <div class="tweaker">
-        <weight-triangle
-          :criterias="['area', 'unit_price', 'deal_price']"
-        ></weight-triangle>
-      </div>
-      <template v-for="tweaker in data.tweakers" :key="tweaker">
+      <template
+        v-for="(tweaker, index) in data.tweakers"
+        :key="tweaker + index"
+      >
         <div class="tweaker">
+          <el-button
+            type="danger"
+            :icon="Close"
+            circle
+            size="small"
+            @click="CloseTweaker(index)"
+          />
+
           <weight-triangle
             v-if="tweaker.type === 'tri'"
             :criterias="tweaker.data"
+            @close="CloseTweaker(index)"
           ></weight-triangle>
           <weight-slider
             v-if="tweaker.type === 'sli'"
             :top-criterias="tweaker.data.top"
             :bottom-criterias="tweaker.data.bottom"
+            @close="CloseTweaker(index)"
           ></weight-slider>
         </div>
       </template>
@@ -174,7 +177,7 @@ import WeightTriangle from "./WeightTriangle.vue";
 import { useStore } from "../store/weight";
 import { reactive } from "@vue/reactivity";
 import { computed, onMounted } from "@vue/runtime-core";
-import { CirclePlus } from "@element-plus/icons-vue";
+import { CirclePlus, Close } from "@element-plus/icons-vue";
 
 const disabled = computed(() => store.criterias.filter((d) => !d.enabled));
 const enabled = computed(() => {
@@ -183,6 +186,10 @@ const enabled = computed(() => {
   data.using_bottom = [];
   return store.criterias.filter((d) => d.enabled);
 });
+
+function CloseTweaker(index) {
+  data.tweakers.splice(index, 1);
+}
 
 function ApplySlider() {
   data.tweakers.push({
@@ -218,7 +225,19 @@ const data = reactive({
   using_top: [],
   using_bottom: [],
 
-  tweakers: [],
+  tweakers: [
+    {
+      type: "sli",
+      data: {
+        top: ["area"],
+        bottom: ["unit_price", "direction"],
+      },
+    },
+    {
+      type: "tri",
+      data: ["area", "unit_price", "deal_price"],
+    },
+  ],
 });
 
 function Root3(number) {
@@ -235,7 +254,7 @@ function Root3(number) {
 
 .sliders-container {
   position: relative;
-  padding-left:20px;
+  padding-left: 20px;
   width: 100%;
   overflow: scroll;
   display: flex;
@@ -422,14 +441,30 @@ function Root3(number) {
   height: 32vh;
   padding: 1.5vh;
   margin: 10px;
+  position: relative;
+
+  .el-button {
+    position: absolute;
+    opacity: 0;
+    filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.3));
+    top: 5px;
+    right: 5px;
+    transition-duration: 0.5s;
+  }
+  &:hover {
+    .el-button {
+      opacity: 1;
+    }
+  }
+
   filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.3));
   transition: 0.5s;
   border-radius: 7px;
   background-color: whitesmoke;
-    transform: scale(0.95,0.95);
+  transform: scale(0.95, 0.95);
   &:hover {
     background-color: rgb(255, 255, 255);
-    transform: scale(1,1);
+    transform: scale(1, 1);
   }
 }
 </style>

@@ -123,9 +123,7 @@ import { VueDraggableNext } from "vue-draggable-next";
 
 import SliderCursor from "../TimeLine/SliderCursor.vue";
 
-function PrintData() {
-  console.log(include_names.value);
-}
+const emits = defineEmits(["close"]);
 
 const store = useStore();
 const props = defineProps({
@@ -161,6 +159,10 @@ watch(
   () => {
     data.top = data.top.filter((d) => d.enabled);
     data.bottom = data.bottom.filter((d) => d.enabled);
+    if (data.top.length <= 0 || data.bottom.length <= 0) {
+      emits("close");
+      console.log("close");
+    }
   }
 );
 
