@@ -334,6 +334,7 @@ function Root3(number) {
   margin-left: 40px;
   margin-right: 40px;
   border-radius: 10px;
+  margin-bottom: 3vh;
   height: 32.5vh;
   width: 100px;
   opacity: 0.8;
