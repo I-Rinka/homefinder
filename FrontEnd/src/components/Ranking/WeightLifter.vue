@@ -44,11 +44,11 @@
           v-if="tweaker.type === 'tri'"
           :criterias="tweaker.data"
         ></weight-triangle>
-        <!-- <weight-slider
-          
-          :top-criterias="['area']"
-          :bottom-criterias="['unit_price', 'direction']"
-        ></weight-slider> -->
+        <weight-slider
+          v-if="tweaker.type === 'sli'"
+          :top-criterias="tweaker.data.top"
+          :bottom-criterias="tweaker.data.bottom"
+        ></weight-slider>
       </template>
 
       <div class="add-button">
@@ -61,7 +61,7 @@
             placement="left"
             effect="customized"
             :width="320"
-            :hide-after="0"
+            :hide-after="50"
             popper-class="popper"
             trigger="hover"
           >
@@ -73,18 +73,37 @@
               </div>
             </template>
 
-            <div class="choice-text">Select Criterias (3 at least):</div>
+            <div class="choice-text">Select Criterias at Top:</div>
             <div class="choice-group">
               <el-checkbox-group
-                :max="3"
-                :min="3"
+                :min="1"
                 class="enabled"
-                v-model="data.using_tri"
+                v-model="data.using_top"
                 text-color="black"
                 fill="white"
               >
                 <div
-                  v-for="d in enabled"
+                  v-for="d in top_enabled"
+                  :key="d.name"
+                  class="enabled-name"
+                  :style="{ '--strip-color': d.color }"
+                >
+                  <el-checkbox :label="d.name"> </el-checkbox>
+                </div>
+              </el-checkbox-group>
+            </div>
+
+            <div class="choice-text">Select Criterias at Bottom:</div>
+            <div class="choice-group">
+              <el-checkbox-group
+                :min="1"
+                class="enabled"
+                v-model="data.using_bottom"
+                text-color="black"
+                fill="white"
+              >
+                <div
+                  v-for="d in bottom_enabled"
                   :key="d.name"
                   class="enabled-name"
                   :style="{ '--strip-color': d.color }"
@@ -97,8 +116,8 @@
             <el-row justify="end">
               <el-button
                 type="primary"
-                :disabled="data.using_tri.length < 3"
-                @click="ApplyTriangle"
+                :disabled="data.using_bottom < 1 || data.using_top < 1"
+                @click="ApplySlider"
                 >Apply</el-button
               >
             </el-row>
@@ -167,19 +186,45 @@ import { CirclePlus } from "@element-plus/icons-vue";
 const disabled = computed(() => store.criterias.filter((d) => !d.enabled));
 const enabled = computed(() => {
   data.using_tri = [];
+  data.using_top = [];
+  data.using_bottom = [];
   return store.criterias.filter((d) => d.enabled);
 });
 
+function ApplySlider() {
+  data.tweakers.push({
+    type: "sli",
+    data: { top: data.using_top, bottom: data.using_bottom },
+  });
+  data.using_top = [];
+  data.using_bottom = [];
+}
+
 function ApplyTriangle() {
   data.tweakers.push({ type: "tri", data: data.using_tri });
-  console.log(data.tweakers);
   data.using_tri = [];
 }
+
+const top_enabled = computed(() =>
+  enabled.value.filter(
+    (d) => data.using_bottom.find((d2) => d2 === d.name) === undefined
+  )
+);
+
+const bottom_enabled = computed(() =>
+  enabled.value.filter(
+    (d) => data.using_top.find((d2) => d2 === d.name) === undefined
+  )
+);
 
 const store = useStore();
 
 const data = reactive({
   using_tri: [],
+
+  using_top: [],
+  using_bottom: [],
+
   tweakers: [],
 });
 
@@ -235,7 +280,7 @@ function Root3(number) {
   }
 }
 .choice-text {
-  margin: 5px;
+  margin: 15px 5px 8px 5px;
 }
 .choice-group {
   pointer-events: all;
@@ -270,8 +315,8 @@ function Root3(number) {
 
 .add-button {
   padding: 0 20px 0 20px;
-  margin-left: 20px;
-  margin-right: 20px;
+  margin-left: 40px;
+  margin-right: 40px;
   border-radius: 10px;
   height: 32vh;
   width: 100px;
