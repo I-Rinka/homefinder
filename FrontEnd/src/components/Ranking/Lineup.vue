@@ -164,17 +164,17 @@ const scale_list = new Map(); // the scale of each attr
 // Add default criteria, this should be name of records criteria. Like price, area etc.
 // name, color, enabled(default is disabled)
 let criteria = [];
-criteria.push(store.CreateCriteria("area", "#a6cee3", true));
-criteria.push(store.CreateCriteria("direction", "#ffff99"));
-criteria.push(store.CreateCriteria("decoration", "#1f78b4"));
-criteria.push(store.CreateCriteria("deal_price", "#b2df8a", true));
-criteria.push(store.CreateCriteria("unit_price", "#33a02c", true));
-criteria.push(store.CreateCriteria("position", "#fb9a99"));
-criteria.push(store.CreateCriteria("room", "#e31a1c"));
-criteria.push(store.CreateCriteria("hall", "#fdbf6f"));
-criteria.push(store.CreateCriteria("block_height", "#ff7f00"));
-criteria.push(store.CreateCriteria("built_year", "#cab2d6"));
-criteria.push(store.CreateCriteria("type", "#6a3d9a"));
+criteria.push(store.CreateCriteria("area", "#8dd3c7", true));
+criteria.push(store.CreateCriteria("direction", "#ffffb3", true));
+criteria.push(store.CreateCriteria("decoration", "#bebada", true));
+criteria.push(store.CreateCriteria("deal_price", "#fb8072", ));
+criteria.push(store.CreateCriteria("unit_price", "#80b1d3", true));
+criteria.push(store.CreateCriteria("position", "#fdb462", true));
+criteria.push(store.CreateCriteria("room", "#b3de69"));
+criteria.push(store.CreateCriteria("hall", "#fccde5"));
+criteria.push(store.CreateCriteria("block_height", "#ffed6f"));
+criteria.push(store.CreateCriteria("built_year", "#bc80bd"));
+criteria.push(store.CreateCriteria("type", "#ccebc5"));
 store.criterias = criteria;
 
 const enabled_strip = computed(() => store.criterias.filter((d) => d.enabled));
@@ -392,10 +392,12 @@ function MapQuantitativeData(attr) {
   width: var(--strip-width);
 }
 .weight-strip {
-  display: flex;
+  // display: flex;
+  display: inline-flex;
   width: 100%;
   height: 40px;
-  overflow: hidden;
+  // overflow: hidden;
+  overflow: scroll;
   white-space: nowrap;
   background-color: rgb(255, 255, 255);
   .enabled {
