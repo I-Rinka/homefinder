@@ -379,43 +379,45 @@ async function GetBlockData() {
   }
 }
 
-function Geo(name, lat, lng) {
-  return {
-    type: "Feature",
-    geometry: {
-      type: "Point",
-      coordinates: [lng, lat],
-    },
-    properties: {
-      name: name,
-    },
-  };
-}
-
-// class Geo {
-//   constructor(name, lat, lng) {
-//     this.type = "Feature";
-//     this.geometry = {
+// function Geo(name, lat, lng) {
+//   return {
+//     type: "Feature",
+//     geometry: {
 //       type: "Point",
 //       coordinates: [lng, lat],
-//     };
-//     this.properties = {
+//     },
+//     properties: {
 //       name: name,
-//     };
-//   }
+//     },
+//   };
 // }
+
+class Geo {
+  constructor(name, lat, lng) {
+    this.type = "Feature";
+    this.geometry = {
+      type: "Point",
+      coordinates: [lng, lat],
+    };
+    this.properties = {
+      name: name,
+    };
+  }
+}
 
 function GetFeatures(zoom) {
   if (block_data.data !== null) {
+    // Make SuperCluster
     if (block_data.superCluster === null) {
       let geo = [];
       for (let i = 0; i < block_data.data.length; i++) {
         const element = block_data.data[i];
-        geo.push(Geo(element.block, element.lat, element.lng));
+        geo.push(new Geo(element.block, element.lat, element.lng));
       }
       block_data.superCluster = new Supercluster({
         radius: 40,
         maxZoom: 18,
+        // radius: 100,
       });
       block_data.superCluster.load(geo);
     }
@@ -427,9 +429,13 @@ function GetFeatures(zoom) {
     for (let i = 0; i < geo.length; i++) {
       const element = geo[i];
       if (element.properties.cluster) {
-        features.push(
-          block_data.superCluster.getLeaves(element.properties.cluster_id)[0]
+        let f = block_data.superCluster.getLeaves(
+          element.properties.cluster_id
         );
+        // console.log(f.length);
+        // f.forEach(d=>console.log(d))
+        // console.log(typeof f)
+        features.push(f[0]);
       } else {
         features.push(element);
       }
@@ -450,11 +456,8 @@ function ChangeView() {
   ) {
     data.zoom = new_percentage_zoom;
   }
-  // ChangeClusterView(data.zoom);
 
-  // GetOnScreenFeatures();
-
-  let cluster_zoom = zoom -2;
+  let cluster_zoom = zoom-2;
   cluster_zoom < 1 ? 1 : cluster_zoom;
   // GetFeatures(cluster_zoom);
   // console.log(GetFeatures(cluster_zoom))
