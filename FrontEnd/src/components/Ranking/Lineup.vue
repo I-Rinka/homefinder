@@ -10,6 +10,7 @@
           '--strip-width': `${(100 * d.weight) / strip_percentage_sum}%`,
         }"
       >
+
         <div class="strip">
           <!-- enable -->
           <div style="overflow: hidden; white-space: nowrap">
@@ -132,6 +133,7 @@
           </div>
         </div>
       </div>
+
     </div>
 
     <TransitionGroup tag="div" name="list-complete" class="table">
@@ -589,10 +591,6 @@ function MapQuantitativeData(attr) {
     background-color: var(--strip-color);
     width: var(--strip-width);
     filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
-
-    &:hover {
-      width: calc(var(--strip-width) * 2);
-    }
   }
   .el-checkbox {
     position: relative;
