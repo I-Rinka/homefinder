@@ -71,7 +71,7 @@ import {
 } from "../database/query.js";
 import { mapboxlayer } from "./Map/mapbox_layer";
 import { beijingLayer } from "./Map/vector_layer";
-import { GetCluster } from "./Map/cluster";
+// import {  } from "./Map/cluster";
 import {
   GetNewMarkFeature,
   MarkSource,
@@ -99,7 +99,10 @@ import {
 } from "ol/interaction";
 import { shiftKeyOnly } from "ol/events/condition";
 import PointerInteraction from "ol/interaction/Pointer";
-import { viewport } from "@popperjs/core";
+import VectorLayer from "ol/layer/Vector";
+import Supercluster from "supercluster";
+import VectorSource from "ol/source/Vector";
+import GeoJSON from "ol/format/GeoJSON";
 
 // the configuration
 const config = {
@@ -230,8 +233,15 @@ function ChangeSelectMode(b) {
 
 // The Openlayers
 useGeographic();
+
+const block_data = {
+  data: null,
+  featureLayer: new VectorLayer(),
+  superCluster: null,
+};
+
 const map = new Map({
-  layers: [mapboxlayer, beijingLayer, MarkLayer],
+  layers: [mapboxlayer, beijingLayer, MarkLayer, block_data.featureLayer],
   view: new View({
     center: config.center,
     zoom: config.zoom,
@@ -256,8 +266,9 @@ map.getView().on("change", ChangeView);
 
 onMounted(() => {
   map.setTarget("map");
-  AddPoint();
+  // AddPoint();
 
+  GetBlockData().then(ChangeView);
   // hover
   map.on("pointermove", (event) => {
     let features = map.getFeaturesAtPixel(event.pixel);
@@ -336,15 +347,6 @@ overlaySource.on(["addfeature", "removefeature"], function (evt) {
     evt.type === "addfeature" ? "pointer" : "";
 });
 
-function AddPoint() {
-  GetBlocks().then((res) => {
-    map.addLayer(GetCluster(res));
-    GetCluster().on("change", () => GetOnScreenFeatures());
-
-    ChangeClusterView(data.zoom);
-  });
-}
-
 function ResetPosition() {
   map.getView().animate({
     center: config.center,
@@ -371,12 +373,70 @@ function ChangeZoom(value) {
   }
 }
 
-function ChangeClusterView(zoom) {
-  if (data.price_view) {
-    MarkLayer.setVisible(true);
-  } else {
-    MarkLayer.setVisible(false);
+async function GetBlockData() {
+  if (block_data.data === null) {
+    block_data.data = await GetBlocks();
   }
+}
+
+function Geo(name, lat, lng) {
+  return {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [lng, lat],
+    },
+    properties: {
+      name: name,
+    },
+  };
+}
+
+// class Geo {
+//   constructor(name, lat, lng) {
+//     this.type = "Feature";
+//     this.geometry = {
+//       type: "Point",
+//       coordinates: [lng, lat],
+//     };
+//     this.properties = {
+//       name: name,
+//     };
+//   }
+// }
+
+function GetFeatures(zoom) {
+  if (block_data.data !== null) {
+    if (block_data.superCluster === null) {
+      let geo = [];
+      for (let i = 0; i < block_data.data.length; i++) {
+        const element = block_data.data[i];
+        geo.push(Geo(element.block, element.lat, element.lng));
+      }
+      block_data.superCluster = new Supercluster({
+        radius: 40,
+        maxZoom: 18,
+      });
+      block_data.superCluster.load(geo);
+    }
+
+    let view_port = [map.getSize()[0], map.getSize()[1]];
+    let currentExtent = map.getView().calculateExtent(view_port);
+    let geo = block_data.superCluster.getClusters(currentExtent, zoom);
+    let features = [];
+    for (let i = 0; i < geo.length; i++) {
+      const element = geo[i];
+      if (element.properties.cluster) {
+        features.push(
+          block_data.superCluster.getLeaves(element.properties.cluster_id)[0]
+        );
+      } else {
+        features.push(element);
+      }
+    }
+    return features;
+  }
+  return [];
 }
 
 function ChangeView() {
@@ -390,49 +450,63 @@ function ChangeView() {
   ) {
     data.zoom = new_percentage_zoom;
   }
-  ChangeClusterView(data.zoom);
-  GetOnScreenFeatures();
+  // ChangeClusterView(data.zoom);
+
+  // GetOnScreenFeatures();
+
+  let cluster_zoom = zoom -2;
+  cluster_zoom < 1 ? 1 : cluster_zoom;
+  // GetFeatures(cluster_zoom);
+  // console.log(GetFeatures(cluster_zoom))
+  block_data.featureLayer.setSource(
+    new VectorSource({
+      features: new GeoJSON().readFeatures({
+        type: "FeatureCollection",
+        features: GetFeatures(cluster_zoom),
+      }),
+    })
+  );
 }
 
-function GetOnScreenFeatures() {
-  let view_port = [map.getSize()[0], map.getSize()[1]];
-  view_port[0] *= 1.2;
-  view_port[1] *= 1.2;
+// function GetOnScreenFeatures() {
+//   let view_port = [map.getSize()[0], map.getSize()[1]];
+//   view_port[0] *= 1.2;
+//   view_port[1] *= 1.2;
 
-  let currentExtent = map.getView().calculateExtent(view_port);
+//   let currentExtent = map.getView().calculateExtent(view_port);
 
-  let features_dic = {};
+//   let features_dic = {};
 
-  if (GetCluster().getVisible()) {
-    GetCluster()
-      .getSource()
-      .forEachFeatureInExtent(currentExtent, (feature) => {
-        features_dic[feature.getGeometry().getCoordinates().toString()] =
-          feature;
-      });
-  }
+//   if (GetCluster().getVisible()) {
+//     GetCluster()
+//       .getSource()
+//       .forEachFeatureInExtent(currentExtent, (feature) => {
+//         features_dic[feature.getGeometry().getCoordinates().toString()] =
+//           feature;
+//       });
+//   }
 
-  let discard_feature = [];
-  for (let i = data.features.length - 1; i >= 0; i--) {
-    const feature = data.features[i];
-    if (
-      features_dic.hasOwnProperty(
-        feature.getGeometry().getCoordinates().toString()
-      )
-    ) {
-      delete features_dic[feature.getGeometry().getCoordinates().toString()];
-    } else {
-      data.features.splice(i, 1);
-      discard_feature.push(toRaw(feature));
-    }
-  }
-  for (const key in features_dic) {
-    if (Object.hasOwnProperty.call(features_dic, key)) {
-      const feature = features_dic[key];
-      data.features.push(feature);
-    }
-  }
-}
+//   let discard_feature = [];
+//   for (let i = data.features.length - 1; i >= 0; i--) {
+//     const feature = data.features[i];
+//     if (
+//       features_dic.hasOwnProperty(
+//         feature.getGeometry().getCoordinates().toString()
+//       )
+//     ) {
+//       delete features_dic[feature.getGeometry().getCoordinates().toString()];
+//     } else {
+//       data.features.splice(i, 1);
+//       discard_feature.push(toRaw(feature));
+//     }
+//   }
+//   for (const key in features_dic) {
+//     if (Object.hasOwnProperty.call(features_dic, key)) {
+//       const feature = features_dic[key];
+//       data.features.push(feature);
+//     }
+//   }
+// }
 </script>
 
 <style lang="less">
