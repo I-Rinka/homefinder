@@ -31,7 +31,10 @@
     </div>
 
     <div class="select-pannel">
-      <select-pannel v-if="data.open_select_pannel" style="position: absolute; top:40px; height:40vh"></select-pannel>
+      <select-pannel
+        v-if="data.open_select_pannel"
+        style="position: absolute; top: 40px; height: 40vh"
+      ></select-pannel>
       <el-button @click="data.open_select_pannel = !data.open_select_pannel">
         Selected House
         <div
@@ -55,21 +58,12 @@
         :feature="feature"
         :markArray="data.user_marks"
         :price_mode="data.price_view"
-        :current_time="data.current_time"
+        :current_time="props.current_time"
         :selection_time="data.selection_time"
         :open_corona="data.real_zoom <= 15"
       ></vis-adaptor>
     </div>
   </div>
-  <time-line
-    @changeCurrentTime="ChangeCurrentTime"
-    @changeSubtractor="ChangeSubtractor"
-    @changeSelection="ChangeSelection"
-    @changeSubtractorSelection="ChangeSubtractorSelection"
-    @changeSubtractorMode="ChangeSubtracorMode"
-    @changeSelectMode="ChangeSelectMode"
-  >
-  </time-line>
 
   <!-- <el-button @click="GetPixels">Get Pixel</el-button> -->
 </template>
@@ -136,6 +130,45 @@ const config = {
   ],
 };
 
+const props = defineProps({
+  use_baseline: {
+    type: Boolean,
+    default: false,
+  },
+
+  current_time: {
+    type: Object,
+    default: { year: 0, month: 0 },
+  },
+
+  baseline_time: {
+    type: Object,
+    default: { year: 0, month: 0 },
+  },
+
+  selection_time: {
+    type: Array,
+    default: [
+      { year: 0, month: 0 },
+      { year: 0, month: 0 },
+    ],
+  },
+
+  current_baseline_selection: {
+    type: Array,
+    default: [
+      [
+        { year: 0, month: 0 },
+        { year: 0, month: 0 },
+      ],
+      [
+        { year: 0, month: 0 },
+        { year: 0, month: 0 },
+      ],
+    ],
+  },
+});
+
 // the reactive data
 const data = reactive({
   zoom: Math.floor(
@@ -146,25 +179,6 @@ const data = reactive({
   features: [],
   user_marks: [],
   user_marks_strip: [],
-
-  use_baseline: false,
-
-  current_time: { year: 0, month: 0 },
-  baseline_time: { year: 0, month: 0 },
-  selection_time: [
-    { year: 0, month: 0 },
-    { year: 0, month: 0 },
-  ],
-  current_baseline_selection: [
-    [
-      { year: 0, month: 0 },
-      { year: 0, month: 0 },
-    ],
-    [
-      { year: 0, month: 0 },
-      { year: 0, month: 0 },
-    ],
-  ],
 
   open_select_pannel: false,
 });
@@ -201,54 +215,6 @@ function GetPixels() {
 
 function GetBasePrice() {
   GetBlocksAvgPrice(["*"]).then((res) => (data.base_price = res.unit_price));
-}
-
-function ChangeCurrentTime(t) {
-  data.current_time = t;
-  console.log("change current time");
-}
-
-function ChangeSelection(t) {
-  data.selection_time = t;
-}
-
-function ChangeSubtractor(t) {
-  data.current_time = t[0];
-  data.baseline_time = t[1];
-  console.log("change subtractor", t);
-}
-
-function ChangeSubtractorSelection(t) {
-  data.current_baseline_selection = t;
-  console.log("change subtractor selection", t);
-}
-
-function ChangeSubtracorMode(b) {
-  data.use_baseline = b;
-  if (!b) {
-    data.baseline_time = { year: 0, month: 0 };
-  }
-}
-
-function ChangeSelectMode(b) {
-  data.price_view = !b;
-
-  if (!b) {
-    data.selection_time = [
-      { year: 0, month: 0 },
-      { year: 0, month: 0 },
-    ];
-    data.current_baseline_selection = [
-      [
-        { year: 0, month: 0 },
-        { year: 0, month: 0 },
-      ],
-      [
-        { year: 0, month: 0 },
-        { year: 0, month: 0 },
-      ],
-    ];
-  }
 }
 
 // -------------------------- Useful functions ---------------------------
