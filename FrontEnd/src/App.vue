@@ -80,7 +80,12 @@ function ChangeSelectMode(b) {
 <template>
   <!-- <map-view></map-view> -->
   <div
-    style="display: flex; flex-direction: column; justify-content: space-evenly"
+    style="
+      height: 98%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+    "
   >
     <map-view :current_time="data.current_time"></map-view>
     <time-line
@@ -99,11 +104,12 @@ function ChangeSelectMode(b) {
 <style>
 body {
   margin: 0.5vw;
-  height: 100vh;
+  height: 98vh;
   width: 99vw;
   overflow: hidden;
 }
 #app {
+  height: 100%;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

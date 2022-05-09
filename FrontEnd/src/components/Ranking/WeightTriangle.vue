@@ -240,8 +240,8 @@ const data = reactive({
     y: Root3((100 * 2) / 3),
   },
   position: {
-    x: 0,
-    y: 0,
+    x: 100,
+    y: Root3((100 * 2) / 3),
   },
 });
 

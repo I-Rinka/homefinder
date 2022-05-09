@@ -9,7 +9,7 @@
         style="
           position: relative;
           font-size: 1.2vh;
-          top: -0.8vh;
+          bottom: 0.5vh;
           right: 1vh;
           text-align: right;
         "
@@ -855,18 +855,19 @@ function UnRegShiftKey() {
 
 <style lang="less">
 .timeline {
-  height: 95px;
+  height: 70px;
   width: 100%;
   margin-bottom: 0px;
   position: relative;
   user-select: none;
+  overflow: hidden;
 }
 
 .timeline-runway {
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
   position: absolute;
   height: 35px;
-  top: 40px;
+  top: 25px;
   width: 99.8%;
   background: linear-gradient(0deg, rgb(230, 230, 230), whitesmoke);
   overflow-y: visible;
@@ -1005,7 +1006,8 @@ function UnRegShiftKey() {
   // pointer-events: none;
   position: absolute;
   width: 100%;
-  top: 20%;
+  // top: 10%;
+  bottom: 50px;
   color: gray;
   font-weight: bolder;
   font-size: 1.5vh;
