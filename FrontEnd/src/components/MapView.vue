@@ -435,7 +435,7 @@ function ChangeView() {
 <style lang="less">
 #MapView {
   position: relative;
-  top: 0.5vh;
+  // top: 0.5vh;
   height: 48vh;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
 }

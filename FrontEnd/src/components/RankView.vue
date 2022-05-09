@@ -30,7 +30,7 @@ onMounted(() => {
 <style>
 #weight-view {
   position: relative;
-  top: 0px;
+  /* top: 0px; */
   height: 39vh;
   background-color: rgb(234, 234, 234);
 }

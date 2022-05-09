@@ -8,7 +8,7 @@ import RankView from "./components/RankView.vue";
 
 <template>
   <!-- <map-view></map-view> -->
-  <div>
+  <div style="display: flex; flex-direction: column; justify-content: space-evenly;">
     <map-view></map-view>
     <rank-view></rank-view>
   </div>

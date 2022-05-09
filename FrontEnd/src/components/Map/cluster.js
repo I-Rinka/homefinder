@@ -64,13 +64,11 @@ export function GetFeatures(zoom, currentExtent) {
         let leaves = block_data.superCluster.getLeaves(
           element.properties.cluster_id
         );
-        // let l = leaves[0];
         let f = JSON.parse(JSON.stringify(leaves[0]));
 
         f.properties.real_coord = element.geometry.coordinates;
         f.properties.contained_features = leaves.map((d) => d.properties.name);
         features.push(f);
-        // console.log(f);
       } else {
         let f = element;
         f.properties.real_coord = element.geometry.coordinates;
