@@ -470,7 +470,7 @@ async function ChangeWeight(v1, v2, v3) {
       wp2.value = v3;
 
       weighchange_timeout = null;
-    }, 100);
+    }, 200);
   }
 }
 
