@@ -68,7 +68,7 @@ class SubRegion extends Geo {
 export function GetClusterCoord(cluster_id) {}
 
 export function GetFeatures(zoom, currentExtent) {
-  if (region_data.region_data !== null && zoom < 12) {
+  if (region_data.region_data !== null && zoom < 12.5) {
     let features = [];
 
     for (let i = 0; i < region_data.region_data.length; i++) {
