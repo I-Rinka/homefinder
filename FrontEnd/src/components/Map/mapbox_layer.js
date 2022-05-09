@@ -8,6 +8,8 @@ import { get as getProjection } from "ol/proj";
 import XYZ from "ol/source/XYZ";
 import Tile from "ol/layer/Tile";
 import MapboxVector from 'ol/layer/MapboxVector';
+import OSM from 'ol/source/OSM';
+
 const key =
   "pk.eyJ1Ijoicmlua2F3YW5nIiwiYSI6ImNsMjRnZjJ2djF0dTgzZG1pZmRkaGZ4eXYifQ.Obj4N2Et5gyFnvQB-zp4cA";
 
@@ -16,6 +18,11 @@ export const mapboxlayer=new Tile({
         url: 'https://api.mapbox.com/styles/v1/rinkawang/cl24h30sl00cx14nukfc7s8ju/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoicmlua2F3YW5nIiwiYSI6ImNsMjRnZjJ2djF0dTgzZG1pZmRkaGZ4eXYifQ.Obj4N2Et5gyFnvQB-zp4cA'
     })
 })
+
+// export const mapboxlayer=new Tile({
+//   source: new OSM()
+// })
+
 
 // export const mapboxlayer = new MapboxVector({
 //   styleUrl: "mapbox://styles/rinkawang/cl24h30sl00cx14nukfc7s8ju",

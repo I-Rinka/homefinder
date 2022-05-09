@@ -44,6 +44,8 @@ import {
   GetBlocksAvgPriceAllTime,
 } from "../../database/query";
 
+import { BlocksCache, BlocksTimeCache } from "./valueCache";
+
 import { config } from "../../config";
 import * as d3 from "d3";
 
@@ -166,6 +168,7 @@ function UpdatePrice() {
 
 let request_controller = new AbortController();
 
+// Change Price When zoom changes
 watch(
   () => props.feature.properties,
   () => {
@@ -198,10 +201,17 @@ async function RequestPrice(year, month) {
   let token = year + "," + month;
   if (year == 2020 && month == 12) {
     try {
-      let res = await GetBlocksAvgPrice(
-        data.contained_blocks,
-        request_controller
-      );
+      let res;
+      if (BlocksCache[toRaw(data.contained_blocks)]) {
+        res = BlocksCache[toRaw(data.contained_blocks)];
+        console.log("hit", toRaw(data.contained_blocks));
+      } else {
+        res = await GetBlocksAvgPrice(
+          data.contained_blocks,
+          request_controller
+        );
+        BlocksCache[toRaw(data.contained_blocks)] = res;
+      }
       if (res) {
         data.history_cache[token] = res.unit_price;
         if (
@@ -218,12 +228,18 @@ async function RequestPrice(year, month) {
     }
   } else {
     try {
-      let res = await GetBlocksAvgPriceYearMonth(
-        data.contained_blocks,
-        year,
-        month,
-        request_controller
-      );
+      let res;
+      if (BlocksCache[toRaw(data.contained_blocks)]) {
+        res = BlocksCache[toRaw(data.contained_blocks)];
+      } else {
+        res = await GetBlocksAvgPriceYearMonth(
+          data.contained_blocks,
+          year,
+          month,
+          request_controller
+        );
+        BlocksCache[toRaw(data.contained_blocks)] = res;
+      }
       if (res) {
         data.history_cache[token] = res.unit_price;
         if (
@@ -257,60 +273,65 @@ async function GetTimeAvgPrice(year, month) {
 
 async function CachePrice() {
   try {
-    let res = await GetBlocksAvgPriceAllTime(
-      data.contained_blocks,
-      request_controller
-    );
-    data.isCached = true;
-    for (let i = 0; i < res.length; i++) {
-      const element = res[i];
-      let year = element.year;
-      let month = element.month;
-      let token = year + "," + month;
-
-      if (
-        year <= config.timeRange[1].year &&
-        month <= config.timeRange[1].month
-      ) {
-        data.history_cache[token] = element.unit_price;
-      }
-    }
-
-    let patch_cache = function () {
-      let i = -1;
-      let n_year, n_month;
-      let n_price = data.history_cache["2020,12"];
-      do {
-        [n_year, n_month] = CaculateTimeOffset(
-          config.timeRange[1].year,
-          config.timeRange[1].month,
-          i
-        );
-        i--;
-        let token = n_year + "," + n_month;
-        if (data.history_cache[token] && data.history_cache[token] != -1) {
-          n_price = data.history_cache[token];
-        } else {
-          data.history_cache[token] = n_price;
-        }
+    if (false && BlocksTimeCache[toRaw(data.contained_blocks)]) {
+      data.history_cache = BlocksTimeCache[toRaw(data.contained_blocks)];
+    } else {
+      let res = await GetBlocksAvgPriceAllTime(
+        data.contained_blocks,
+        request_controller
+      );
+      data.isCached = true;
+      for (let i = 0; i < res.length; i++) {
+        const element = res[i];
+        let year = element.year;
+        let month = element.month;
+        let token = year + "," + month;
 
         if (
-          props.current_time.year === n_year &&
-          props.current_time.month === n_month
+          year <= config.timeRange[1].year &&
+          month <= config.timeRange[1].month
         ) {
-          unit_price.value = data.history_cache[token];
+          data.history_cache[token] = element.unit_price;
         }
-      } while (
-        n_year > config.timeRange[0].year ||
-        n_month > config.timeRange[0].month
-      );
-    };
+      }
 
-    if (!data.history_cache["2020,12"]) {
-      await RequestPrice(2020, 12);
-      patch_cache();
-    } else {
-      patch_cache();
+      let patch_cache = function () {
+        let i = -1;
+        let n_year, n_month;
+        let n_price = data.history_cache["2020,12"];
+        do {
+          [n_year, n_month] = CaculateTimeOffset(
+            config.timeRange[1].year,
+            config.timeRange[1].month,
+            i
+          );
+          i--;
+          let token = n_year + "," + n_month;
+          if (data.history_cache[token] && data.history_cache[token] != -1) {
+            n_price = data.history_cache[token];
+          } else {
+            data.history_cache[token] = n_price;
+          }
+
+          if (
+            props.current_time.year === n_year &&
+            props.current_time.month === n_month
+          ) {
+            unit_price.value = data.history_cache[token];
+          }
+        } while (
+          n_year > config.timeRange[0].year ||
+          n_month > config.timeRange[0].month
+        );
+      };
+
+      if (!data.history_cache["2020,12"]) {
+        await RequestPrice(2020, 12);
+        patch_cache();
+      } else {
+        patch_cache();
+      }
+      // BlocksTimeCache[toRaw(data.contained_blocks)] = data.history_cache;
     }
   } catch (error) {
     if (error.message !== "canceled") {

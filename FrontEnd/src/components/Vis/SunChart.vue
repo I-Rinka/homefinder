@@ -225,8 +225,18 @@ function GetOrientation(
   opacity: 0.8;
   transition: 1s;
   user-select: none;
+  animation: inputPrice 1s;
   &:hover {
     cursor: pointer;
+  }
+}
+
+@keyframes inputPrice {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.8;
   }
 }
 
