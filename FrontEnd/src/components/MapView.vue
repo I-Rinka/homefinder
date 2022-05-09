@@ -89,7 +89,7 @@ import {
   MarkLayer,
   UserMarkModify,
 } from "./Map/user_mark";
-import { block_data, GetBlockData, GetFeatures } from "./Map/cluster";
+import { block_data, GetBlockData, GetFeatures, GetRegionData } from "./Map/cluster";
 
 import TimeLine from "./TimeLine.vue";
 import VisAdaptor from "./Vis/VisAdaptor.vue";
@@ -250,7 +250,8 @@ onMounted(() => {
   map.setTarget("map");
   // AddPoint();
 
-  GetBlockData().then(ChangeView);
+  GetRegionData().then(ChangeView);
+  GetBlockData();
   // hover
   map.on("pointermove", (event) => {
     let features = map.getFeaturesAtPixel(event.pixel);

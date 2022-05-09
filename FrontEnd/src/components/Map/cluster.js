@@ -5,6 +5,7 @@ import VectorLayer from "ol/layer/Vector";
 import {
   GetBlocks,
   GetRegions,
+  GetSubRegions,
   GetBlocksAvgPrice,
   GetBlocksAvgPriceYearMonth,
 } from "../../database/query.js";
@@ -16,11 +17,24 @@ export const block_data = {
   details_map: {},
 };
 
+export const region_data = {
+  sub_region_data: null,
+  region_data: null,
+};
+
+export async function GetRegionData() {
+  if (region_data.region_data === null ) {
+    region_data.region_data = await GetRegions();
+  }
+
+  if (region_data.sub_region_data === null ) {
+    region_data.sub_region_data = await GetSubRegions();
+  }
+}
+
 export async function GetBlockData() {
   if (block_data.data === null) {
     block_data.data = await GetBlocks();
-
-    block_data.data.forEach((d) => (block_data[d.name] = d));
   }
 }
 
@@ -37,9 +51,47 @@ class Geo {
   }
 }
 
+class Region extends Geo {
+  constructor(name, lat, lng)
+  {
+    super(name,lat,lng);
+    this.properties.type='region'
+  }
+}
+
+class SubRegion extends Geo{
+  constructor(name, lat, lng)
+  {
+    super(name,lat,lng);
+    this.properties.type='sub_region'
+  }
+}
+
 export function GetClusterCoord(cluster_id) {}
 
 export function GetFeatures(zoom, currentExtent) {
+  if (region_data.region_data!==null && zoom<12) {
+    let features = [];
+
+    for (let i = 0; i < region_data.region_data.length; i++) {
+      const d = region_data.region_data[i];
+      features.push(new Region(d['region'],d['lat'],d['lng']))
+    }
+
+    return features;
+  }
+
+  // if (region_data.sub_region_data!==null && zoom<14) {
+  //   let features = [];
+
+  //   for (let i = 0; i < region_data.sub_region_data.length; i++) {
+  //     const d = region_data.sub_region_data[i];
+  //     features.push(new SubRegion(d['sub_region'],d['lat'],d['lng']))
+  //   }
+
+  //   return features;
+  // }
+
   if (block_data.data !== null) {
     // Make SuperCluster
     if (block_data.superCluster === null) {
