@@ -83,7 +83,7 @@ function Confirm() {
 
 <style lang="less" scoped>
 .slider-block {
-  background-color: rgb(234, 234, 234);
+  background-color: whitesmoke;
   display: flex;
   margin-bottom: 20px;
   margin-right: 5px;

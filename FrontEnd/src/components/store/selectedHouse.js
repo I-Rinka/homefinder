@@ -49,9 +49,7 @@ export const useHouseStore = defineStore("selectedHouse", {
         block_data.data.forEach((d) => {
           block_data_map[d.block] = d;
         });
-
       }
-      console.log(block_data_map)
     },
     AddHouse: async function (house_name) {
       await this.ConstructBlockDataMap();

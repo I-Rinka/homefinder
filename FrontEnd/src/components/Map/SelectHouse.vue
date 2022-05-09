@@ -1,12 +1,20 @@
 <template>
   <div class="select-pannel">
-    <div
-      class="select-item"
-      v-for="house in house_store.selectedHouseArrary"
-      :key="house.block"
-    >
-      {{ house.block }}
-    </div>
+    <TransitionGroup tag="div" name="list-complete">
+      <div
+        class="select-item"
+        v-for="house in house_store.selectedHouseArrary"
+        :key="house.block"
+      >
+        <el-checkbox
+          :checked="true"
+          @change="ClickCheckBox(house.block)"
+          size="small"
+        >
+          {{ house.block }}</el-checkbox
+        >
+      </div>
+    </TransitionGroup>
   </div>
 </template>
 
@@ -14,31 +22,45 @@
 import { useHouseStore } from "../store/selectedHouse";
 
 const house_store = useHouseStore();
+
+function ClickCheckBox(name) {
+  house_store.RemoveHouse(name);
+}
 </script>
 
 <style lang="less" scoped>
+.list-complete-enter, .list-complete-leave-to
+/* .list-complete-leave-active below version 2.1.8 */ {
+  transform: translateY(30px);
+  opacity: 0;
+}
+.list-complete-leave-active {
+  position: absolute;
+}
+
 .select-pannel {
   width: 20vw;
   background-color: white;
   border-radius: 5px;
   height: 100%;
   overflow: scroll;
-  animation: enter 0.3s;
+  animation: enter 0.2s;
 }
 
 .select-item {
   background-color: whitesmoke;
   border-radius: 5px;
   display: flex;
-  margin: 10px;
-  padding: 5px;
+  margin: 12px;
+  padding: 7px;
   font-size: 12px;
+  transition: 0.5s;
   filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 @keyframes enter {
   from {
-    transform: translateX(10px);
+    transform: translateX(20px);
     opacity: 0;
   }
   to {
