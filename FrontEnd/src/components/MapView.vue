@@ -13,8 +13,6 @@
         circle
       >
       </el-button>
-      <!-- @click="ResetPosition"
-        @input="SetZoom" -->
       <el-slider
         v-model="data.zoom"
         :step="1"
@@ -25,12 +23,30 @@
       >
       </el-slider>
     </div>
-    <div id="view-choice">
+    <div class="view-choice">
       <el-radio-group v-model="view_choice" size="">
         <el-radio-button label="Price View" />
         <el-radio-button label="Trend View" />
       </el-radio-group>
     </div>
+
+    <div class="select-pannel">
+      <select-pannel v-if="data.open_select_pannel" style="position: absolute; top:40px; height:40vh"></select-pannel>
+      <el-button @click="data.open_select_pannel = !data.open_select_pannel">
+        Selected House
+        <div
+          :style="{
+            transform: data.open_select_pannel
+              ? 'rotate(180deg)'
+              : 'rotate(0deg)',
+          }"
+          style="transition: 0.5s"
+        >
+          <el-icon><fold /></el-icon>
+        </div>
+      </el-button>
+    </div>
+
     <div>
       <vis-adaptor
         v-for="feature in data.features"
@@ -61,7 +77,7 @@
 <script setup>
 import { reactive, toRaw } from "@vue/reactivity";
 import { computed, onMounted } from "@vue/runtime-core";
-import { LocationFilled } from "@element-plus/icons-vue";
+import { LocationFilled, Fold } from "@element-plus/icons-vue";
 import * as d3 from "d3";
 
 import {
@@ -84,6 +100,7 @@ import { block_data, GetBlockData, GetFeatures } from "./Map/cluster";
 import TimeLine from "./TimeLine.vue";
 import VisAdaptor from "./Vis/VisAdaptor.vue";
 import SunChart from "./Vis/SunChart.vue";
+import SelectPannel from "./Map/SelectHouse.vue";
 
 import Map from "ol/Map";
 import View from "ol/View";
@@ -148,6 +165,8 @@ const data = reactive({
       { year: 0, month: 0 },
     ],
   ],
+
+  open_select_pannel: false,
 });
 
 const view_choice = computed({
@@ -374,7 +393,7 @@ function ChangeView() {
   let zoom = map.getView().getZoom();
   data.real_zoom = zoom;
 
-  console.log(data.real_zoom)
+  console.log(data.real_zoom);
 
   let new_percentage_zoom = Math.floor(
     ((zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
@@ -421,11 +440,18 @@ function ChangeView() {
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
 }
 
-#view-choice {
+.view-choice {
   position: absolute;
   right: 1%;
   bottom: 2%;
-  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.4));
+}
+
+.select-pannel {
+  position: absolute;
+  right: 1%;
+  top: 2%;
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.4));
 }
 
 .map {
@@ -530,7 +556,7 @@ function ChangeView() {
   left: 1%;
   z-index: 6;
   cursor: default;
-  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.4));
 
   > div {
     height: 20vh;
