@@ -32,7 +32,6 @@ onMounted(() => {
   position: relative;
   /* top: 0px; */
   height: 39vh;
-  background-color: rgb(234, 234, 234);
 }
 
 .weight-view-frame {

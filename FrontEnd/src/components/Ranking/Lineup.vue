@@ -10,7 +10,6 @@
           '--strip-width': `${(100 * d.weight) / strip_percentage_sum}%`,
         }"
       >
-
         <div class="strip" :title="d.name">
           <!-- enable -->
           <div style="overflow: hidden; white-space: nowrap">
@@ -100,11 +99,22 @@
               </template>
 
               <!-- quantitative -->
-              <el-slider v-if="!nominal_attr_name.includes(d.name)"
-                range v-model="data.quantitative_filter[d.name]"
-                :min="data.quantitative_attr_range[d.name]== null ? 0 : data.quantitative_attr_range[d.name].min" 
-                :max="data.quantitative_attr_range[d.name]== null ? 0 : data.quantitative_attr_range[d.name].max"
-                @change="HandleQuanFilterChange(d.name)">
+              <el-slider
+                v-if="!nominal_attr_name.includes(d.name)"
+                range
+                v-model="data.quantitative_filter[d.name]"
+                :min="
+                  data.quantitative_attr_range[d.name] == null
+                    ? 0
+                    : data.quantitative_attr_range[d.name].min
+                "
+                :max="
+                  data.quantitative_attr_range[d.name] == null
+                    ? 0
+                    : data.quantitative_attr_range[d.name].max
+                "
+                @change="HandleQuanFilterChange(d.name)"
+              >
               </el-slider>
 
               <!-- nominal -->
@@ -123,7 +133,6 @@
           </div>
         </div>
       </div>
-
     </div>
 
     <TransitionGroup tag="div" name="list-complete" class="table">
@@ -359,8 +368,8 @@ function HandleScale(name) {
 //   {deep: true}
 // )
 function HandleQuanFilterChange(attr) {
-  HandleScale(attr)
-  CalculateScaledRecords(attr)
+  HandleScale(attr);
+  CalculateScaledRecords(attr);
 }
 
 function CalculateQuantitativeScale(name, is_positive_correlation) {
@@ -519,24 +528,41 @@ function MapQuantitativeData(attr) {
   position: relative;
   height: 100%;
   width: 60%;
-  background-color: rgb(234, 234, 234);
 }
 .table {
   position: relative;
-  margin: 20px;
-  height: 90%;
-  width: 98%;
+  // margin: 20px;
+  height: 98%;
+  width: 100%;
   overflow: scroll;
 }
 .table-content {
   transition-delay: 0.2s;
   transition: 0.5s;
   text-align: left;
-  height: 30px;
-  border-bottom: solid #eaeaea 2px;
+  height: 35px;
+  margin: 10px 5px 10px 5px;
+  // padding: 1px;
+  border-radius: 5px;
+
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
+
+  // margin-bottom: 5px;
+  // border-top: solid #eaeaea 2px;
   // margin: 5px;
 
-  background-color: rgb(255, 255, 255);
+  background-color: #f5f5f5;
+
+  transition: 0.5s;
+  &:hover {
+    background-color: white;
+  }
+
+  span {
+    position: relative;
+    top: 5px;
+    padding: 10px 0px 0px 2px;
+  }
 }
 .table-content-block {
   width: 15%;
@@ -565,13 +591,13 @@ function MapQuantitativeData(attr) {
   // display: inline-flex;
   width: 100%;
   user-select: none;
-  height: 40px;
+  height: 35px;
   overflow: hidden;
   // overflow: scroll;
   white-space: nowrap;
   background-color: rgb(255, 255, 255);
   .enabled {
-    height: 23px;
+    height: 24px;
     border-radius: 5px;
     margin: 0px 5px 2px 5px;
     padding: 0px 20px 5px 20px;
@@ -579,7 +605,7 @@ function MapQuantitativeData(attr) {
     animation: enter 0.5s;
     transition: 0.4s;
     color: white;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
     background-color: var(--strip-color);
     width: var(--strip-width);
@@ -587,6 +613,7 @@ function MapQuantitativeData(attr) {
   }
   .el-checkbox {
     position: relative;
+    margin-right: 3px;
     top: 3px;
   }
 
