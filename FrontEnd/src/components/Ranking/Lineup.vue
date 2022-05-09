@@ -144,23 +144,30 @@
         <div class="table-content-block">
           <span> {{ props.origin_records[item.index].block }} </span>
         </div>
-
-        <div
-          class="table-content-weighted"
-          v-for="d in enabled_strip"
-          :key="d.name"
-          :style="{
-            '--strip-color': d.color,
-            '--strip-width': `${
-              (d.weight / strip_percentage_sum) *
-              data.scaled_records[item.index][d.name] *
-              100 *
-              0.9
-            }%`,
-          }"
-        >
-          {{ props.origin_records[item.index][d.name] }}
-        </div>
+        <template v-for="d in enabled_strip" :key="d.name">
+          <el-tooltip
+            :content="props.origin_records[item.index][d.name]"
+            :hide-after="0"
+            placement="top"
+            popper-class="popper"
+            effect="customized"
+          >
+            <div
+              class="table-content-weighted"
+              :style="{
+                '--strip-color': d.color,
+                '--strip-width': `${
+                  (d.weight / strip_percentage_sum) *
+                  data.scaled_records[item.index][d.name] *
+                  100 *
+                  0.9
+                }%`,
+              }"
+            >
+              {{ props.origin_records[item.index][d.name] }}
+            </div>
+          </el-tooltip>
+        </template>
       </div>
     </TransitionGroup>
 
@@ -524,6 +531,9 @@ function MapQuantitativeData(attr) {
 </script>
 
 <style lang="less" scoped>
+.popper {
+  filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.3));
+}
 .line-up {
   position: relative;
   height: 100%;
@@ -541,11 +551,11 @@ function MapQuantitativeData(attr) {
   transition: 0.5s;
   text-align: left;
   height: 35px;
-  margin: 10px 5px 10px 5px;
+  margin: 12px 5px 12px 5px;
   // padding: 1px;
   border-radius: 5px;
 
-  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.3));
 
   // margin-bottom: 5px;
   // border-top: solid #eaeaea 2px;
