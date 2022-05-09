@@ -59,9 +59,12 @@ import {
   GetBlocksAvgPriceYearMonth,
   GetBlocksAvgPriceAllTime,
   GetRegionPrice,
+  SelectHouseByRegion,
 } from "../../database/query";
 
 import { BlocksTimeCache } from "./valueCache";
+
+import { useHouseStore } from "../store/selectedHouse";
 
 import { config } from "../../config";
 import * as d3 from "d3";
@@ -94,6 +97,8 @@ const props = defineProps({
 });
 
 const unit_price = ref(-1);
+
+const house_store = useHouseStore();
 
 const data = {
   history_cache: {},
@@ -162,7 +167,11 @@ function GetContainedBlock() {
 }
 
 function ClickSunchart() {
-  console.log(toRaw(props.feature));
+  // console.log(toRaw(props.feature));
+  if (react_data.type === "region") {
+    // SelectHouseByRegion(react_data.name).then((res) => console.log(res));
+    house_store.AddHouseByRegionName(react_data.name);
+  }
 }
 
 function UpdatePrice() {

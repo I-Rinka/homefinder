@@ -33,17 +33,17 @@
     <div class="select-pannel">
       <select-pannel
         v-if="data.open_select_pannel"
-        style="position: absolute; top: 40px; height: 40vh"
+        style="position: absolute; top: 40px; height: 38.5vh"
       ></select-pannel>
       <el-button @click="data.open_select_pannel = !data.open_select_pannel">
         Selected House
         <div
           :style="{
             transform: data.open_select_pannel
-              ? 'rotate(180deg)'
-              : 'rotate(0deg)',
+              ? 'rotate(180deg) translateY(1px)'
+              : 'rotate(0deg) translateY(1px)',
           }"
-          style="transition: 0.5s"
+          style="margin: 0px 0px 0px 5px; transition: 0.5s"
         >
           <el-icon><fold /></el-icon>
         </div>
@@ -174,7 +174,6 @@ const props = defineProps({
     ],
   },
 });
-
 
 emitter.on("change-view", (d) => (data.price_view = !d));
 

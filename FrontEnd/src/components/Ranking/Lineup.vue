@@ -551,17 +551,16 @@ function MapQuantitativeData(attr) {
   transition: 0.5s;
   text-align: left;
   height: 35px;
-  margin: 12px 5px 12px 5px;
+  margin: 12px 7px 15px 6px;
   // padding: 1px;
   border-radius: 5px;
 
-  filter: drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
 
   // margin-bottom: 5px;
   // border-top: solid #eaeaea 2px;
   // margin: 5px;
-
-  background-color: #f5f5f5;
+  background-color: whitesmoke;
 
   transition: 0.5s;
   &:hover {
