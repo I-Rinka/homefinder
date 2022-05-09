@@ -119,7 +119,7 @@ import GeoJSON from "ol/format/GeoJSON";
 
 // the configuration
 const config = {
-  zoom: 10,
+  zoom: 10.5,
   minZoom: 8,
   // minZoom: 3,
   maxZoom: 18,

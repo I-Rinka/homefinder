@@ -76,7 +76,7 @@ let price_r = computed(() => {
     props.marks.length == 0 ||
     (props.open_corona != undefined && props.open_corona === false)
   ) {
-    return 50;
+    return 45;
   } else if (props.marks.length) {
     return 29;
   }
@@ -247,5 +247,6 @@ function GetOrientation(
   filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.8));
   font-weight: 700;
   transition: 1s;
+  white-space: pre-line;
 }
 </style>

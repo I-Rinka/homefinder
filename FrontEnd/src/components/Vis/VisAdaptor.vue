@@ -22,6 +22,9 @@
         :history_records="react_data.history_records"
         :selection_time="props.selection_time"
       ></trend-vis>
+      <div class="adaptor-title" v-if="react_data.type === 'region'">
+        {{ react_data.name }}
+      </div>
     </div>
   </div>
 </template>
@@ -158,6 +161,21 @@ function UpdatePrice() {
     react_data.name = props.feature.properties.name;
     GetAndCacheRegionPrice().then(() => {
       GetTimeAvgPrice(props.current_time.year, props.current_time.month);
+
+      // send trend view price
+      let history_records = [];
+      for (const key in data.history_cache) {
+        if (Object.hasOwnProperty.call(data.history_cache, key)) {
+          const element = data.history_cache[key];
+          let t = key.split(",");
+          history_records.push({
+            time: Date.UTC(t[0], t[1] - 1),
+            price: element,
+          });
+        }
+      }
+      history_records.sort((a, b) => a.time - b.time);
+      react_data.history_records = history_records;
     });
   } else {
     GetContainedBlock();
@@ -449,5 +467,18 @@ let sun_chart_color = computed(() => {
 }
 .adaptor-trend-vis {
   position: relative;
+}
+.adaptor-title {
+  user-select: none;
+  color: white;
+  font-size: 5px;
+  font-weight: 500;
+  position: absolute;
+  top: 306px;
+  left: 0px;
+  text-align: center;
+  width: 100%;
+  transform: scale(0.8,0.8);
+  filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.8));
 }
 </style>
