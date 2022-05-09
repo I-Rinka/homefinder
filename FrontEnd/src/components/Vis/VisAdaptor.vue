@@ -3,12 +3,12 @@
     <!-- 向子传递必须要proxy -->
     <div
       class="adaptor"
-      :id="props.feature.getGeometry().getCoordinates().toString()"
+      :id="props.feature.geometry.coordinates.toString()"
     >
       <sun-chart
         class="adaptor-sun-chart"
         v-if="props.price_mode"
-        :myCoordinates="props.feature.getGeometry().getCoordinates()"
+        :myCoordinates="props.feature.properties.real_coord"
         :marks="props.markArray"
         :color="sun_chart_color"
         :text="computed_price"
@@ -86,6 +86,8 @@ const react_data = reactive({
 
 const ol_data = {
   contained_blocks: [],
+  feature_position:[],
+  cluster_position:[],
   overlay: null,
 };
 
@@ -127,23 +129,30 @@ let computed_price = computed(() => {
 let request_controller = new AbortController();
 onMounted(() => {
   if (props.map && props.feature) {
+    
     ol_data.overlay = new Overlay({
       element: document.getElementById(
-        props.feature.getGeometry().getCoordinates().toString()
+        props.feature.geometry.coordinates.toString()
       ),
-      position: props.feature.getGeometry().getCoordinates(),
+      position: props.feature.geometry.coordinates,
       positioning: "center-center",
     });
     props.map.addOverlay(ol_data.overlay);
-    ol_data.contained_blocks = toRaw(props.feature.get("features")).map(
-      (feature) => {
-        return {
-          block: feature.get("block"),
-          sub_region: feature.get("sub_region"),
-          region: feature.get("region"),
-        };
-      }
+    // ol_data.contained_blocks = toRaw(props.feature.get("features")).map(
+    //   (feature) => {
+    //     return {
+    //       block: feature.get("block"),
+    //       sub_region: feature.get("sub_region"),
+    //       region: feature.get("region"),
+    //     };
+    //   }
+    // );
+    ol_data.contained_blocks = toRaw(
+      props.feature.properties.contained_features.map((d) => {
+        d.properties.name;
+      })
     );
+
     GetTimeAvgPrice(props.current_time.year, props.current_time.month).then(
       () => {
         CachePrice().then(() => {
@@ -179,7 +188,7 @@ async function RequestPrice(year, month) {
   if (year == 2020 && month == 12) {
     try {
       let res = await GetBlocksAvgPrice(
-        ol_data.contained_blocks.map((record) => record.block),
+        ol_data.contained_blocks,
         request_controller
       );
       if (res) {
@@ -199,7 +208,7 @@ async function RequestPrice(year, month) {
   } else {
     try {
       let res = await GetBlocksAvgPriceYearMonth(
-        ol_data.contained_blocks.map((record) => record.block),
+        ol_data.contained_blocks,
         year,
         month,
         request_controller
@@ -238,7 +247,7 @@ async function GetTimeAvgPrice(year, month) {
 async function CachePrice() {
   try {
     let res = await GetBlocksAvgPriceAllTime(
-      ol_data.contained_blocks.map((record) => record.block),
+      ol_data.contained_blocks,
       request_controller
     );
     data.isCached = true;
