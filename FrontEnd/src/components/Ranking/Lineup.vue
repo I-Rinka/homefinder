@@ -146,7 +146,7 @@
         </div>
         <template v-for="d in enabled_strip" :key="d.name">
           <el-tooltip
-            :content="props.origin_records[item.index][d.name]"
+            :content="props.origin_records[item.index][d.name].toString()"
             :hide-after="0"
             placement="top"
             popper-class="popper"
