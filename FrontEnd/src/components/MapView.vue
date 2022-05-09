@@ -369,7 +369,7 @@ function ChangeView() {
   let zoom = map.getView().getZoom();
   data.real_zoom = zoom;
 
-  console.log(data.real_zoom);
+  // console.log(data.real_zoom);
 
   let new_percentage_zoom = Math.floor(
     ((zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)

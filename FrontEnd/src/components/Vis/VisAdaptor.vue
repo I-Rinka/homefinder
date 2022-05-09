@@ -227,7 +227,6 @@ onMounted(() => {
     if (props.feature.properties.type) {
       react_data.type = props.feature.properties.type;
     }
-    console.log(props.feature);
 
     props.map.addOverlay(ol_data.overlay);
     UpdatePrice();
