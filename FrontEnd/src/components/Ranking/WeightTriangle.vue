@@ -204,6 +204,9 @@
         </div>
       </vue-draggable-next>
     </div>
+
+    {{ data.position.x }}
+    {{ data.position.y }}
   </div>
 </template>
 
@@ -212,6 +215,7 @@ import { reactive, computed, toRaw, ref } from "@vue/reactivity";
 import { useStore } from "../store/weight";
 import { VueDraggableNext } from "vue-draggable-next";
 import { onMounted, watch } from "@vue/runtime-core";
+import gsap from "gsap";
 
 const emits = defineEmits(["close"]);
 
@@ -234,7 +238,25 @@ const data = reactive({
     x: 100,
     y: Root3((100 * 2) / 3),
   },
+  position: {
+    x: 0,
+    y: 0,
+  },
 });
+
+watch(
+  () => data.slider.x,
+  (n) => {
+    gsap.to(data.position, { duration: 0.5, x: Number(n) || 0 });
+  }
+);
+
+watch(
+  () => data.slider.y,
+  (n) => {
+    gsap.to(data.position, { duration: 0.5, y: Number(n) || 0 });
+  }
+);
 
 data.tri = store.GetCriterias(props.criterias);
 
