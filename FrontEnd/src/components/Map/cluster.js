@@ -50,8 +50,8 @@ export function GetFeatures(zoom, currentExtent) {
       }
       block_data.superCluster = new Supercluster({
         maxZoom: 16,
-        minZoom: 7,
-        radius: 30,
+        radius: 400,
+        minZoom: 10,
       });
       block_data.superCluster.load(geo);
     }
@@ -61,18 +61,20 @@ export function GetFeatures(zoom, currentExtent) {
     for (let i = 0; i < geo.length; i++) {
       const element = geo[i];
       if (element.properties.cluster) {
-        let f = block_data.superCluster.getLeaves(
+        let leaves = block_data.superCluster.getLeaves(
           element.properties.cluster_id
         );
-        f[0].properties.real_coord = element.geometry.coordinates;
-        f[0].properties.contained_features = block_data.superCluster.getLeaves(
-          element.properties.cluster_id
-        );
-        features.push(f[0]);
+        // let l = leaves[0];
+        let f = JSON.parse(JSON.stringify(leaves[0]));
+
+        f.properties.real_coord = element.geometry.coordinates;
+        f.properties.contained_features = leaves.map((d) => d.properties.name);
+        features.push(f);
+        // console.log(f);
       } else {
         let f = element;
         f.properties.real_coord = element.geometry.coordinates;
-        f.properties.contained_features = [element];
+        f.properties.contained_features = [element.properties.name];
         features.push(element);
       }
     }

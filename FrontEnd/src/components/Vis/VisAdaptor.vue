@@ -9,6 +9,8 @@
         :marks="props.markArray"
         :color="sun_chart_color"
         :text="computed_price"
+        :open_corona="props.open_corona"
+        @click="ClickSunchart"
       ></sun-chart>
       <trend-vis
         class="adaptor-trend-vis"
@@ -25,7 +27,9 @@ import {
   computed,
   onBeforeMount,
   onBeforeUnmount,
+  onBeforeUpdate,
   onMounted,
+  onUpdated,
   reactive,
   ref,
   toRaw,
@@ -75,6 +79,7 @@ const unit_price = ref(-1);
 const data = {
   history_cache: {},
   isCached: false,
+  contained_blocks: [],
 };
 
 const react_data = reactive({
@@ -82,7 +87,7 @@ const react_data = reactive({
 });
 
 const ol_data = {
-  contained_blocks: [],
+  // contained_blocks: [],
   feature_position: [],
   cluster_position: [],
   overlay: null,
@@ -123,7 +128,51 @@ let computed_price = computed(() => {
   }
 });
 
+function GetContainedBlock() {
+  // data.contained_blocks = props.feature.properties.contained_features.map(
+  //   (d) => d.properties.name
+  // );
+  data.contained_blocks = props.feature.properties.contained_features;
+}
+
+function ClickSunchart() {
+  console.log(toRaw(props.feature));
+}
+
+function UpdatePrice() {
+  GetContainedBlock();
+
+  GetTimeAvgPrice(props.current_time.year, props.current_time.month).then(
+    () => {
+      CachePrice().then(() => {
+        // send trend view price
+        let history_records = [];
+        for (const key in data.history_cache) {
+          if (Object.hasOwnProperty.call(data.history_cache, key)) {
+            const element = data.history_cache[key];
+            let t = key.split(",");
+            history_records.push({
+              time: Date.UTC(t[0], t[1] - 1),
+              price: element,
+            });
+          }
+        }
+        history_records.sort((a, b) => a.time - b.time);
+        react_data.history_records = history_records;
+      });
+    }
+  );
+}
+
 let request_controller = new AbortController();
+
+watch(
+  () => props.feature.properties,
+  () => {
+    UpdatePrice();
+  }
+);
+
 onMounted(() => {
   if (props.map && props.feature) {
     ol_data.overlay = new Overlay({
@@ -134,35 +183,7 @@ onMounted(() => {
       positioning: "center-center",
     });
     props.map.addOverlay(ol_data.overlay);
-
-    ol_data.contained_blocks = toRaw(
-      props.feature.properties.contained_features
-    )
-
-    ol_data.contained_blocks=ol_data.contained_blocks.map(d=>d.properties.name)
-
-    console.log(ol_data.contained_blocks);
-
-    GetTimeAvgPrice(props.current_time.year, props.current_time.month).then(
-      () => {
-        CachePrice().then(() => {
-          // send trend view price
-          let history_records = [];
-          for (const key in data.history_cache) {
-            if (Object.hasOwnProperty.call(data.history_cache, key)) {
-              const element = data.history_cache[key];
-              let t = key.split(",");
-              history_records.push({
-                time: Date.UTC(t[0], t[1] - 1),
-                price: element,
-              });
-            }
-          }
-          history_records.sort((a, b) => a.time - b.time);
-          react_data.history_records = history_records;
-        });
-      }
-    );
+    UpdatePrice();
   }
 });
 
@@ -178,7 +199,7 @@ async function RequestPrice(year, month) {
   if (year == 2020 && month == 12) {
     try {
       let res = await GetBlocksAvgPrice(
-        ol_data.contained_blocks,
+        data.contained_blocks,
         request_controller
       );
       if (res) {
@@ -198,7 +219,7 @@ async function RequestPrice(year, month) {
   } else {
     try {
       let res = await GetBlocksAvgPriceYearMonth(
-        ol_data.contained_blocks,
+        data.contained_blocks,
         year,
         month,
         request_controller
@@ -237,7 +258,7 @@ async function GetTimeAvgPrice(year, month) {
 async function CachePrice() {
   try {
     let res = await GetBlocksAvgPriceAllTime(
-      ol_data.contained_blocks,
+      data.contained_blocks,
       request_controller
     );
     data.isCached = true;

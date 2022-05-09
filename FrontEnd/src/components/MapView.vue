@@ -41,6 +41,7 @@
         :price_mode="data.price_view"
         :current_time="data.current_time"
         :selection_time="data.selection_time"
+        :open_corona="data.real_zoom <= 15"
       ></vis-adaptor>
     </div>
   </div>
@@ -123,6 +124,7 @@ const data = reactive({
   zoom: Math.floor(
     ((config.zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
   ),
+  real_zoom: config.zoom,
   price_view: true,
   features: [],
   user_marks: [],
@@ -370,6 +372,10 @@ function ChangeZoom(value) {
 
 function ChangeView() {
   let zoom = map.getView().getZoom();
+  data.real_zoom = zoom;
+
+  console.log(data.real_zoom)
+
   let new_percentage_zoom = Math.floor(
     ((zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
   );
@@ -380,14 +386,20 @@ function ChangeView() {
     data.zoom = new_percentage_zoom;
   }
 
-  let cluster_zoom = zoom - 3;
+  let cluster_zoom = zoom;
   cluster_zoom < 1 ? 1 : cluster_zoom;
 
   let view_port = [map.getSize()[0], map.getSize()[1]];
+  view_port[0] *= 1.3;
+  view_port[1] *= 1.3;
+
+  // console.log(cluster_zoom);
+
   let currentExtent = map.getView().calculateExtent(view_port);
+  // currentExtent = [currentExtent[0] * 1.2, currentExtent[1] * 1.2];
 
   let features = GetFeatures(cluster_zoom, currentExtent);
-  console.log(features)
+  // console.log(features)
   data.features = features;
 
   block_data.featureLayer.setSource(
