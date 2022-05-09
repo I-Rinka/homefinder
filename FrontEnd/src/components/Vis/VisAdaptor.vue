@@ -130,10 +130,16 @@ let computed_price = computed(() => {
   }
 });
 
+
+// Change Price When zoom changes
+watch(
+  () => props.feature.properties,
+  () => {
+    UpdatePrice();
+  }
+);
+
 function GetContainedBlock() {
-  // data.contained_blocks = props.feature.properties.contained_features.map(
-  //   (d) => d.properties.name
-  // );
   data.contained_blocks = props.feature.properties.contained_features;
 }
 
@@ -168,13 +174,6 @@ function UpdatePrice() {
 
 let request_controller = new AbortController();
 
-// Change Price When zoom changes
-watch(
-  () => props.feature.properties,
-  () => {
-    UpdatePrice();
-  }
-);
 
 onMounted(() => {
   if (props.map && props.feature) {
@@ -204,7 +203,6 @@ async function RequestPrice(year, month) {
       let res;
       if (BlocksCache[toRaw(data.contained_blocks)]) {
         res = BlocksCache[toRaw(data.contained_blocks)];
-        console.log("hit", toRaw(data.contained_blocks));
       } else {
         res = await GetBlocksAvgPrice(
           data.contained_blocks,
