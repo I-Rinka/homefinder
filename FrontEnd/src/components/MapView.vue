@@ -59,7 +59,7 @@
         :markArray="data.user_marks"
         :price_mode="data.price_view"
         :current_time="props.current_time"
-        :selection_time="data.selection_time"
+        :selection_time="props.selection_time"
         :open_corona="data.real_zoom <= 15"
       ></vis-adaptor>
     </div>
@@ -89,7 +89,13 @@ import {
   MarkLayer,
   UserMarkModify,
 } from "./Map/user_mark";
-import { block_data, GetBlockData, GetFeatures, GetRegionData } from "./Map/cluster";
+import {
+  block_data,
+  GetBlockData,
+  GetFeatures,
+  GetRegionData,
+} from "./Map/cluster";
+import { emitter } from "./store/bus";
 
 import TimeLine from "./TimeLine.vue";
 import VisAdaptor from "./Vis/VisAdaptor.vue";
@@ -168,6 +174,9 @@ const props = defineProps({
     ],
   },
 });
+
+
+emitter.on("change-view", (d) => (data.price_view = !d));
 
 // the reactive data
 const data = reactive({

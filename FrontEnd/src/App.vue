@@ -7,6 +7,8 @@ import MapView from "./components/MapView.vue";
 import RankView from "./components/RankView.vue";
 import TimeLine from "./components/TimeLine.vue";
 
+import { emitter } from "./components/store/bus";
+
 const data = reactive({
   use_baseline: false,
 
@@ -35,6 +37,8 @@ function ChangeCurrentTime(t) {
 
 function ChangeSelection(t) {
   data.selection_time = t;
+  console.log("change")
+
 }
 
 function ChangeSubtractor(t) {
@@ -56,8 +60,9 @@ function ChangeSubtracorMode(b) {
 }
 
 function ChangeSelectMode(b) {
-  data.price_view = !b;
-
+  // data.price_view = !b;
+  emitter.emit('change-view',b);
+  console.log("change")
   if (!b) {
     data.selection_time = [
       { year: 0, month: 0 },
@@ -87,7 +92,10 @@ function ChangeSelectMode(b) {
       justify-content: space-around;
     "
   >
-    <map-view :current_time="data.current_time"></map-view>
+    <map-view
+      :current_time="data.current_time"
+      :selection_time="data.selection_time"
+    ></map-view>
     <time-line
       @changeCurrentTime="ChangeCurrentTime"
       @changeSubtractor="ChangeSubtractor"

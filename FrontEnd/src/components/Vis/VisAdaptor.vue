@@ -22,7 +22,16 @@
         :history_records="react_data.history_records"
         :selection_time="props.selection_time"
       ></trend-vis>
-      <div class="adaptor-title" v-if="react_data.type === 'region'">
+      <div
+        class="adaptor-title"
+        v-if="react_data.type === 'region' && props.price_mode"
+      >
+        {{ react_data.name }}
+      </div>
+      <div
+        class="adaptor-title2"
+        v-else-if="react_data.type === 'region' && !props.price_mode"
+      >
         {{ react_data.name }}
       </div>
     </div>
@@ -52,7 +61,7 @@ import {
   GetRegionPrice,
 } from "../../database/query";
 
-import { BlocksCache, BlocksTimeCache } from "./valueCache";
+import { BlocksTimeCache } from "./valueCache";
 
 import { config } from "../../config";
 import * as d3 from "d3";
@@ -478,7 +487,19 @@ let sun_chart_color = computed(() => {
   left: 0px;
   text-align: center;
   width: 100%;
-  transform: scale(0.8,0.8);
+  transform: scale(0.8, 0.8);
+  filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.8));
+}
+.adaptor-title2 {
+  user-select: none;
+  color: white;
+  font-size: 5px;
+  font-weight: 500;
+  position: relative;
+  top: -45px;
+  text-align: center;
+  width: 100%;
+  transform: scale(0.8, 0.8);
   filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.8));
 }
 </style>

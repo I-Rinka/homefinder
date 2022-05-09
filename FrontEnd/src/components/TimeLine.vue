@@ -60,7 +60,11 @@
       </el-col>
     </el-row>
     <div class="timeline-runway">
-      <div class="time-scale" @dblclick="TranslateRedSlider">
+      <div
+        class="time-scale"
+        @dblclick="TranslateRedSlider"
+        @pointerleave="UnRegShiftKey"
+      >
         <div
           class="year"
           @pointerdown="PressTimeScale"
@@ -111,7 +115,6 @@
                 ChangeCursor(data.slider1);
               }
             "
-            @pointerleave="UnRegShiftKey"
             :style="{
               left: `${data.slider1.position}px`,
               cursor: data.multicursor.pressing_shiftkey
@@ -133,7 +136,6 @@
                 ChangeCursor(data.slider1_l);
               }
             "
-            @pointerleave="UnRegShiftKey"
             :style="{
               left: `${data.slider1_l.position}px`,
               cursor: data.multicursor.pressing_shiftkey
@@ -180,7 +182,6 @@
                 ChangeCursor(data.slider2);
               }
             "
-            @pointerleave="UnRegShiftKey"
             :style="{
               left: `${data.slider2.position}px`,
               cursor: data.multicursor.pressing_shiftkey
@@ -205,7 +206,6 @@
                 ChangeCursor(data.slider2_l);
               }
             "
-            @pointerleave="UnRegShiftKey"
             :style="{
               left: `${data.slider2_l.position}px`,
               cursor: data.multicursor.pressing_shiftkey
@@ -860,7 +860,6 @@ function UnRegShiftKey() {
   margin-bottom: 0px;
   position: relative;
   user-select: none;
-  overflow: hidden;
 }
 
 .timeline-runway {
