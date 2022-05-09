@@ -1,10 +1,7 @@
 <template>
   <div>
     <!-- 向子传递必须要proxy -->
-    <div
-      class="adaptor"
-      :id="props.feature.geometry.coordinates.toString()"
-    >
+    <div class="adaptor" :id="props.feature.geometry.coordinates.toString()">
       <sun-chart
         class="adaptor-sun-chart"
         v-if="props.price_mode"
@@ -86,8 +83,8 @@ const react_data = reactive({
 
 const ol_data = {
   contained_blocks: [],
-  feature_position:[],
-  cluster_position:[],
+  feature_position: [],
+  cluster_position: [],
   overlay: null,
 };
 
@@ -129,7 +126,6 @@ let computed_price = computed(() => {
 let request_controller = new AbortController();
 onMounted(() => {
   if (props.map && props.feature) {
-    
     ol_data.overlay = new Overlay({
       element: document.getElementById(
         props.feature.geometry.coordinates.toString()
@@ -138,20 +134,14 @@ onMounted(() => {
       positioning: "center-center",
     });
     props.map.addOverlay(ol_data.overlay);
-    // ol_data.contained_blocks = toRaw(props.feature.get("features")).map(
-    //   (feature) => {
-    //     return {
-    //       block: feature.get("block"),
-    //       sub_region: feature.get("sub_region"),
-    //       region: feature.get("region"),
-    //     };
-    //   }
-    // );
+
     ol_data.contained_blocks = toRaw(
-      props.feature.properties.contained_features.map((d) => {
-        d.properties.name;
-      })
-    );
+      props.feature.properties.contained_features
+    )
+
+    ol_data.contained_blocks=ol_data.contained_blocks.map(d=>d.properties.name)
+
+    console.log(ol_data.contained_blocks);
 
     GetTimeAvgPrice(props.current_time.year, props.current_time.month).then(
       () => {
