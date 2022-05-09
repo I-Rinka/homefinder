@@ -88,10 +88,10 @@
 
         <line
           class="slider-height-line"
-          :x1="`${data.slider.x - 3}px`"
+          :x1="`${data.position.x - 3}px`"
           :y1="`${Root3(100) - 1.5}`"
-          :x2="`${data.slider.x - 3}px`"
-          :y2="`${data.slider.y + 7}px`"
+          :x2="`${data.position.x - 3}px`"
+          :y2="`${data.position.y + 7}px`"
           style="
             stroke-width: 3;
             stroke-linecap: round;
@@ -104,17 +104,19 @@
         <line
           class="slider-height-line"
           :x1="`${
-            (data.slider.x - 0.5 + Root3(1) * (data.slider.y + 3) + 300) / 4 - 3
+            (data.position.x - 0.5 + Root3(1) * (data.position.y + 3) + 300) /
+              4 -
+            3
           }`"
           :y1="`${
-            (Root3(1) * (data.slider.x - 0.5) +
-              3 * (data.slider.y + 3) -
+            (Root3(1) * (data.position.x - 0.5) +
+              3 * (data.position.y + 3) -
               Root3(100)) /
               4 -
             3
           }`"
-          :x2="`${data.slider.x + 3}px`"
-          :y2="`${data.slider.y - 3}px`"
+          :x2="`${data.position.x + 3}px`"
+          :y2="`${data.position.y - 3}px`"
           style="
             stroke-width: 3;
             stroke-linecap: round;
@@ -128,17 +130,19 @@
           v-if="data.tri[2]"
           class="slider-height-line"
           :x1="`${
-            (data.slider.x - 0.5 - Root3(1) * (data.slider.y + 3) + 300) / 4 + 3
+            (data.position.x - 0.5 - Root3(1) * (data.position.y + 3) + 300) /
+              4 +
+            3
           }`"
           :y1="`${
-            (-Root3(1) * (data.slider.x - 0.5) +
-              3 * (data.slider.y + 3) +
+            (-Root3(1) * (data.position.x - 0.5) +
+              3 * (data.position.y + 3) +
               Root3(100)) /
               4 -
             3
           }`"
-          :x2="`${data.slider.x - 9}px`"
-          :y2="`${data.slider.y - 3}px`"
+          :x2="`${data.position.x - 9}px`"
+          :y2="`${data.position.y - 3}px`"
           style="
             stroke-width: 3;
             stroke-linecap: round;
@@ -154,8 +158,8 @@
           ref="triSlider"
           @pointerdown="PressSlider"
           :style="{
-            '--slider-x': `${data.slider.x - 0.5}px`,
-            '--slider-y': `${data.slider.y + 3}px`,
+            '--slider-x': `${data.position.x - 0.5}px`,
+            '--slider-y': `${data.position.y + 3}px`,
             pointerEvents: !data.slider.pressed ? 'all' : 'none',
           }"
           cx="-2.5"
@@ -204,9 +208,6 @@
         </div>
       </vue-draggable-next>
     </div>
-
-    {{ data.position.x }}
-    {{ data.position.y }}
   </div>
 </template>
 
@@ -247,14 +248,22 @@ const data = reactive({
 watch(
   () => data.slider.x,
   (n) => {
-    gsap.to(data.position, { duration: 0.5, x: Number(n) || 0 });
+    if (data.slider.pressed) {
+      data.position.x = n;
+    } else {
+      gsap.to(data.position, { delay: 0.1, duration: 0.5, x: Number(n) || 0 });
+    }
   }
 );
 
 watch(
   () => data.slider.y,
   (n) => {
-    gsap.to(data.position, { duration: 0.5, y: Number(n) || 0 });
+    if (data.slider.pressed) {
+      data.position.y = n;
+    } else {
+      gsap.to(data.position, { delay: 0.1, duration: 0.5, y: Number(n) || 0 });
+    }
   }
 );
 
