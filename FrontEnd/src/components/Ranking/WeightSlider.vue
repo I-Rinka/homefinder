@@ -239,9 +239,10 @@ const slider_y = computed({
   get() {
     if (data.slider.pressed) {
       return data.slider.y;
+    } else {
+      data.slider.y = 23.4 * bottom_slider_percentage.value;
+      return data.slider.y;
     }
-    data.slider.y = 23.4 * bottom_slider_percentage.value;
-    return data.slider.y;
   },
   set(value) {
     let y = value < 0 ? 0 : value;
@@ -260,7 +261,7 @@ const slider_y = computed({
           bottom_slider_percentage.value = weight_v;
         }
         weight_change_timeout = null;
-      }, 100);
+      }, 200);
     }
   },
 });
@@ -405,12 +406,12 @@ function TranslateSlider(e) {
   width: 10px;
   transition: 0.5s;
   transform: translate(0, var(--slider-y));
-  transition-delay: 0.1s;
+  // transition-delay: 0.1s;
   cursor: grab;
 
   &:active {
-    transition-delay: 0.025s;
-    transition: 0.025s;
+    transition-delay: 0.0s;
+    transition: 0.0s;
     cursor: grabbing;
   }
 }
