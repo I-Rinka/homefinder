@@ -34,13 +34,14 @@
     <div>
       <vis-adaptor
         v-for="feature in data.features"
-        :key="feature.getGeometry().getCoordinates().toString()"
+        :key="feature.properties.name"
         :map="map"
         :feature="feature"
         :markArray="data.user_marks"
         :price_mode="data.price_view"
         :current_time="data.current_time"
         :selection_time="data.selection_time"
+        :open_corona="data.real_zoom <= 15"
       ></vis-adaptor>
     </div>
   </div>
@@ -71,13 +72,14 @@ import {
 } from "../database/query.js";
 import { mapboxlayer } from "./Map/mapbox_layer";
 import { beijingLayer } from "./Map/vector_layer";
-import { GetCluster } from "./Map/cluster";
+// import {  } from "./Map/cluster";
 import {
   GetNewMarkFeature,
   MarkSource,
   MarkLayer,
   UserMarkModify,
 } from "./Map/user_mark";
+import { block_data, GetBlockData, GetFeatures } from "./Map/cluster";
 
 import TimeLine from "./TimeLine.vue";
 import VisAdaptor from "./Vis/VisAdaptor.vue";
@@ -99,7 +101,10 @@ import {
 } from "ol/interaction";
 import { shiftKeyOnly } from "ol/events/condition";
 import PointerInteraction from "ol/interaction/Pointer";
-import { viewport } from "@popperjs/core";
+import VectorLayer from "ol/layer/Vector";
+import Supercluster from "supercluster";
+import VectorSource from "ol/source/Vector";
+import GeoJSON from "ol/format/GeoJSON";
 
 // the configuration
 const config = {
@@ -119,6 +124,7 @@ const data = reactive({
   zoom: Math.floor(
     ((config.zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
   ),
+  real_zoom: config.zoom,
   price_view: true,
   features: [],
   user_marks: [],
@@ -230,8 +236,9 @@ function ChangeSelectMode(b) {
 
 // The Openlayers
 useGeographic();
+
 const map = new Map({
-  layers: [mapboxlayer, beijingLayer, MarkLayer],
+  layers: [mapboxlayer, beijingLayer, MarkLayer, block_data.featureLayer],
   view: new View({
     center: config.center,
     zoom: config.zoom,
@@ -256,8 +263,9 @@ map.getView().on("change", ChangeView);
 
 onMounted(() => {
   map.setTarget("map");
-  AddPoint();
+  // AddPoint();
 
+  GetBlockData().then(ChangeView);
   // hover
   map.on("pointermove", (event) => {
     let features = map.getFeaturesAtPixel(event.pixel);
@@ -336,15 +344,6 @@ overlaySource.on(["addfeature", "removefeature"], function (evt) {
     evt.type === "addfeature" ? "pointer" : "";
 });
 
-function AddPoint() {
-  GetBlocks().then((res) => {
-    map.addLayer(GetCluster(res));
-    GetCluster().on("change", () => GetOnScreenFeatures());
-
-    ChangeClusterView(data.zoom);
-  });
-}
-
 function ResetPosition() {
   map.getView().animate({
     center: config.center,
@@ -371,16 +370,12 @@ function ChangeZoom(value) {
   }
 }
 
-function ChangeClusterView(zoom) {
-  if (data.price_view) {
-    MarkLayer.setVisible(true);
-  } else {
-    MarkLayer.setVisible(false);
-  }
-}
-
 function ChangeView() {
   let zoom = map.getView().getZoom();
+  data.real_zoom = zoom;
+
+  console.log(data.real_zoom)
+
   let new_percentage_zoom = Math.floor(
     ((zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
   );
@@ -390,48 +385,31 @@ function ChangeView() {
   ) {
     data.zoom = new_percentage_zoom;
   }
-  ChangeClusterView(data.zoom);
-  GetOnScreenFeatures();
-}
 
-function GetOnScreenFeatures() {
+  let cluster_zoom = zoom;
+  cluster_zoom < 1 ? 1 : cluster_zoom;
+
   let view_port = [map.getSize()[0], map.getSize()[1]];
-  view_port[0] *= 1.2;
-  view_port[1] *= 1.2;
+  view_port[0] *= 1.3;
+  view_port[1] *= 1.3;
+
+  // console.log(cluster_zoom);
 
   let currentExtent = map.getView().calculateExtent(view_port);
+  // currentExtent = [currentExtent[0] * 1.2, currentExtent[1] * 1.2];
 
-  let features_dic = {};
+  let features = GetFeatures(cluster_zoom, currentExtent);
+  // console.log(features)
+  data.features = features;
 
-  if (GetCluster().getVisible()) {
-    GetCluster()
-      .getSource()
-      .forEachFeatureInExtent(currentExtent, (feature) => {
-        features_dic[feature.getGeometry().getCoordinates().toString()] =
-          feature;
-      });
-  }
-
-  let discard_feature = [];
-  for (let i = data.features.length - 1; i >= 0; i--) {
-    const feature = data.features[i];
-    if (
-      features_dic.hasOwnProperty(
-        feature.getGeometry().getCoordinates().toString()
-      )
-    ) {
-      delete features_dic[feature.getGeometry().getCoordinates().toString()];
-    } else {
-      data.features.splice(i, 1);
-      discard_feature.push(toRaw(feature));
-    }
-  }
-  for (const key in features_dic) {
-    if (Object.hasOwnProperty.call(features_dic, key)) {
-      const feature = features_dic[key];
-      data.features.push(feature);
-    }
-  }
+  block_data.featureLayer.setSource(
+    new VectorSource({
+      features: new GeoJSON().readFeatures({
+        type: "FeatureCollection",
+        features: features,
+      }),
+    })
+  );
 }
 </script>
 

@@ -1,228 +1,84 @@
+import Supercluster from "supercluster";
 import VectorSource from "ol/source/Vector";
-import Feature from "ol/Feature";
+import GeoJSON from "ol/format/GeoJSON";
 import VectorLayer from "ol/layer/Vector";
-import Cluster from "ol/source/Cluster";
-import CircleStyle from "ol/style/Circle";
-import Point from "ol/geom/Point";
-import { Fill, Icon, Stroke, Style, Text } from "ol/style";
+import {
+  GetBlocks,
+  GetRegions,
+  GetBlocksAvgPrice,
+  GetBlocksAvgPriceYearMonth,
+} from "../../database/query.js";
 
-const config = {
-  sub_region_distance: 200,
-  region_distance: 200,
-  normal_distance: 300,
+export const block_data = {
+  data: null,
+  featureLayer: new VectorLayer(),
+  superCluster: null,
+  details_map: {},
 };
 
-let BlockCluster = null;
-let RegionCluster = null;
-let NormalCluster = null;
-let point_features = null;
+export async function GetBlockData() {
+  if (block_data.data === null) {
+    block_data.data = await GetBlocks();
 
-export function GetPointFeatures(blocks) {
-  if (point_features !== null) {
-    return point_features;
-  } else {
-    point_features = [];
-    for (let i = 0; i < blocks.length; i++) {
-      const element = blocks[i];
-      let point_feature = new Feature({
-        block: element.block,
-        region: element.region,
-        sub_region: element.sub_region,
+    block_data.data.forEach((d) => (block_data[d.name] = d));
+  }
+}
+
+class Geo {
+  constructor(name, lat, lng) {
+    this.type = "Feature";
+    this.geometry = {
+      type: "Point",
+      coordinates: [lng, lat],
+    };
+    this.properties = {
+      name: name,
+    };
+  }
+}
+
+export function GetClusterCoord(cluster_id) {}
+
+export function GetFeatures(zoom, currentExtent) {
+  if (block_data.data !== null) {
+    // Make SuperCluster
+    if (block_data.superCluster === null) {
+      let geo = [];
+      for (let i = 0; i < block_data.data.length; i++) {
+        const element = block_data.data[i];
+        geo.push(new Geo(element.block, element.lat, element.lng));
+      }
+      block_data.superCluster = new Supercluster({
+        maxZoom: 16,
+        radius: 400,
+        minZoom: 10,
       });
-      let point_geom = new Point([element.lng, element.lat]);
-      point_feature.setGeometry(point_geom);
-      point_features.push(point_feature);
+      block_data.superCluster.load(geo);
     }
-    return point_features;
-  }
-}
 
-export function GetBlockClusterArray(blocks) {
-  if (BlockCluster !== null) {
-    return BlockCluster;
-  } else {
-    BlockCluster = [];
-    let block_dic = {};
-
-    GetPointFeatures(blocks).forEach((feature) => {
-      if (!block_dic.hasOwnProperty(feature.get("sub_region"))) {
-        block_dic[feature.get("sub_region")] = new VectorSource();
-      }
-      block_dic[feature.get("sub_region")].addFeature(feature);
-    });
-
-    for (const sub_region in block_dic) {
-      if (Object.hasOwnProperty.call(block_dic, sub_region)) {
-        let cluster = new Cluster({
-          source: block_dic[sub_region],
-          distance: config.sub_region_distance,
-        });
-
-        BlockCluster.push(
-          new VectorLayer({
-            source: cluster,
-            style: blockClusterStyle,
-          })
+    let geo = block_data.superCluster.getClusters(currentExtent, zoom);
+    let features = [];
+    for (let i = 0; i < geo.length; i++) {
+      const element = geo[i];
+      if (element.properties.cluster) {
+        let leaves = block_data.superCluster.getLeaves(
+          element.properties.cluster_id
         );
+        // let l = leaves[0];
+        let f = JSON.parse(JSON.stringify(leaves[0]));
+
+        f.properties.real_coord = element.geometry.coordinates;
+        f.properties.contained_features = leaves.map((d) => d.properties.name);
+        features.push(f);
+        // console.log(f);
+      } else {
+        let f = element;
+        f.properties.real_coord = element.geometry.coordinates;
+        f.properties.contained_features = [element.properties.name];
+        features.push(element);
       }
     }
-    return BlockCluster;
+    return features;
   }
+  return [];
 }
-export function GetRegionClusterArray(blocks) {
-  if (RegionCluster !== null) {
-    return RegionCluster;
-  } else {
-    RegionCluster = [];
-    let block_dic = {};
-
-    GetPointFeatures(blocks).forEach((feature) => {
-      if (!block_dic.hasOwnProperty(feature.get("region"))) {
-        block_dic[feature.get("region")] = new VectorSource();
-      }
-      block_dic[feature.get("region")].addFeature(feature);
-    });
-
-    for (const region in block_dic) {
-      if (Object.hasOwnProperty.call(block_dic, region)) {
-        let cluster = new Cluster({
-          source: block_dic[region],
-          distance: config.region_distance,
-        });
-
-        RegionCluster.push(
-          new VectorLayer({
-            source: cluster,
-            style: regionClusterStyle,
-          })
-        );
-      }
-    }
-    return RegionCluster;
-  }
-}
-
-export function GetCluster(blocks) {
-  if (NormalCluster !== null) {
-    return NormalCluster;
-  } else {
-    let source = new VectorSource();
-    source.addFeatures(GetPointFeatures(blocks));
-    let cluster = new Cluster({
-      source: source,
-      distance: config.normal_distance,
-    });
-
-    NormalCluster = new VectorLayer({
-      source: cluster,
-      style: new Style()
-    });
-    return NormalCluster;
-  }
-}
-function regionClusterStyle(feature) {
-  const size = feature.get("features").length;
-  const block_name = feature.get("features")[0].get("region");
-  if (size > 1) {
-    return [
-      // outer style
-      new Style({
-        image: new CircleStyle({
-          radius: Math.sqrt(Math.log(size + 3) * 150),
-          fill: outerCircleFill,
-        }),
-      }),
-
-      // inner
-      new Style({
-        image: new CircleStyle({
-          radius: Math.sqrt(Math.log(size + 3) * 150) - 5,
-          fill: innerCircleFill,
-        }),
-        text: new Text({
-          text: block_name,
-          fill: textFill,
-          stroke: textStroke,
-        }),
-      }),
-    ];
-  } else {
-    const originalFeature = feature.get("features")[0];
-    return clusterMemberStyle(originalFeature);
-  }
-}
-
-function blockClusterStyle(feature) {
-  const size = feature.get("features").length;
-  const block_name = feature.get("features")[0].get("sub_region");
-  if (size > 1) {
-    return [
-      // outer style
-      new Style({
-        image: new CircleStyle({
-          radius: Math.sqrt(Math.log(size + 3) * 250),
-          fill: outerBlueFill,
-        }),
-      }),
-
-      // inner
-      new Style({
-        image: new CircleStyle({
-          radius: Math.sqrt(Math.log(size + 3) * 250) - 5,
-          fill: innerBlueFill,
-        }),
-        text: new Text({
-          text: block_name,
-          fill: textFill,
-          stroke: textStroke,
-        }),
-      }),
-    ];
-  } else {
-    const originalFeature = feature.get("features")[0];
-    return clusterMemberStyle(originalFeature);
-  }
-}
-
-function clusterMemberStyle(clusterMember) {
-  return new Style({
-    geometry: clusterMember.getGeometry(),
-    image: new CircleStyle({
-      fill: fill,
-      stroke: stroke,
-      radius: 8,
-      // image: clusterMember.get('LEISTUNG') > 5 ? darkIcon : lightIcon,
-    }),
-    fill: fill,
-    stroke: stroke,
-  });
-}
-
-const fill = new Fill({
-  color: [180, 0, 0, 0.3],
-});
-
-const stroke = new Stroke({
-  color: [180, 0, 0, 1],
-  width: 1,
-});
-
-const outerCircleFill = new Fill({
-  color: "rgba(255, 153, 102, 0.0)",
-});
-const innerCircleFill = new Fill({
-  color: "rgba(255, 165, 0, 0.0)",
-});
-const outerBlueFill = new Fill({
-  color: "rgba(131, 188, 255, 0.0)",
-});
-const innerBlueFill = new Fill({
-  color: "rgba(84, 160, 255, 0.0)",
-});
-const textFill = new Fill({
-  color: "#fff",
-});
-const textStroke = new Stroke({
-  color: "rgba(0, 0, 0, 0.6)",
-  width: 3,
-});

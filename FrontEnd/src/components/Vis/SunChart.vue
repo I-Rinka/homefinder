@@ -23,7 +23,7 @@
           transform: `rotate(${mark.orientation}deg)`,
         }"
       />
-    <!-- cicle in the middle -->
+      <!-- cicle in the middle -->
       <circle
         class="sun-chart-price"
         :r="price_r"
@@ -59,6 +59,8 @@ const props = withDefaults(
   }
 );
 
+const emits = defineEmits(["click"]);
+
 let view_box = computed(() => {
   if (user_marks.value.length <= 3) {
     return "-500 -500 1000 1000";
@@ -92,7 +94,7 @@ let price_text_size = computed(() => {
 });
 
 function ClickMiddle() {
-  console.log("hello");
+  emits("click");
 }
 
 const user_marks = computed(() => {
@@ -223,8 +225,18 @@ function GetOrientation(
   opacity: 0.8;
   transition: 1s;
   user-select: none;
+  animation: inputPrice 1s;
   &:hover {
     cursor: pointer;
+  }
+}
+
+@keyframes inputPrice {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.8;
   }
 }
 

@@ -10,6 +10,7 @@
           '--strip-width': `${(100 * d.weight) / strip_percentage_sum}%`,
         }"
       >
+
         <div class="strip">
           <!-- enable -->
           <div style="overflow: hidden; white-space: nowrap">
@@ -122,6 +123,7 @@
           </div>
         </div>
       </div>
+
     </div>
 
     <TransitionGroup tag="div" name="list-complete" class="table">
@@ -371,8 +373,7 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
   let scale = d3.scaleLinear().range([0, 1]);
   if (is_positive_correlation) {
     scale.domain([min, max]);
-  } 
-  else {
+  } else {
     scale.domain([max, min]);
   }
   scale_list.set(name, scale);
@@ -396,9 +397,9 @@ function CalculateScaledRecords(name) {
       }
       data.scaled_records.push(obj);
     }
-  } 
-  else {
-    if (nominal_attr_name.includes(name)) { // nominal:map
+  } else {
+    if (nominal_attr_name.includes(name)) {
+      // nominal:map
       for (let i = 0; i < value_list.length; i++) {
         data.scaled_records[i][name] = scale_list.get(name).get(value_list[i]);
       }
@@ -563,6 +564,7 @@ function MapQuantitativeData(attr) {
   display: flex;
   // display: inline-flex;
   width: 100%;
+  user-select: none;
   height: 40px;
   overflow: hidden;
   // overflow: scroll;
@@ -582,7 +584,6 @@ function MapQuantitativeData(attr) {
     background-color: var(--strip-color);
     width: var(--strip-width);
     filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
-    // border: solid gray 1px;
   }
   .el-checkbox {
     position: relative;
