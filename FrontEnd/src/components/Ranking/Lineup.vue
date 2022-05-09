@@ -11,7 +11,7 @@
         }"
       >
 
-        <div class="strip">
+        <div class="strip" :title="d.name">
           <!-- enable -->
           <div style="overflow: hidden; white-space: nowrap">
             <el-checkbox v-model="d.enabled"></el-checkbox>

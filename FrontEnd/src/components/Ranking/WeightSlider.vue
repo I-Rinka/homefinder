@@ -93,7 +93,7 @@
       <div
         class="slider-cursor-frame"
         :style="{
-          '--slider-y': `${slider_y}vh`,
+          '--slider-y': `${slider_y + 1}vh`,
         }"
       >
         <slider-cursor
@@ -240,7 +240,7 @@ const slider_y = computed({
     if (data.slider.pressed) {
       return data.slider.y;
     }
-    data.slider.y = 23.4 * (1 - bottom_slider_percentage.value);
+    data.slider.y = 23.4 * bottom_slider_percentage.value;
     return data.slider.y;
   },
   set(value) {
@@ -252,21 +252,16 @@ const slider_y = computed({
 
     if (weight_change_timeout === null) {
       weight_change_timeout = setTimeout(() => {
-        if (1 - weight_v >= 0.99) {
-          console.log("surpassed");
+        if (weight_v >= 0.99) {
           bottom_slider_percentage.value = 0.99;
-        } else if (1 - weight_v <= 0.01) {
-          console.log("surpassed");
+        } else if (weight_v <= 0.01) {
           bottom_slider_percentage.value = 0.01;
         } else {
-          console.log("no problem");
-          bottom_slider_percentage.value = 1 - weight_v;
+          bottom_slider_percentage.value = weight_v;
         }
         weight_change_timeout = null;
       }, 100);
     }
-
-    return data.slider.y;
   },
 });
 
@@ -276,10 +271,6 @@ function TranslateSlider(e) {
   let y = 23.4 * percentage;
   slider_y.value = y;
 }
-
-onMounted(() => {
-  // percentage.value = 1 - bottom_slider_percentage.value;
-});
 </script>
 
 <style lang="less" scoped>
@@ -412,11 +403,14 @@ onMounted(() => {
   left: 48px;
   height: 50px;
   width: 10px;
-  transition: 0.1s;
+  transition: 0.5s;
   transform: translate(0, var(--slider-y));
+  transition-delay: 0.1s;
   cursor: grab;
 
   &:active {
+    transition-delay: 0.025s;
+    transition: 0.025s;
     cursor: grabbing;
   }
 }
