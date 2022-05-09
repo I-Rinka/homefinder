@@ -130,7 +130,6 @@ let computed_price = computed(() => {
   }
 });
 
-
 // Change Price When zoom changes
 watch(
   () => props.feature.properties,
@@ -173,7 +172,6 @@ function UpdatePrice() {
 }
 
 let request_controller = new AbortController();
-
 
 onMounted(() => {
   if (props.map && props.feature) {
@@ -271,7 +269,7 @@ async function GetTimeAvgPrice(year, month) {
 
 async function CachePrice() {
   try {
-    if (false && BlocksTimeCache[toRaw(data.contained_blocks)]) {
+    if (BlocksTimeCache[toRaw(data.contained_blocks)]) {
       data.history_cache = BlocksTimeCache[toRaw(data.contained_blocks)];
     } else {
       let res = await GetBlocksAvgPriceAllTime(
@@ -329,7 +327,7 @@ async function CachePrice() {
       } else {
         patch_cache();
       }
-      // BlocksTimeCache[toRaw(data.contained_blocks)] = data.history_cache;
+      BlocksTimeCache[toRaw(data.contained_blocks)] = data.history_cache;
     }
   } catch (error) {
     if (error.message !== "canceled") {
