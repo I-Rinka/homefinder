@@ -262,7 +262,7 @@ function Root3(number) {
 }
 .reserved-criteria {
   display: flex;
-  width: 100%;
+  width: 102%;
   overflow: scroll;
   background-color: rgb(255, 255, 255);
 

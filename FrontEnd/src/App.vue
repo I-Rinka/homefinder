@@ -16,8 +16,9 @@ import RankView from "./components/RankView.vue";
 
 <style>
 body {
-  margin: 8;
+  margin: 0.5vw;
   height: 100vh;
+  width: 99vw;
   overflow: hidden;
 }
 #app {
