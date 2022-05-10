@@ -31,11 +31,16 @@
     </div>
 
     <div class="select-pannel">
-      <select-pannel
-        v-if="data.open_select_pannel"
-        style="position: absolute; top: 40px; height: 38.5vh"
-      ></select-pannel>
-      <el-button @click="data.open_select_pannel = !data.open_select_pannel">
+      <el-button
+        style="position: relative; z-index: 2"
+        @click="data.open_select_pannel = !data.open_select_pannel"
+        :style="{
+          backgroundColor: data.open_select_pannel
+            ? 'transparent !important'
+            : undefined,
+          border: data.open_select_pannel ? 'solid transparent 1px' : undefined,
+        }"
+      >
         Selected House
         <div
           :style="{
@@ -48,9 +53,13 @@
           <el-icon><fold /></el-icon>
         </div>
       </el-button>
+      <select-pannel
+        v-if="data.open_select_pannel"
+        style="position: absolute; height: 46vh; z-index: 0"
+      ></select-pannel>
     </div>
 
-    <div>
+    <div ref="visRef">
       <vis-adaptor
         v-for="feature in data.features"
         :key="feature.properties.name"
@@ -65,13 +74,24 @@
     </div>
   </div>
 
+  <el-popover
+    ref="popoverRef"
+    :virtual-ref="visRef"
+    trigger="click"
+    title="With title"
+    virtual-triggering
+  >
+    <span> Some content </span>
+  </el-popover>
+
   <!-- <el-button @click="GetPixels">Get Pixel</el-button> -->
 </template>
 
 <script setup>
 import { reactive, toRaw } from "@vue/reactivity";
-import { computed, onMounted } from "@vue/runtime-core";
+import { computed, onMounted, ref, unref } from "@vue/runtime-core";
 import { LocationFilled, Fold } from "@element-plus/icons-vue";
+import { ClickOutside as vClickOutside } from "element-plus";
 import * as d3 from "d3";
 
 import {
@@ -221,9 +241,12 @@ function GetPixels() {
   // console.log(map.getView().getResolutionForExtent(currentExtent));
 }
 
-function GetBasePrice() {
-  GetBlocksAvgPrice(["*"]).then((res) => (data.base_price = res.unit_price));
-}
+const popoverRef = ref();
+const visRef = ref();
+
+const onClickOutside = () => {
+  unref(popoverRef).visRef?.delayHide?.();
+};
 
 // -------------------------- Useful functions ---------------------------
 
@@ -425,6 +448,7 @@ function ChangeView() {
   right: 1%;
   top: 2%;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.4));
+  z-index: 2;
 }
 
 .map {

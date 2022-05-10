@@ -170,7 +170,7 @@ function ClickSunchart() {
   // console.log(toRaw(props.feature));
   if (react_data.type === "region") {
     // SelectHouseByRegion(react_data.name).then((res) => console.log(res));
-    house_store.AddHouseByRegionName(react_data.name);
+    // house_store.AddHouseByRegionName(react_data.name);
   }
 }
 

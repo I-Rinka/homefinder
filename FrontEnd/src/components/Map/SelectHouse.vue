@@ -1,20 +1,22 @@
 <template>
   <div class="select-pannel">
-    <TransitionGroup tag="div" name="list-complete">
-      <div
-        class="select-item"
-        v-for="house in house_store.selectedHouseArrary"
-        :key="house.block"
-      >
-        <el-checkbox
-          :checked="true"
-          @change="ClickCheckBox(house.block)"
-          size="small"
+    <div class="select-table">
+      <TransitionGroup tag="div" name="list-complete">
+        <div
+          class="select-item"
+          v-for="house in house_store.selectedHouseArrary"
+          :key="house.block"
         >
-          {{ house.block }}</el-checkbox
-        >
-      </div>
-    </TransitionGroup>
+          <el-checkbox
+            :checked="true"
+            @change="ClickCheckBox(house.block)"
+            size="small"
+          >
+            {{ house.block }}</el-checkbox
+          >
+        </div>
+      </TransitionGroup>
+    </div>
   </div>
 </template>
 
@@ -39,19 +41,25 @@ function ClickCheckBox(name) {
 }
 
 .select-pannel {
-  width: 20vw;
+  width: 30vw;
   background-color: white;
   border-radius: 5px;
-  height: 100%;
-  overflow: scroll;
   animation: enter 0.2s;
+  overflow: hidden;
+}
+
+.select-table {
+  position: relative;
+  margin: 30px 5px 25px 5px;
+  height: 95%;
+  overflow: scroll;
 }
 
 .select-item {
   background-color: whitesmoke;
   border-radius: 5px;
   display: flex;
-  margin: 12px;
+  margin: 5px 5px 12px 12px;
   padding: 7px;
   font-size: 12px;
   transition: 0.5s;
