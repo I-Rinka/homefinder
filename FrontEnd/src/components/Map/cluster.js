@@ -65,10 +65,10 @@ class SubRegion extends Geo {
   }
 }
 
-export function GetClusterCoord(cluster_id) {}
+export function GetClusterCoord(cluster_id) { }
 
 export function GetFeatures(zoom, currentExtent) {
-  if (region_data.region_data !== null && zoom < 12.5) {
+  if (region_data.region_data !== null && zoom < 12) {
     let features = [];
 
     for (let i = 0; i < region_data.region_data.length; i++) {
@@ -88,14 +88,14 @@ export function GetFeatures(zoom, currentExtent) {
         geo.push(new Geo(element.block, element.lat, element.lng));
       }
       block_data.superCluster = new Supercluster({
-        maxZoom: 20,
+        maxZoom: 18,
         radius: 300,
         minZoom: 12,
       });
       block_data.superCluster.load(geo);
     }
-
-    let geo = block_data.superCluster.getClusters(currentExtent, zoom);
+    let ext_extend = [currentExtent[0] - 0.1, currentExtent[1] - 0.1, currentExtent[2] + 0.1, currentExtent[3] + 0.1]
+    let geo = block_data.superCluster.getClusters(ext_extend, zoom - 1);
     let features = [];
     for (let i = 0; i < geo.length; i++) {
       const element = geo[i];
@@ -103,16 +103,20 @@ export function GetFeatures(zoom, currentExtent) {
         let leaves = block_data.superCluster.getLeaves(
           element.properties.cluster_id
         );
+        
+        if (leaves[0].geometry.coordinates[0] >= currentExtent[0] && leaves[0].geometry.coordinates[1] >= currentExtent[1] && leaves[0].geometry.coordinates[0] <= currentExtent[2] && leaves[0].geometry.coordinates[1] <= currentExtent[3]) {
         let f = JSON.parse(JSON.stringify(leaves[0]));
-
-        f.properties.real_coord = element.geometry.coordinates;
-        f.properties.contained_features = leaves.map((d) => d.properties.name);
-        features.push(f);
+          f.properties.real_coord = element.geometry.coordinates;
+          f.properties.contained_features = leaves.map((d) => d.properties.name);
+          features.push(f);
+        }
       } else {
         let f = element;
-        f.properties.real_coord = element.geometry.coordinates;
-        f.properties.contained_features = [element.properties.name];
-        features.push(element);
+        if (f.geometry.coordinates[0] >= currentExtent[0] && f.geometry.coordinates[1] >= currentExtent[1] && f.geometry.coordinates[0] <= currentExtent[2] && f.geometry.coordinates[1] <= currentExtent[3]) {
+          f.properties.real_coord = element.geometry.coordinates;
+          f.properties.contained_features = [element.properties.name];
+          features.push(element);
+        }
       }
     }
     return features;

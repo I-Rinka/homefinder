@@ -69,7 +69,7 @@
         :price_mode="data.price_view"
         :current_time="props.current_time"
         :selection_time="props.selection_time"
-        :open_corona="data.real_zoom <= 15"
+        :open_corona="data.real_zoom <= 20"
       ></vis-adaptor>
     </div>
   </div>
@@ -386,8 +386,8 @@ function ChangeView() {
   cluster_zoom < 1 ? 1 : cluster_zoom;
 
   let view_port = [map.getSize()[0], map.getSize()[1]];
-  view_port[0] *= 1.3;
-  view_port[1] *= 1.3;
+  // view_port[0] *= 1.3;
+  // view_port[1] *= 1.3;
 
   // console.log(cluster_zoom);
 

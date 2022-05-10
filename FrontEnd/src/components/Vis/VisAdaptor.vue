@@ -58,7 +58,6 @@
           },
         ],
       }"
-      placement="top"
       virtual-triggering
       popper-class="popper"
       effect="customized"
