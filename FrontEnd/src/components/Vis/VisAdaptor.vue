@@ -1,7 +1,11 @@
 <template>
   <div>
     <!-- 向子传递必须要proxy -->
-    <div class="adaptor" :id="props.feature.geometry.coordinates.toString()">
+    <div
+      ref="visRef"
+      class="adaptor"
+      :id="props.feature.geometry.coordinates.toString()"
+    >
       <sun-chart
         class="adaptor-sun-chart"
         v-if="props.price_mode"
@@ -35,6 +39,38 @@
         {{ react_data.name }}
       </div>
     </div>
+
+    <el-popover
+      ref="popoverRef"
+      :virtual-ref="visRef"
+      :hide-after="0"
+      trigger="click"
+      width="170px"
+      :popper-options="{
+        modifiers: [
+          {
+            name: 'offset',
+            options: {
+              offset: props.price_mode ? [0, -270] : [0, -20],
+            },
+          },
+        ],
+      }"
+      placement="top"
+      virtual-triggering
+      popper-class="popper"
+      effect="customized"
+    >
+      <div>Select Houses?</div>
+      <div class="popover-content">
+        <el-button type="danger" size="small" plain
+          ><el-icon><delete /></el-icon> <span class="popover-text">Remove</span>
+        </el-button>
+        <el-button type="primary" size="small" plain
+          ><el-icon><circle-plus /></el-icon><span class="popover-text">Add All</span>
+        </el-button>
+      </div>
+    </el-popover>
   </div>
 </template>
 
@@ -48,11 +84,15 @@ import {
   onUpdated,
   reactive,
   ref,
+  unref,
   toRaw,
   watch,
 } from "@vue/runtime-core";
+import { Delete, CirclePlus } from "@element-plus/icons-vue";
+
 import SunChart from "./SunChart.vue";
 import TrendVis from "./TrendVis.vue";
+
 import Overlay from "ol/Overlay";
 import {
   GetBlocksAvgPrice,
@@ -68,6 +108,13 @@ import { useHouseStore } from "../store/selectedHouse";
 
 import { config } from "../../config";
 import * as d3 from "d3";
+
+const popoverRef = ref();
+const visRef = ref();
+
+const onClickOutside = () => {
+  unref(popoverRef).visRef?.delayHide?.();
+};
 
 const props = defineProps({
   map: Object,
@@ -472,7 +519,7 @@ let sun_chart_color = computed(() => {
 });
 </script>
 
-<style>
+<style lang="less">
 .ol-overlay-container {
   pointer-events: none !important;
 }
@@ -509,5 +556,13 @@ let sun_chart_color = computed(() => {
   width: 100%;
   transform: scale(0.8, 0.8);
   filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.8));
+}
+.popover-content {
+  display: flex;
+  justify-content: space-around;
+  margin: 10px 5px 5px 5px;
+  .popover-text{
+    padding-left: 1px;
+  }
 }
 </style>

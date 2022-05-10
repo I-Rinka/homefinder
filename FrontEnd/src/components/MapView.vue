@@ -59,7 +59,7 @@
       ></select-pannel>
     </div>
 
-    <div ref="visRef">
+    <div>
       <vis-adaptor
         v-for="feature in data.features"
         :key="feature.properties.name"
@@ -74,22 +74,12 @@
     </div>
   </div>
 
-  <el-popover
-    ref="popoverRef"
-    :virtual-ref="visRef"
-    trigger="click"
-    title="With title"
-    virtual-triggering
-  >
-    <span> Some content </span>
-  </el-popover>
-
   <!-- <el-button @click="GetPixels">Get Pixel</el-button> -->
 </template>
 
 <script setup>
 import { reactive, toRaw } from "@vue/reactivity";
-import { computed, onMounted, ref, unref } from "@vue/runtime-core";
+import { computed, onMounted } from "@vue/runtime-core";
 import { LocationFilled, Fold } from "@element-plus/icons-vue";
 import { ClickOutside as vClickOutside } from "element-plus";
 import * as d3 from "d3";
@@ -241,12 +231,6 @@ function GetPixels() {
   // console.log(map.getView().getResolutionForExtent(currentExtent));
 }
 
-const popoverRef = ref();
-const visRef = ref();
-
-const onClickOutside = () => {
-  unref(popoverRef).visRef?.delayHide?.();
-};
 
 // -------------------------- Useful functions ---------------------------
 
