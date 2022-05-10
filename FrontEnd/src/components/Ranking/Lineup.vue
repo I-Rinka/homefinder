@@ -427,6 +427,7 @@ function CalculateScaledRecords(name) {
     }
   }
 }
+
 function CheckFilter(index) {
   let record = props.origin_records[index];
   let flag = true;

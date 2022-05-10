@@ -165,10 +165,13 @@ export function getNewestRecords(req, res) {
 export function getRegionAvgPrice(req, res) {
   let region = req.query.region;
   MongoClient.connect(url, (err, db) => {
-    if (err || region === undefined || db === undefined) {
+    if (err || region === undefined) {
       res.status(404);
     }
     try {
+      if (!db) {
+        return
+      }
       db.db("homefinder")
         .collection("sales_records")
         .aggregate([
