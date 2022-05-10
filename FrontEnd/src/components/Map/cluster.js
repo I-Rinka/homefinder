@@ -101,13 +101,19 @@ export function GetFeatures(zoom, currentExtent) {
       const element = geo[i];
       if (element.properties.cluster) {
         let leaves = block_data.superCluster.getLeaves(
-          element.properties.cluster_id
+          element.id,
+          1
         );
-        
+
         if (leaves[0].geometry.coordinates[0] >= currentExtent[0] && leaves[0].geometry.coordinates[1] >= currentExtent[1] && leaves[0].geometry.coordinates[0] <= currentExtent[2] && leaves[0].geometry.coordinates[1] <= currentExtent[3]) {
-        let f = JSON.parse(JSON.stringify(leaves[0]));
+          let f = JSON.parse(JSON.stringify(leaves[0]));
           f.properties.real_coord = element.geometry.coordinates;
-          f.properties.contained_features = leaves.map((d) => d.properties.name);
+
+          f.properties.contained_features = block_data.superCluster.getLeaves(
+            element.id,
+            Infinity
+          ).map((d) => d.properties.name);;
+
           features.push(f);
         }
       } else {

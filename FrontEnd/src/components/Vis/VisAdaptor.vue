@@ -63,6 +63,7 @@
       effect="customized"
     >
       <div>Select Houses?</div>
+      <div style="text-align: left; font-size: 10px;" v-if="react_data.type==='block'">( {{react_data.contained_blocks.length}} houses )</div>
       <div class="popover-content">
         <el-button type="danger" size="small" plain
         @click="RemoveHouse"
@@ -157,10 +158,10 @@ const house_store = useHouseStore();
 const data = {
   history_cache: {},
   isCached: false,
-  contained_blocks: [],
 };
 
 const react_data = reactive({
+  contained_blocks: [],
   history_records: [],
   type: "block",
   name: "",
@@ -218,7 +219,7 @@ watch(
 );
 
 function GetContainedBlock() {
-  data.contained_blocks = props.feature.properties.contained_features;
+  react_data.contained_blocks = props.feature.properties.contained_features;
 }
 
 function SelectHouse() {
@@ -227,8 +228,8 @@ function SelectHouse() {
     // SelectHouseByRegion(react_data.name).then((res) => console.log(res));
     house_store.AddHouseByRegionName(react_data.name);
   } else {
-    for (let i = 0; i < data.contained_blocks.length; i++) {
-      const house_name = data.contained_blocks[i];
+    for (let i = 0; i < react_data.contained_blocks.length; i++) {
+      const house_name = react_data.contained_blocks[i];
       house_store.AddHouse(house_name);
     }
   }
@@ -241,8 +242,8 @@ function RemoveHouse() {
   if (react_data.type === "region") {
     house_store.RemoveHouseByRegionName(react_data.name);
   } else {
-    for (let i = 0; i < data.contained_blocks.length; i++) {
-      const house_name = data.contained_blocks[i];
+    for (let i = 0; i < react_data.contained_blocks.length; i++) {
+      const house_name = react_data.contained_blocks[i];
       house_store.RemoveHouse(house_name);
     }
   }
@@ -367,16 +368,16 @@ async function RequestPrice(year, month) {
       unit_price.value = data.history_cache[token];
     }
   } else {
-    if (BlocksTimeCache[data.contained_blocks]) {
+    if (BlocksTimeCache[react_data.contained_blocks]) {
       if (!data.isCached) {
-        data.history_cache = BlocksTimeCache[toRaw(data.contained_blocks)];
+        data.history_cache = BlocksTimeCache[toRaw(react_data.contained_blocks)];
       }
       unit_price.value = data.history_cache[token];
     } else {
       if (year == 2020 && month == 12) {
         try {
           let res = await GetBlocksAvgPrice(
-            data.contained_blocks,
+            react_data.contained_blocks,
             request_controller
           );
           if (res) {
@@ -396,7 +397,7 @@ async function RequestPrice(year, month) {
       } else {
         try {
           let res = await GetBlocksAvgPriceYearMonth(
-            data.contained_blocks,
+            react_data.contained_blocks,
             year,
             month,
             request_controller
@@ -466,11 +467,11 @@ let patch_cache = function () {
 
 async function CachePrice() {
   try {
-    if (BlocksTimeCache[toRaw(data.contained_blocks)]) {
-      data.history_cache = BlocksTimeCache[toRaw(data.contained_blocks)];
+    if (BlocksTimeCache[toRaw(react_data.contained_blocks)]) {
+      data.history_cache = BlocksTimeCache[toRaw(react_data.contained_blocks)];
     } else {
       let res = await GetBlocksAvgPriceAllTime(
-        data.contained_blocks,
+        react_data.contained_blocks,
         request_controller
       );
       data.isCached = true;
@@ -494,7 +495,7 @@ async function CachePrice() {
       } else {
         patch_cache();
       }
-      BlocksTimeCache[toRaw(data.contained_blocks)] = data.history_cache;
+      BlocksTimeCache[toRaw(react_data.contained_blocks)] = data.history_cache;
     }
   } catch (error) {
     if (error.message !== "canceled") {
