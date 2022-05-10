@@ -66,6 +66,7 @@
       <div>Select Houses?</div>
       <div class="popover-content">
         <el-button type="danger" size="small" plain
+        @click="RemoveHouse"
           ><el-icon><delete /></el-icon>
           <span class="popover-text">Remove</span>
         </el-button>
@@ -230,6 +231,19 @@ function SelectHouse() {
     for (let i = 0; i < data.contained_blocks.length; i++) {
       const house_name = data.contained_blocks[i];
       house_store.AddHouse(house_name);
+    }
+  }
+  react_data.tooltip_visibility = false;
+}
+
+function RemoveHouse() {
+  // console.log(toRaw(props.feature));
+  if (react_data.type === "region") {
+    house_store.RemoveHouseByRegionName(react_data.name);
+  } else {
+    for (let i = 0; i < data.contained_blocks.length; i++) {
+      const house_name = data.contained_blocks[i];
+      house_store.RemoveHouse(house_name);
     }
   }
   react_data.tooltip_visibility = false;

@@ -40,6 +40,14 @@ export const useHouseStore = defineStore("selectedHouse", {
         console.log("error!", error);
       }
     },
+    RemoveHouseByRegionName: async function (region_name) {
+      try {
+        let res = await SelectHouseByRegion(region_name);
+        res.forEach((d) => this.RemoveHouse(d.block));
+      } catch (error) {
+        console.log("error!", error);
+      }
+    },
     ConstructBlockDataMap: async function () {
       if (block_data.data === null) {
         block_data.data = await GetBlocks();

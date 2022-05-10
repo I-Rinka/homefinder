@@ -31,9 +31,9 @@ function ClickCheckBox(name) {
 </script>
 
 <style lang="less" scoped>
-.list-complete-enter, .list-complete-leave-to
+.list-complete-enter-from, .list-complete-leave-to
 /* .list-complete-leave-active below version 2.1.8 */ {
-  transform: translateY(30px);
+  transform: translateY(45vh);
   opacity: 0;
 }
 .list-complete-leave-active {
