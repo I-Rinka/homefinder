@@ -18,6 +18,7 @@
         :color="sun_chart_color"
         :text="computed_price"
         :open_corona="props.open_corona"
+        @click="react_data.tooltip_visibility=true"
       ></sun-chart>
       <trend-vis
         class="adaptor-trend-vis"
@@ -43,6 +44,7 @@
       ref="popoverRef"
       :virtual-ref="visRef"
       :hide-after="0"
+      :visible="react_data.tooltip_visibility"
       trigger="click"
       width="170px"
       :popper-options="{
@@ -158,6 +160,7 @@ const react_data = reactive({
   history_records: [],
   type: "block",
   name: "",
+  tooltip_visibility: false,
 });
 
 const ol_data = {
@@ -216,17 +219,16 @@ function GetContainedBlock() {
 
 function SelectHouse() {
   // console.log(toRaw(props.feature));
-  unref(popoverRef).visRef?.delayHide?.();
   if (react_data.type === "region") {
     // SelectHouseByRegion(react_data.name).then((res) => console.log(res));
     house_store.AddHouseByRegionName(react_data.name);
-  }
-  else {
+  } else {
     for (let i = 0; i < data.contained_blocks.length; i++) {
       const house_name = data.contained_blocks[i];
       house_store.AddHouse(house_name);
     }
   }
+  react_data.tooltip_visibility = false;
 }
 
 function UpdatePrice() {
