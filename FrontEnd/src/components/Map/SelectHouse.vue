@@ -36,6 +36,11 @@ function ClickCheckBox(name) {
   transform: translateY(45vh);
   opacity: 0;
 }
+
+.list-complete-leave-from {
+  transform: translateY(0vh);
+}
+
 .list-complete-leave-active {
   position: absolute;
 }

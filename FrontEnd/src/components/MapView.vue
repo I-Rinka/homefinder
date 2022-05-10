@@ -73,8 +73,6 @@
       ></vis-adaptor>
     </div>
   </div>
-
-  <!-- <el-button @click="GetPixels">Get Pixel</el-button> -->
 </template>
 
 <script setup>
@@ -230,7 +228,6 @@ function GetPixels() {
   console.log("h:", h, "w:", w);
   // console.log(map.getView().getResolutionForExtent(currentExtent));
 }
-
 
 // -------------------------- Useful functions ---------------------------
 
@@ -559,6 +556,42 @@ function ChangeView() {
 
   ::-webkit-scrollbar {
     width: 15px;
+  }
+}
+
+.add-animation {
+  position: absolute;
+  background-color: grey;
+  opacity: 0;
+  border-radius: 25px;
+  animation: addSelection 0.5s ease-in-out;
+}
+
+@keyframes addSelection {
+  from {
+    height: 30px;
+    width: 30px;
+
+    opacity: 0.2;
+
+    top: var(--y-start);
+    left: var(--x-start);
+  }
+
+  66% {
+    opacity: 0.8;
+    height: 40px;
+    width: 40px;
+    top: calc(var(--y-end)-1vh);
+  }
+  to {
+    height: 20px;
+    width: 20px;
+
+    opacity: 0.2;
+
+    top: var(--y-end);
+    left: var(--x-end);
   }
 }
 </style>

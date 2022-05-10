@@ -12,6 +12,7 @@ import {
 // the first argument is a unique id of the store across your application
 
 let block_data_map = null;
+let newDiv = null;
 
 export const useHouseStore = defineStore("selectedHouse", {
   state: () => {
@@ -66,5 +67,28 @@ export const useHouseStore = defineStore("selectedHouse", {
     RemoveHouse: async function (house_name) {
       delete this.selectedHouse[house_name];
     },
+    AddAnimation: function (start_ref) {
+      let rect = start_ref.getBoundingClientRect()
+
+      let previous = document.getElementsByClassName("add-animation");
+
+      for (let i = 0; i < previous.length; i++) {
+        previous[i].remove();
+      }
+
+      newDiv = document.createElement("div");
+      const currentDiv = document.getElementById("app");
+      currentDiv.append(newDiv);
+
+      let x = document.getElementById("app").clientWidth;
+
+      let x0 = `${rect.x + rect.width / 2}px`;
+      let x1 = `${x * 0.95}px`;
+      let y0 = `${rect.y + rect.height / 2}px`;
+      let y1 = '2.5vh';
+
+      newDiv.style = `--x-start: ${x0}; --y-start: ${y0}; --x-end: ${x1}; --y-end:${y1}`
+      newDiv.classList.add('add-animation')
+    }
   },
 });

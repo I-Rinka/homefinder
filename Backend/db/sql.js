@@ -64,7 +64,7 @@ export function selectHouse(req, res) {
               },
               {
                 $group: {
-                  _id: "$block" ,
+                  _id: "$block",
                   //   unit_price: { $avg: "$unit_price" },
                   //   deal_price: { $avg: "$deal_price" },
                 },
@@ -78,11 +78,11 @@ export function selectHouse(req, res) {
                   //   deal_price: "$deal_price",
                 },
               },
-                {
-                  $project: {
-                    _id: 0,
-                  },
+              {
+                $project: {
+                  _id: 0,
                 },
+              },
             ])
             .toArray((err, result) => {
               if (err) {
@@ -165,12 +165,11 @@ export function getNewestRecords(req, res) {
 export function getRegionAvgPrice(req, res) {
   let region = req.query.region;
   MongoClient.connect(url, (err, db) => {
-    if (err || region === undefined) {
+    if (err || region === undefined || db === undefined) {
       res.status(404);
     }
-    let dbo = db.db("homefinder");
     try {
-      dbo
+      db.db("homefinder")
         .collection("sales_records")
         .aggregate([
           {

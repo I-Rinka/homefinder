@@ -233,6 +233,7 @@ function SelectHouse() {
       house_store.AddHouse(house_name);
     }
   }
+  house_store.AddAnimation(visRef.value);
   react_data.tooltip_visibility = false;
 }
 
