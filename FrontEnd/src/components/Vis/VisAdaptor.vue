@@ -18,7 +18,6 @@
         :color="sun_chart_color"
         :text="computed_price"
         :open_corona="props.open_corona"
-        @click="ClickSunchart"
       ></sun-chart>
       <trend-vis
         class="adaptor-trend-vis"
@@ -64,10 +63,12 @@
       <div>Select Houses?</div>
       <div class="popover-content">
         <el-button type="danger" size="small" plain
-          ><el-icon><delete /></el-icon> <span class="popover-text">Remove</span>
+          ><el-icon><delete /></el-icon>
+          <span class="popover-text">Remove</span>
         </el-button>
-        <el-button type="primary" size="small" plain
-          ><el-icon><circle-plus /></el-icon><span class="popover-text">Add All</span>
+        <el-button type="primary" size="small" plain @click="SelectHouse"
+          ><el-icon><circle-plus /></el-icon
+          ><span class="popover-text">Add All</span>
         </el-button>
       </div>
     </el-popover>
@@ -213,11 +214,18 @@ function GetContainedBlock() {
   data.contained_blocks = props.feature.properties.contained_features;
 }
 
-function ClickSunchart() {
+function SelectHouse() {
   // console.log(toRaw(props.feature));
+  unref(popoverRef).visRef?.delayHide?.();
   if (react_data.type === "region") {
     // SelectHouseByRegion(react_data.name).then((res) => console.log(res));
-    // house_store.AddHouseByRegionName(react_data.name);
+    house_store.AddHouseByRegionName(react_data.name);
+  }
+  else {
+    for (let i = 0; i < data.contained_blocks.length; i++) {
+      const house_name = data.contained_blocks[i];
+      house_store.AddHouse(house_name);
+    }
   }
 }
 
@@ -561,7 +569,7 @@ let sun_chart_color = computed(() => {
   display: flex;
   justify-content: space-around;
   margin: 10px 5px 5px 5px;
-  .popover-text{
+  .popover-text {
     padding-left: 1px;
   }
 }

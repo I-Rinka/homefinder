@@ -54,7 +54,7 @@
         </div>
       </el-button>
       <select-pannel
-        v-if="data.open_select_pannel"
+        v-show="data.open_select_pannel"
         style="position: absolute; height: 46vh; z-index: 0"
       ></select-pannel>
     </div>
