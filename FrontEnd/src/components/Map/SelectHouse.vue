@@ -1,6 +1,12 @@
 <template>
   <div class="select-pannel">
     <div class="select-table">
+      <div
+        class="void-selection"
+        v-if="house_store.selectedHouseArrary.length === 0"
+      >
+        No Selected House
+      </div>
       <TransitionGroup tag="div" name="list-complete">
         <div
           class="select-item"
@@ -58,6 +64,27 @@ function ClickCheckBox(name) {
   margin: 30px 5px 25px 5px;
   height: 95%;
   overflow: scroll;
+
+  .void-selection {
+    font-size: 20px;
+    font-weight: bold;
+    color: grey;
+    position: relative;
+    top: 40%;
+    animation: voidTextEnter 1s;
+  }
+}
+
+@keyframes voidTextEnter {
+  from {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .select-item {
