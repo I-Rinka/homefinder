@@ -68,7 +68,7 @@ class SubRegion extends Geo {
 export function GetClusterCoord(cluster_id) { }
 
 export function GetFeatures(zoom, currentExtent) {
-  if (region_data.region_data !== null && zoom < 12) {
+  if (region_data.region_data !== null && zoom < 12.5) {
     let features = [];
 
     for (let i = 0; i < region_data.region_data.length; i++) {
@@ -89,13 +89,13 @@ export function GetFeatures(zoom, currentExtent) {
       }
       block_data.superCluster = new Supercluster({
         maxZoom: 18,
-        radius: 300,
-        minZoom: 12,
+        radius: 150,
+        minZoom: 10,
       });
       block_data.superCluster.load(geo);
     }
     let ext_extend = [currentExtent[0] - 0.1, currentExtent[1] - 0.1, currentExtent[2] + 0.1, currentExtent[3] + 0.1]
-    let geo = block_data.superCluster.getClusters(ext_extend, zoom - 1);
+    let geo = block_data.superCluster.getClusters(ext_extend, zoom - 1.2);
     let features = [];
     for (let i = 0; i < geo.length; i++) {
       const element = geo[i];

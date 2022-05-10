@@ -62,11 +62,28 @@
       popper-class="popper"
       effect="customized"
     >
-      <div>Select Houses?</div>
-      <div style="text-align: left; font-size: 10px;" v-if="react_data.type==='block'">( {{react_data.contained_blocks.length}} houses )</div>
+      <template v-if="react_data.type === 'block'">
+        <template v-if="react_data.contained_blocks.length > 1">
+          <div>Select Houses?</div>
+          <div style="text-align: left; font-size: 10px">
+            ( {{ react_data.contained_blocks.length }} houses )
+          </div>
+        </template>
+
+        <template v-else-if="react_data.contained_blocks.length == 1">
+          <div>Select House?</div>
+          <div style="text-align: left; font-size: 10px">
+            ( {{ react_data.contained_blocks[0] }} )
+          </div>
+        </template>
+      </template>
+
+      <template v-else-if="react_data.type === 'region'">
+        <div>Select Houses in {{ react_data.name }}?</div>
+      </template>
+
       <div class="popover-content">
-        <el-button type="danger" size="small" plain
-        @click="RemoveHouse"
+        <el-button type="danger" size="small" plain @click="RemoveHouse"
           ><el-icon><delete /></el-icon>
           <span class="popover-text">Remove</span>
         </el-button>
@@ -120,7 +137,7 @@ const popoverRef = ref();
 const visRef = ref();
 
 const onClickOutside = () => {
-  react_data.tooltip_visibility=false;
+  react_data.tooltip_visibility = false;
   // unref(popoverRef).visRef?.delayHide?.();
 };
 
@@ -370,7 +387,8 @@ async function RequestPrice(year, month) {
   } else {
     if (BlocksTimeCache[react_data.contained_blocks]) {
       if (!data.isCached) {
-        data.history_cache = BlocksTimeCache[toRaw(react_data.contained_blocks)];
+        data.history_cache =
+          BlocksTimeCache[toRaw(react_data.contained_blocks)];
       }
       unit_price.value = data.history_cache[token];
     } else {
