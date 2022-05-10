@@ -5,6 +5,7 @@
       ref="visRef"
       class="adaptor"
       :id="props.feature.geometry.coordinates.toString()"
+      v-click-outside="onClickOutside"
     >
       <sun-chart
         class="adaptor-sun-chart"
@@ -18,7 +19,7 @@
         :color="sun_chart_color"
         :text="computed_price"
         :open_corona="props.open_corona"
-        @click="react_data.tooltip_visibility=true"
+        @click="react_data.tooltip_visibility = true"
       ></sun-chart>
       <trend-vis
         class="adaptor-trend-vis"
@@ -93,6 +94,8 @@ import {
 } from "@vue/runtime-core";
 import { Delete, CirclePlus } from "@element-plus/icons-vue";
 
+import { ClickOutside as vClickOutside } from "element-plus";
+
 import SunChart from "./SunChart.vue";
 import TrendVis from "./TrendVis.vue";
 
@@ -116,7 +119,8 @@ const popoverRef = ref();
 const visRef = ref();
 
 const onClickOutside = () => {
-  unref(popoverRef).visRef?.delayHide?.();
+  react_data.tooltip_visibility=false;
+  // unref(popoverRef).visRef?.delayHide?.();
 };
 
 const props = defineProps({
