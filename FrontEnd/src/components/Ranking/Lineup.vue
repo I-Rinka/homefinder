@@ -259,7 +259,10 @@ const strip_percentage_sum = computed(() => {
 
 watch(
   () => props.origin_records, // calculate the scaled value of the default attr list, can't use onMounted because props is slower
-  () => PreProcess()
+  () => {
+    data.scaled_records = [];
+    PreProcess();
+  }
 );
 
 function PreProcess() {

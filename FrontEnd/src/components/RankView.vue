@@ -4,21 +4,36 @@
       <!-- <line-up
         :origin_records="data.newest_records.filter((d) => d.area < 30)"
       ></line-up> -->
-      <line-up :origin_records="data.newest_records"></line-up>
+      <!-- <line-up :origin_records="data.newest_records"></line-up> -->
+      <line-up :origin_records="newest_records"></line-up>
       <weight-lifter></weight-lifter>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive } from "@vue/reactivity";
-import { onMounted } from "@vue/runtime-core";
+import { reactive, toRaw } from "@vue/reactivity";
+import { computed, onMounted } from "@vue/runtime-core";
 import { GetNewestRecords } from "../database/query";
 import LineUp from "./Ranking/Lineup.vue";
 import WeightLifter from "./Ranking/WeightLifter.vue";
 
+import { useHouseStore } from "./store/selectedHouse.js";
+
 const data = reactive({
   newest_records: [],
+});
+
+const houseStore = useHouseStore();
+
+const newest_records = computed(() => {
+  if (houseStore.selectedHouseArrary.length <= 0) {
+    return data.newest_records;
+  } else {
+    return data.newest_records.filter((d) =>
+      houseStore.selectedHouse.hasOwnProperty(d.block)
+    );
+  }
 });
 
 onMounted(() => {
