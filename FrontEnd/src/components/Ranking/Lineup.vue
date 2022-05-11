@@ -292,6 +292,8 @@ function PreProcess() {
     // data.quantitative_details[attr].filter = [res.min, res.max]
   });
 
+  rank_store.ChangeQuantitativeMapping(data.quantitative_mapping_type);
+
   let default_attr_list = enabled_strip.value.map((s) => s.name);
   default_attr_list.forEach((attr) => {
     HandleScale(attr);
@@ -317,6 +319,8 @@ function GenDefaultNominalMap(name) {
   value_list.forEach((v) => {
     data.nominal_mapping_map[name].set(v, 0.5);
   }); // default value=0.5
+
+  rank_store.ChangeNominalMapping(data.nominal_mapping_map);
 
   return value_list;
 }
@@ -508,6 +512,7 @@ function HandleConfirmMapping(mapping_data, attr) {
   for (let [key, value] of mapping_data) {
     data.nominal_mapping_map[attr].set(key, value);
   }
+  rank_store.ChangeNominalMapping(data.nominal_mapping_map);
   // data.nominal_mapping_map[attr] = mapping_data
 
   // recalculate scaled data
@@ -549,6 +554,8 @@ function MapNominalData(attr) {
 
 function MapQuantitativeData(attr) {
   data.quantitative_mapping_type[attr] = !data.quantitative_mapping_type[attr];
+
+  rank_store.ChangeQuantitativeMapping(data.quantitative_mapping_type);
 
   HandleScale(attr);
   CalculateScaledRecords(attr);

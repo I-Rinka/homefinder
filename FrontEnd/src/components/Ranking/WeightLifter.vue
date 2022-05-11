@@ -175,8 +175,8 @@
 import WeightSlider from "./WeightSlider.vue";
 import WeightTriangle from "./WeightTriangle.vue";
 import { useStore } from "../store/weight";
-import { reactive } from "@vue/reactivity";
-import { computed, onMounted } from "@vue/runtime-core";
+import { reactive, toRaw } from "@vue/reactivity";
+import { computed, onMounted, watch } from "@vue/runtime-core";
 import { CirclePlus, Close } from "@element-plus/icons-vue";
 import { useRankStore } from "../store/rank";
 
@@ -246,6 +246,13 @@ const data = reactive({
 function Root3(number) {
   return Math.sqrt(3) * number;
 }
+
+watch(
+  () => rank_store.quantitative_mapping,
+  () => {
+    console.log(toRaw(rank_store.quantitative_mapping));
+  }
+);
 </script>
 
 <style lang="less" scoped>
