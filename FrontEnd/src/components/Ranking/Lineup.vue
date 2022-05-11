@@ -395,6 +395,7 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
   scale_list.set(name, scale);
 }
 
+// 将所有input重新计算了value
 function CalculateScaledRecords(name) {
   let value_list = props.origin_records.map((record) => {
     if (name == "built_year") return Number(record[name]);
@@ -474,7 +475,7 @@ const ranking_score = computed(() => {
   scores.sort((a, b) => {
     return a.score - b.score;
   });
-  return scores;
+  return scores.slice(0, 100);
 });
 
 function HandleConfirmMapping(mapping_data, attr) {
