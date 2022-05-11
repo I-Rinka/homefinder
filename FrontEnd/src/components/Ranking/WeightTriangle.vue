@@ -1,4 +1,5 @@
 <template>
+  <!-- <el-button @click="Test">Test</el-button> -->
   <div class="triangle-block">
     <div class="top-ends">
       <vue-draggable-next
@@ -85,6 +86,12 @@
           @mousemove="MoveSlider"
           @click="PrintData"
         />
+
+        <polygon class="hinter" :points="data.top_has_sb" />
+
+        <polygon class="hinter" :points="data.current_in_top" />
+
+        <polygon class="hinter" :points="data.current_not_change" />
 
         <line
           class="slider-height-line"
@@ -214,9 +221,11 @@
 <script setup>
 import { reactive, computed, toRaw, ref } from "@vue/reactivity";
 import { useStore } from "../store/weight";
+import { useRankStore } from "../store/rank";
 import { VueDraggableNext } from "vue-draggable-next";
 import { onMounted, watch } from "@vue/runtime-core";
 import gsap from "gsap";
+import monotoneChainConvexHull from "monotone-chain-convex-hull";
 
 const emits = defineEmits(["close"]);
 
@@ -227,6 +236,7 @@ const props = defineProps({
 });
 
 const store = useStore();
+const rank_store = useRankStore();
 
 function Root3(number) {
   return Math.sqrt(3) * number;
@@ -243,6 +253,10 @@ const data = reactive({
     x: 100,
     y: Root3((100 * 2) / 3),
   },
+
+  current_not_change: "",
+  current_in_top: "",
+  top_has_sb: "",
 });
 
 watch(
@@ -358,6 +372,19 @@ watch(
       point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
       data.slider.x = point.x;
       data.slider.y = point.y;
+    }
+  }
+);
+
+let solution_trigger = null;
+watch(
+  () => rank_store.current_solutions,
+  () => {
+    if (solution_trigger === null) {
+      solution_trigger = setTimeout(() => {
+        LoadHinter();
+        solution_trigger = null;
+      }, 1000);
     }
   }
 );
@@ -514,6 +541,43 @@ function MoveSlider(e) {
   }
 }
 
+async function LoadHinter() {
+  rank_store
+    .Compute3WayRange(
+      data.tri.map((d) => d.name),
+      store.GetCriterias().map((d) => toRaw(d))
+    )
+    .then((res) => {
+      let current_at_top = res.notChangeCurrent.map((d) => {
+        let coord = WeightToPoint(d);
+        return [coord.x, coord.y];
+      });
+      console.log(current_at_top);
+      current_at_top = monotoneChainConvexHull(current_at_top);
+      let AtTopStr = "";
+      current_at_top.forEach((d) => (AtTopStr += ` ${d[0]},${d[1]} `));
+      data.current_not_change = AtTopStr;
+
+      let current_in_top = res.currentStillInTop.map((d) => {
+        let coord = WeightToPoint(d);
+        return [coord.x, coord.y];
+      });
+      current_in_top = monotoneChainConvexHull(current_in_top);
+      let InTopStr = "";
+      current_in_top.forEach((d) => (InTopStr += ` ${d[0]},${d[1]} `));
+      data.current_in_top = InTopStr;
+
+      let top_in_top = res.topStillHasSb.map((d) => {
+        let coord = WeightToPoint(d);
+        return [coord.x, coord.y];
+      });
+      top_in_top = monotoneChainConvexHull(top_in_top);
+      let TInTStr = "";
+      top_in_top.forEach((d) => (TInTStr += ` ${d[0]},${d[1]} `));
+      data.top_has_sb = TInTStr;
+    });
+}
+
 onMounted(() => {
   point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
   data.slider.x = point.x;
@@ -547,6 +611,16 @@ onMounted(() => {
   fill: #e7eae8;
   stroke: gray;
   stroke-width: 1px;
+}
+
+.hinter {
+  pointer-events: none;
+  position: absolute;
+  stroke-linejoin: round;
+  fill: rgb(84, 123, 192);
+  opacity: 0.5;
+  // stroke: gray;
+  // stroke-width: 1px;
 }
 
 .slider {
