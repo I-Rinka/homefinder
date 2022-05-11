@@ -142,11 +142,11 @@
         :key="item.index"
       >
         <div class="table-content-block">
-          <span> {{ props.origin_records[item.index].block }} </span>
+          <span> {{ item.origin.block }} </span>
         </div>
         <template v-for="d in enabled_strip" :key="d.name">
           <el-tooltip
-            :content="props.origin_records[item.index][d.name].toString()"
+            :content="item.origin[d.name].toString()"
             :hide-after="0"
             placement="top"
             popper-class="popper"
@@ -164,10 +164,11 @@
                 }%`,
               }"
             >
-              {{ props.origin_records[item.index][d.name] }}
+              {{ item.origin[d.name] }}
             </div>
           </el-tooltip>
         </template>
+          {{ item.score.toFixed(2) }}
       </div>
     </TransitionGroup>
 
@@ -404,6 +405,7 @@ function CalculateScaledRecords(name) {
     if (name == "built_year") return Number(record[name]);
     else return record[name];
   });
+
   if (data.scaled_records.length == 0) {
     // the first time to calculate, create
     for (let i = 0; i < value_list.length; i++) {
@@ -478,7 +480,19 @@ const ranking_score = computed(() => {
   scores.sort((a, b) => {
     return a.score - b.score;
   });
-  return scores.slice(0, 100);
+
+  // select Top100
+  let num = scores.length < 100 ? scores.length : 100;
+  let records = [];
+  for (let i = 0; i < num; i++) {
+    const element = scores[i];
+    records.push({
+      index: element.index,
+      origin: props.origin_records[element.index],
+      score: element.score,
+    });
+  }
+  return records;
 });
 
 function HandleConfirmMapping(mapping_data, attr) {
