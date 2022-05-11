@@ -112,9 +112,23 @@ export const useRankStore = defineStore("rankstore", {
                 }
             }
 
-            change.notChangeCurrent.sort((a, b) => a - b)
-            change.currentStillInTop.sort((a, b) => a - b)
-            change.topStillHasSb.sort((a, b) => a - b)
+            let min = 1;
+            let max = 0;
+            change.notChangeCurrent.forEach(d => min = d < min ? d : min);
+            change.notChangeCurrent.forEach(d => max = d > max ? d : max);
+            change.notChangeCurrent = [min, max];
+
+            min = 1;
+            max = 0;
+            change.currentStillInTop.forEach(d => min = d < min ? d : min);
+            change.currentStillInTop.forEach(d => max = d > max ? d : max);
+            change.currentStillInTop = [min, max];
+
+            min = 1;
+            max = 0;
+            change.topStillHasSb.forEach(d => min = d < min ? d : min);
+            change.topStillHasSb.forEach(d => max = d > max ? d : max);
+            change.topStillHasSb = [min, max];
 
             return change;
         },

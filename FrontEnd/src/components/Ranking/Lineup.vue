@@ -501,7 +501,7 @@ const ranking_score = computed(() => {
   records.forEach((d) => scaled_records.push(data.scaled_records[d.index]));
   rank_store.ChangeCurrentScale(scaled_records.slice(0, 100));
 
-  return records.slice(0, 100);
+  return records.slice(0, 99);
 });
 
 function HandleConfirmMapping(mapping_data, attr) {
@@ -667,8 +667,17 @@ function MapQuantitativeData(attr) {
 .list-complete-enter, .list-complete-leave-to
 /* .list-complete-leave-active below version 2.1.8 */ {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(30px) scale(0,0);
+  bottom: 0;
 }
+
+.list-complete-leave-from
+/* .list-complete-leave-active below version 2.1.8 */ {
+  opacity: 0;
+  // transform: translateY(30px) scale(0,0);
+  bottom: 0;
+}
+
 .list-complete-leave-active {
   position: absolute;
 }
