@@ -266,7 +266,7 @@ watch(
     if (data.slider.pressed) {
       data.position.x = n;
     } else {
-      gsap.to(data.position, { delay: 0.1, duration: 0.5, x: Number(n) || 0 });
+      gsap.to(data.position, { delay: 0.3, duration: 0.5, x: Number(n) || 0 });
     }
   }
 );
@@ -277,7 +277,7 @@ watch(
     if (data.slider.pressed) {
       data.position.y = n;
     } else {
-      gsap.to(data.position, { delay: 0.1, duration: 0.5, y: Number(n) || 0 });
+      gsap.to(data.position, { delay: 0.3, duration: 0.5, y: Number(n) || 0 });
     }
   }
 );
@@ -604,6 +604,8 @@ onMounted(() => {
   point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
   data.slider.x = point.x;
   data.slider.y = point.y;
+
+  LoadHinterTimeout();
 });
 </script>
 

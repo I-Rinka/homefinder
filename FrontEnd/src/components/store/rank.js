@@ -34,7 +34,7 @@ export const useRankStore = defineStore("rankstore", {
             this.current_solutions = top_solutions;
         },
         ChangeCurrentScale(current_scale) {
-            this.current_solutions_scale = current_scale.slice(0, 100)
+            this.current_solutions_scale = current_scale;
         },
         async ComputeGlobalRankFrequency(involved_criterias) {
 

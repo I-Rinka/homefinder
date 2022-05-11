@@ -135,11 +135,10 @@
               </div>
             </template>
 
-            <div class="choice-text">Select Criterias (3 at least):</div>
+            <div class="choice-text">Select 3 Criterias:</div>
             <div class="choice-group">
               <el-checkbox-group
                 :max="3"
-                :min="3"
                 class="enabled"
                 v-model="data.using_tri"
                 text-color="black"

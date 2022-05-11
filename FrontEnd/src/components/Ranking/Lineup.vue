@@ -499,9 +499,9 @@ const ranking_score = computed(() => {
   rank_store.ChangeCurrentSolutions(records.map((d) => d.origin));
   let scaled_records = [];
   records.forEach((d) => scaled_records.push(data.scaled_records[d.index]));
-  rank_store.ChangeCurrentScale(scaled_records);
+  rank_store.ChangeCurrentScale(scaled_records.slice(0, 100));
 
-  return records;
+  return records.slice(0, 100);
 });
 
 function HandleConfirmMapping(mapping_data, attr) {
