@@ -1,5 +1,5 @@
 <template>
-  <el-button @click="LoadHinter">Test</el-button>
+  <!-- <el-button @click="LoadHinter">Test</el-button> -->
   <div class="slider-block">
     <div>
       <vue-draggable-next
@@ -83,33 +83,35 @@
         </div>
       </vue-draggable-next>
 
-      <div class="slider-container"></div>
-      <div
-        ref="SliderTrack"
-        class="slider-track"
-        @dblclick="TranslateSlider"
-      ></div>
-      <div
-        class="slider-hinter"
-        :style="{
-          height: `${data.hinter.hinter_bottom.height}vh`,
-          top: `${data.hinter.hinter_bottom.top + 4.2}vh`,
-        }"
-      ></div>
-      <div
-        class="slider-hinter"
-        :style="{
-          height: `${data.hinter.hinter_middle.height}vh`,
-          top: `${data.hinter.hinter_middle.top + 4.2}vh`,
-        }"
-      ></div>
-      <div
-        class="slider-hinter"
-        :style="{
-          height: `${data.hinter.hinter_top.height}vh`,
-          top: `${data.hinter.hinter_top.top + 4.2}vh`,
-        }"
-      ></div>
+      <div class="slider-container">
+        <div
+          ref="SliderTrack"
+          class="slider-track"
+          @dblclick="TranslateSlider"
+        ></div>
+        <div
+          class="slider-hinter"
+          :style="{
+            height: `${data.hinter.hinter_bottom.height}vh`,
+            top: `${data.hinter.hinter_bottom.top + 0.8}vh`,
+          }"
+        ></div>
+        <div
+          class="slider-hinter"
+          :style="{
+            height: `${data.hinter.hinter_middle.height}vh`,
+            top: `${data.hinter.hinter_middle.top + 0.8}vh`,
+          }"
+        ></div>
+        <div
+          class="slider-hinter"
+          :style="{
+            height: `${data.hinter.hinter_top.height}vh`,
+            top: `${data.hinter.hinter_top.top + 0.8}vh`,
+          }"
+        ></div>
+      </div>
+
       <div
         class="slider-cursor-frame"
         :style="{
@@ -253,6 +255,7 @@ function ReleaseSlider() {
 
 let SliderTrack = ref(null);
 function MoveSlider(e) {
+  n_time = Date.now();
   if (data.slider.pressed) {
     let rect = SliderTrack.value.getBoundingClientRect();
     let percentage = (e.clientY - rect.y) / rect.height;
@@ -301,14 +304,33 @@ function TranslateSlider(e) {
   slider_y.value = y;
 }
 
+watch(
+  () => rank_store.current_solutions,
+  () => LoadHinterTimeout()
+);
+
+let solution_trigger = null;
+let n_time = 0;
+function LoadHinterTimeout() {
+  // n_time = Date.now();
+  if (solution_trigger === null) {
+    solution_trigger = setTimeout(() => {
+      LoadHinter();
+      solution_trigger = null;
+    }, 1000);
+  }
+}
+
 async function LoadHinter() {
   let start_time = Date.now();
+  if (start_time - n_time < 20) {
+    return;
+  }
   let res = await rank_store.Compute2WayRange(
     data.top.map((d) => d.name),
     data.bottom.map((d) => d.name),
     store.GetCriterias()
   );
-  console.log(res);
   data.hinter.hinter_top = {
     top: res.notChangeCurrent.at(0) * height,
     height: (res.notChangeCurrent.at(-1) - res.notChangeCurrent.at(0)) * height,
@@ -322,7 +344,6 @@ async function LoadHinter() {
     top: res.topStillHasSb.at(0) * height,
     height: (res.topStillHasSb.at(-1) - res.topStillHasSb.at(0)) * height,
   };
-  console.log(toRaw(data.hinter));
   console.log("slider compute spent time:", Date.now() - start_time);
 }
 </script>
@@ -445,7 +466,8 @@ async function LoadHinter() {
   position: absolute;
   background-color: rgb(84, 123, 192);
   opacity: 0.5;
-  width: 100px;
+  left: 23.3px;
+  width: 50%;
 }
 
 .slider-track {
