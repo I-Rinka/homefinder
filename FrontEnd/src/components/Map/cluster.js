@@ -35,6 +35,7 @@ export async function GetRegionData() {
 export async function GetBlockData() {
   if (block_data.data === null) {
     block_data.data = await GetBlocks();
+    block_data.data.forEach(d => block_data.details_map[d.block] = d);
   }
 }
 
@@ -100,21 +101,56 @@ export function GetFeatures(zoom, currentExtent) {
     for (let i = 0; i < geo.length; i++) {
       const element = geo[i];
       if (element.properties.cluster) {
-        let leaves = block_data.superCluster.getLeaves(
-          element.id,
-          1
-        );
-
-        if (leaves[0].geometry.coordinates[0] >= currentExtent[0] && leaves[0].geometry.coordinates[1] >= currentExtent[1] && leaves[0].geometry.coordinates[0] <= currentExtent[2] && leaves[0].geometry.coordinates[1] <= currentExtent[3]) {
-          let f = JSON.parse(JSON.stringify(leaves[0]));
-          f.properties.real_coord = element.geometry.coordinates;
-
-          f.properties.contained_features = block_data.superCluster.getLeaves(
+        
+        if (zoom > 15) {
+          let diff_region = {};
+          let leaves = block_data.superCluster.getLeaves(
             element.id,
             Infinity
-          ).map((d) => d.properties.name);;
+          ).map((d) => d);
 
-          features.push(f);
+          leaves.forEach(d => {
+            let sub_region = block_data.details_map[d.properties.name];
+            if (!diff_region[sub_region]) {
+              diff_region[sub_region] = [];
+              diff_region[sub_region].push(d);
+            }
+          })
+
+          for (const sub_region in diff_region) {
+            if (Object.hasOwnProperty.call(diff_region, sub_region)) {
+              const blocks = diff_region[sub_region];
+
+              let f = JSON.parse(JSON.stringify(blocks[0]));
+              if (leaves[0].geometry.coordinates[0] >= currentExtent[0] && leaves[0].geometry.coordinates[1] >= currentExtent[1] && leaves[0].geometry.coordinates[0] <= currentExtent[2] && leaves[0].geometry.coordinates[1] <= currentExtent[3]) {
+
+                f.properties.real_coord = element.geometry.coordinates;
+
+                f.properties.contained_features = blocks.map(d => d.properties.name);
+
+                features.push(f);
+              }
+            }
+          }
+        }
+        else {
+          let leaves = block_data.superCluster.getLeaves(
+            element.id,
+            1
+          );
+
+
+          if (leaves[0].geometry.coordinates[0] >= currentExtent[0] && leaves[0].geometry.coordinates[1] >= currentExtent[1] && leaves[0].geometry.coordinates[0] <= currentExtent[2] && leaves[0].geometry.coordinates[1] <= currentExtent[3]) {
+            let f = JSON.parse(JSON.stringify(leaves[0]));
+            f.properties.real_coord = element.geometry.coordinates;
+
+            f.properties.contained_features = block_data.superCluster.getLeaves(
+              element.id,
+              Infinity
+            ).map((d) => d.properties.name);
+
+            features.push(f);
+          }
         }
       } else {
         let f = element;

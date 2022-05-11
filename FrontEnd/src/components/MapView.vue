@@ -30,6 +30,24 @@
       </el-radio-group>
     </div>
 
+    <div
+      style="
+        position: absolute;
+        left: 1%;
+        bottom: 2%;
+        padding: 2px 10px;
+        color: white;
+        font-weight: 600;
+        border-radius: 2px;
+        font-size: 12px;
+        filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.4));
+        user-select: none;
+      "
+      :style="{ backgroundColor: current_mode_color }"
+    >
+      {{ current_mode }}
+    </div>
+
     <div class="select-pannel">
       <el-button
         style="position: relative; z-index: 2"
@@ -211,6 +229,26 @@ const view_choice = computed({
     }
     ChangeView();
   },
+});
+
+const current_mode = computed(() => {
+  if (data.real_zoom < 12.5) {
+    return "Region";
+  } else if (data.real_zoom > 15) {
+    return "Blocks";
+  } else {
+    return "SubRegion";
+  }
+});
+
+const current_mode_color = computed(() => {
+  if (data.real_zoom < 12.5) {
+    return "rgb(209, 96, 94)";
+  } else if (data.real_zoom > 15) {
+    return "rgb(88, 120, 163)";
+  } else {
+    return "rgb(228, 147, 68)";
+  }
 });
 
 function GetPixels() {

@@ -20,6 +20,17 @@
           >
             {{ house.block }}</el-checkbox
           >
+
+          <span
+            class="compared-price"
+            style="background-color: rgb(216, 151, 83); right: 15px"
+            >{{ house.sub_region }}</span
+          >
+          <span
+            class="compared-price"
+            style="background-color: rgb(195, 102, 98); right: 80px"
+            >{{ house.region }}</span
+          >
         </div>
       </TransitionGroup>
     </div>
@@ -88,6 +99,7 @@ function ClickCheckBox(name) {
 }
 
 .select-item {
+  position: relative;
   background-color: whitesmoke;
   border-radius: 5px;
   display: flex;
@@ -107,5 +119,16 @@ function ClickCheckBox(name) {
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+.compared-price {
+  position: absolute;
+  border-radius: 3px;
+  padding: 2px 10px 2px 10px;
+  height: 16px;
+  margin-left: 2px;
+  margin-right: 2px;
+  color: white;
+  font-weight: 600;
 }
 </style>
