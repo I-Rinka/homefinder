@@ -46,7 +46,6 @@ export const useRankStore = defineStore("rankstore", {
 
         // current_criterias {name,weight}
         async Compute3WayRange(involved_criterias, current_criterias) {
-            console.log(involved_criterias, current_criterias)
             // 
             let change = {
                 notChangeCurrent: [],
@@ -54,7 +53,6 @@ export const useRankStore = defineStore("rankstore", {
                 topStillHasSb: []
             }
             let step = 1 / 30;
-            // let c2 = 0.033;
             let end = 1;
 
             // time complexity: 30*30 * 100 * n; 90000
@@ -74,7 +72,7 @@ export const useRankStore = defineStore("rankstore", {
 
 
                 for (let c1 = step; c1 <= end - step; c1 += step) {
-                    for (let c2 = step; c2 + c1 <= end - 2 * step; c2 += step) {
+                    for (let c2 = step; c2 + c1 <= end - step; c2 += step) {
                         let c3 = 1 - (c1 + c2);
 
                         record_scores.forEach((d, i) => {
@@ -85,15 +83,16 @@ export const useRankStore = defineStore("rankstore", {
                             record_scores[i].new_score = record_scores[i].score + ic1 + ic2 + ic3;
                         })
 
-                        record_scores.sort((a, b) => a.new_score - b.new_score);
+                        let n_record_scores = record_scores.map(d => d);
+                        n_record_scores.sort((a, b) => a.new_score - b.new_score);
 
-                        if (record_scores[0].index === 0) {
+                        if (n_record_scores[0].index === 0) {
                             change.notChangeCurrent.push([c1, c2, c3]);
                         }
 
                         let flag = false;
-                        for (let i = 0; i < record_scores.length; i++) {
-                            const d = record_scores[i];
+                        for (let i = 0; i < n_record_scores.length; i++) {
+                            const d = n_record_scores[i];
                             if (i < 5) {
                                 if (d.index < 5) {
                                     flag = true;

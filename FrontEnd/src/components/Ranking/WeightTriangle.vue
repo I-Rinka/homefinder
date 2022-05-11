@@ -83,6 +83,7 @@
           class="triangle"
           :points="`0,${Root3(100)} 100,0 200,${Root3(100)} 0,${Root3(100)}`"
           vector-effect="non-scaling-stroke"
+          @dblclick="TranslateSlider"
           @mousemove="MoveSlider"
           @click="PrintData"
         />
@@ -376,19 +377,6 @@ watch(
   }
 );
 
-let solution_trigger = null;
-watch(
-  () => rank_store.current_solutions,
-  () => {
-    if (solution_trigger === null) {
-      solution_trigger = setTimeout(() => {
-        LoadHinter();
-        solution_trigger = null;
-      }, 1000);
-    }
-  }
-);
-
 function PressSlider() {
   data.slider.pressed = true;
   window.addEventListener("pointerup", ReleaseSlider);
@@ -492,90 +480,124 @@ async function ChangeWeight(v1, v2, v3) {
 
   if (weighchange_timeout == null) {
     weighchange_timeout = setTimeout(() => {
-      wp0.value = v1;
-      wp1.value = v2;
-      wp2.value = v3;
+      if (Date.now() - n_time > 10) {
+        wp0.value = v1;
+        wp1.value = v2;
+        wp2.value = v3;
+      }
 
       weighchange_timeout = null;
-    }, 200);
+    }, 300);
   }
 }
 
 let moveslider_timeout = null;
 let point = null;
 function MoveSlider(e) {
+  n_time = Date.now();
+
   if (data.slider.pressed) {
-    let XRatio =
-      triSlider.value.getBBox().width /
-      triSlider.value.getBoundingClientRect().width;
-    let YRatio =
-      triSlider.value.getBBox().height /
-      triSlider.value.getBoundingClientRect().height;
-    let x = e.offsetX * XRatio;
-    let y = e.offsetY * YRatio;
-    point = { x: x - 3, y: y + 0.5 };
+    TranslateSlider(e);
+  }
+}
 
-    if (moveslider_timeout === null) {
-      moveslider_timeout = setTimeout(() => {
-        let d1 = GetDistance(tri_point[2], tri_point[0], point);
-        let d2 = GetDistance(tri_point[1], tri_point[2], point);
-        let d3 = GetDistance(tri_point[0], tri_point[1], point);
+function TranslateSlider(e) {
+  let XRatio =
+    triSlider.value.getBBox().width /
+    triSlider.value.getBoundingClientRect().width;
+  let YRatio =
+    triSlider.value.getBBox().height /
+    triSlider.value.getBoundingClientRect().height;
+  let x = e.offsetX * XRatio;
+  let y = e.offsetY * YRatio;
+  point = { x: x - 3, y: y + 0.5 };
 
-        let overall = d1 + d2 + d3;
-        let v1 = d1 / overall;
-        let v2 = d2 / overall;
-        let v3 = d3 / overall;
+  if (moveslider_timeout === null) {
+    moveslider_timeout = setTimeout(() => {
+      let d1 = GetDistance(tri_point[2], tri_point[0], point);
+      let d2 = GetDistance(tri_point[1], tri_point[2], point);
+      let d3 = GetDistance(tri_point[0], tri_point[1], point);
 
-        ChangeWeight(v1, v2, v3);
-        // wp0.value = v1;
-        // wp1.value = v2;
-        // wp2.value = v3;
+      let overall = d1 + d2 + d3;
+      let v1 = d1 / overall;
+      let v2 = d2 / overall;
+      let v3 = d3 / overall;
 
-        // point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
-        data.slider.x = point.x;
-        data.slider.y = point.y;
+      ChangeWeight(v1, v2, v3);
+      // wp0.value = v1;
+      // wp1.value = v2;
+      // wp2.value = v3;
 
-        moveslider_timeout = null;
-      }, 10);
-    }
+      // point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
+      if (data.slider.x - point.x < 5 && data.slider.y - point.y < 5) {
+        LoadHinterTimeout();
+      }
+
+      data.slider.x = point.x;
+      data.slider.y = point.y;
+
+      moveslider_timeout = null;
+    }, 10);
+  }
+}
+
+watch(
+  () => rank_store.current_solutions,
+  () => LoadHinterTimeout()
+);
+
+let solution_trigger = null;
+let n_time = 0;
+function LoadHinterTimeout() {
+  // n_time = Date.now();
+  if (solution_trigger === null) {
+    solution_trigger = setTimeout(() => {
+      LoadHinter();
+      solution_trigger = null;
+    }, 1000);
   }
 }
 
 async function LoadHinter() {
-  rank_store
-    .Compute3WayRange(
-      data.tri.map((d) => d.name),
-      store.GetCriterias().map((d) => toRaw(d))
-    )
-    .then((res) => {
-      let current_at_top = res.notChangeCurrent.map((d) => {
-        let coord = WeightToPoint(d);
-        return [coord.x, coord.y];
-      });
-      console.log(current_at_top);
-      current_at_top = monotoneChainConvexHull(current_at_top);
-      let AtTopStr = "";
-      current_at_top.forEach((d) => (AtTopStr += ` ${d[0]},${d[1]} `));
-      data.current_not_change = AtTopStr;
+  if (Date.now() - n_time < 20) {
+    return;
+  }
+  let start_time = Date.now();
+  // console.log("start hinter calculation");
+  let res = await rank_store.Compute3WayRange(
+    data.tri.map((d) => d.name),
+    store.GetCriterias().map((d) => toRaw(d))
+  );
 
-      let current_in_top = res.currentStillInTop.map((d) => {
-        let coord = WeightToPoint(d);
-        return [coord.x, coord.y];
-      });
-      current_in_top = monotoneChainConvexHull(current_in_top);
-      let InTopStr = "";
-      current_in_top.forEach((d) => (InTopStr += ` ${d[0]},${d[1]} `));
-      data.current_in_top = InTopStr;
+  let current_at_top = res.notChangeCurrent.map((d) => {
+    let coord = WeightToPoint(d);
+    return [coord.x, coord.y];
+  });
+  console.log(current_at_top);
+  current_at_top = monotoneChainConvexHull(current_at_top);
+  let AtTopStr = "";
+  current_at_top.forEach((d) => (AtTopStr += ` ${d[0]},${d[1]} `));
+  data.current_not_change = AtTopStr;
 
-      let top_in_top = res.topStillHasSb.map((d) => {
-        let coord = WeightToPoint(d);
-        return [coord.x, coord.y];
-      });
-      top_in_top = monotoneChainConvexHull(top_in_top);
-      let TInTStr = "";
-      top_in_top.forEach((d) => (TInTStr += ` ${d[0]},${d[1]} `));
-      data.top_has_sb = TInTStr;
-    });
+  let current_in_top = res.currentStillInTop.map((d) => {
+    let coord = WeightToPoint(d);
+    return [coord.x, coord.y];
+  });
+  current_in_top = monotoneChainConvexHull(current_in_top);
+  let InTopStr = "";
+  current_in_top.forEach((d) => (InTopStr += ` ${d[0]},${d[1]} `));
+  data.current_in_top = InTopStr;
+
+  let top_in_top = res.topStillHasSb.map((d) => {
+    let coord = WeightToPoint(d);
+    return [coord.x, coord.y];
+  });
+  top_in_top = monotoneChainConvexHull(top_in_top);
+  let TInTStr = "";
+  top_in_top.forEach((d) => (TInTStr += ` ${d[0]},${d[1]} `));
+  data.top_has_sb = TInTStr;
+
+  console.log("calculation used time:", Date.now() - start_time, "ms");
 }
 
 onMounted(() => {
@@ -611,6 +633,8 @@ onMounted(() => {
   fill: #e7eae8;
   stroke: gray;
   stroke-width: 1px;
+  cursor: pointer;
+  user-select: none;
 }
 
 .hinter {
