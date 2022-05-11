@@ -101,8 +101,8 @@ export function GetFeatures(zoom, currentExtent) {
     for (let i = 0; i < geo.length; i++) {
       const element = geo[i];
       if (element.properties.cluster) {
-        
-        if (zoom > 15) {
+
+        if (zoom > 16) {
           let diff_region = {};
           let leaves = block_data.superCluster.getLeaves(
             element.id,
@@ -110,20 +110,19 @@ export function GetFeatures(zoom, currentExtent) {
           ).map((d) => d);
 
           leaves.forEach(d => {
-            let sub_region = block_data.details_map[d.properties.name];
+            let sub_region = block_data.details_map[d.properties.name].sub_region;
             if (!diff_region[sub_region]) {
               diff_region[sub_region] = [];
-              diff_region[sub_region].push(d);
             }
+            diff_region[sub_region].push(d);
           })
 
           for (const sub_region in diff_region) {
             if (Object.hasOwnProperty.call(diff_region, sub_region)) {
               const blocks = diff_region[sub_region];
 
-              let f = JSON.parse(JSON.stringify(blocks[0]));
-              if (leaves[0].geometry.coordinates[0] >= currentExtent[0] && leaves[0].geometry.coordinates[1] >= currentExtent[1] && leaves[0].geometry.coordinates[0] <= currentExtent[2] && leaves[0].geometry.coordinates[1] <= currentExtent[3]) {
-
+              if (blocks[0].geometry.coordinates[0] >= currentExtent[0] && blocks[0].geometry.coordinates[1] >= currentExtent[1] && blocks[0].geometry.coordinates[0] <= currentExtent[2] && blocks[0].geometry.coordinates[1] <= currentExtent[3]) {
+                let f = JSON.parse(JSON.stringify(blocks[0]));
                 f.properties.real_coord = element.geometry.coordinates;
 
                 f.properties.contained_features = blocks.map(d => d.properties.name);

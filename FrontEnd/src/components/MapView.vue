@@ -231,10 +231,12 @@ const view_choice = computed({
   },
 });
 
+const unfold_sub_region = 16;
+
 const current_mode = computed(() => {
   if (data.real_zoom < 12.5) {
     return "Region";
-  } else if (data.real_zoom > 15) {
+  } else if (data.real_zoom > unfold_sub_region) {
     return "Blocks";
   } else {
     return "SubRegion";
@@ -244,7 +246,7 @@ const current_mode = computed(() => {
 const current_mode_color = computed(() => {
   if (data.real_zoom < 12.5) {
     return "rgb(209, 96, 94)";
-  } else if (data.real_zoom > 15) {
+  } else if (data.real_zoom > unfold_sub_region) {
     return "rgb(88, 120, 163)";
   } else {
     return "rgb(228, 147, 68)";
