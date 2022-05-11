@@ -1,4 +1,5 @@
 <template>
+  <el-button @click="LoadHinter">Test</el-button>
   <div class="slider-block">
     <div>
       <vue-draggable-next
@@ -82,14 +83,33 @@
         </div>
       </vue-draggable-next>
 
-      <div class="slider-container">
-        <div
-          ref="SliderTrack"
-          class="slider-track"
-          @dblclick="TranslateSlider"
-        ></div>
-      </div>
-
+      <div class="slider-container"></div>
+      <div
+        ref="SliderTrack"
+        class="slider-track"
+        @dblclick="TranslateSlider"
+      ></div>
+      <div
+        class="slider-hinter"
+        :style="{
+          height: `${data.hinter.hinter_bottom.height}vh`,
+          top: `${data.hinter.hinter_bottom.top + 4.2}vh`,
+        }"
+      ></div>
+      <div
+        class="slider-hinter"
+        :style="{
+          height: `${data.hinter.hinter_middle.height}vh`,
+          top: `${data.hinter.hinter_middle.top + 4.2}vh`,
+        }"
+      ></div>
+      <div
+        class="slider-hinter"
+        :style="{
+          height: `${data.hinter.hinter_top.height}vh`,
+          top: `${data.hinter.hinter_top.top + 4.2}vh`,
+        }"
+      ></div>
       <div
         class="slider-cursor-frame"
         :style="{
@@ -119,6 +139,7 @@ import {
   watch,
 } from "@vue/runtime-core";
 import { useStore } from "../store/weight";
+import { useRankStore } from "../store/rank";
 import { VueDraggableNext } from "vue-draggable-next";
 
 import SliderCursor from "../TimeLine/SliderCursor.vue";
@@ -126,6 +147,7 @@ import SliderCursor from "../TimeLine/SliderCursor.vue";
 const emits = defineEmits(["close"]);
 
 const store = useStore();
+const rank_store = useRankStore();
 const props = defineProps({
   topCriterias: {
     type: Array,
@@ -134,7 +156,7 @@ const props = defineProps({
     type: Array,
   },
 });
-
+const height = 23.4;
 const data = reactive({
   top: store.GetCriterias(props.topCriterias),
   bottom: store.GetCriterias(props.bottomCriterias),
@@ -142,6 +164,12 @@ const data = reactive({
     // 0~23.4
     y: 11.7,
     pressed: false,
+  },
+
+  hinter: {
+    hinter_top: { top: 0, height: 0 },
+    hinter_middle: { top: 0, height: 0 },
+    hinter_bottom: { top: 0, height: 0 },
   },
 });
 
@@ -272,6 +300,31 @@ function TranslateSlider(e) {
   let y = 23.4 * percentage;
   slider_y.value = y;
 }
+
+async function LoadHinter() {
+  let start_time = Date.now();
+  let res = await rank_store.Compute2WayRange(
+    data.top.map((d) => d.name),
+    data.bottom.map((d) => d.name),
+    store.GetCriterias()
+  );
+  console.log(res);
+  data.hinter.hinter_top = {
+    top: res.notChangeCurrent.at(0) * height,
+    height: (res.notChangeCurrent.at(-1) - res.notChangeCurrent.at(0)) * height,
+  };
+  data.hinter.hinter_middle = {
+    top: res.currentStillInTop.at(0) * height,
+    height:
+      (res.currentStillInTop.at(-1) - res.currentStillInTop.at(0)) * height,
+  };
+  data.hinter.hinter_bottom = {
+    top: res.topStillHasSb.at(0) * height,
+    height: (res.topStillHasSb.at(-1) - res.topStillHasSb.at(0)) * height,
+  };
+  console.log(toRaw(data.hinter));
+  console.log("slider compute spent time:", Date.now() - start_time);
+}
 </script>
 
 <style lang="less" scoped>
@@ -387,6 +440,14 @@ function TranslateSlider(e) {
   width: 100px;
 }
 
+.slider-hinter {
+  pointer-events: none;
+  position: absolute;
+  background-color: rgb(84, 123, 192);
+  opacity: 0.5;
+  width: 100px;
+}
+
 .slider-track {
   background-color: #e7eae8;
   border: solid grey 1px;
@@ -410,8 +471,8 @@ function TranslateSlider(e) {
   cursor: grab;
 
   &:active {
-    transition-delay: 0.0s;
-    transition: 0.0s;
+    transition-delay: 0s;
+    transition: 0s;
     cursor: grabbing;
   }
 }
