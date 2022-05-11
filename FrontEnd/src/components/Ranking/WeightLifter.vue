@@ -178,6 +178,7 @@ import { useStore } from "../store/weight";
 import { reactive } from "@vue/reactivity";
 import { computed, onMounted } from "@vue/runtime-core";
 import { CirclePlus, Close } from "@element-plus/icons-vue";
+import { useRankStore } from "../store/rank";
 
 const disabled = computed(() => store.criterias.filter((d) => !d.enabled));
 const enabled = computed(() => {
@@ -186,9 +187,10 @@ const enabled = computed(() => {
   data.using_bottom = [];
   return store.criterias.filter((d) => d.enabled);
 });
+const rank_store = useRankStore();
 
 function CloseTweaker(tweaker) {
-  data.tweakers=data.tweakers.filter((d)=>d!=tweaker);
+  data.tweakers = data.tweakers.filter((d) => d != tweaker);
   // data.tweakers.splice(index, 1);
 }
 

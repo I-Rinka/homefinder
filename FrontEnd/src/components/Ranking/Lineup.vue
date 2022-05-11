@@ -168,7 +168,7 @@
             </div>
           </el-tooltip>
         </template>
-          {{ item.score.toFixed(2) }}
+        {{ item.score.toFixed(2) }}
       </div>
     </TransitionGroup>
 
@@ -186,12 +186,14 @@
 <script setup>
 import { reactive, ref } from "@vue/reactivity";
 import { useStore } from "../store/weight";
+import { useRankStore } from "../store/rank.js";
 import { computed, onMounted, watch } from "@vue/runtime-core";
 import * as d3 from "d3";
 import MapNominal from "./MapNominal.vue";
 import { Edit, TopRight, BottomRight, Filter } from "@element-plus/icons-vue";
 
 const store = useStore();
+const rank_store = useRankStore();
 const props = defineProps({
   origin_records: {
     type: Array,
@@ -492,6 +494,10 @@ const ranking_score = computed(() => {
       score: element.score,
     });
   }
+
+  // We can use this to compute rank frequency
+  rank_store.ChangeCurrentSolutions(records.map((d) => d.origin));
+
   return records;
 });
 
