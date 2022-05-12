@@ -169,6 +169,40 @@
           </el-tooltip>
         </template>
         {{ item.score.toFixed(2) }}
+        <div class="table-rank-frequency">
+          <!-- opacity: 0.5; -->
+          <div
+            style="
+              position: absolute;
+              height: 100%;
+              left: 0;
+              background-color: rgb(84, 123, 192);
+              transition: 0.5s;
+            "
+            :style="{
+              opacity: `${
+                rank_store.GetRankFrequency(item.id).in_top === 0 ? 0 : 0.5
+              }`,
+              width: `${80 * rank_store.GetRankFrequency(item.id).in_top}%`,
+            }"
+          ></div>
+          <!-- opacity: 0.75; -->
+          <div
+            style="
+              position: absolute;
+              height: 100%;
+              left: 0;
+              transition: 0.5s;
+              background-color: rgb(84, 123, 192);
+            "
+            :style="{
+              opacity: `${
+                rank_store.GetRankFrequency(item.id).in_top === 0 ? 0 : 0.75
+              }`,
+              width: `${80 * rank_store.GetRankFrequency(item.id).at_top}%`,
+            }"
+          ></div>
+        </div>
       </div>
     </TransitionGroup>
 
@@ -491,6 +525,7 @@ const ranking_score = computed(() => {
     records.push({
       index: element.index,
       origin: props.origin_records[element.index],
+      id: props.origin_records[element.index]._id,
       score: element.score,
     });
   }
@@ -575,6 +610,7 @@ function MapQuantitativeData(attr) {
   overflow: scroll;
 }
 .table-content {
+  position: relative;
   transition-delay: 0.2s;
   transition: 0.5s;
   text-align: left;
@@ -623,6 +659,16 @@ function MapQuantitativeData(attr) {
   background-color: var(--strip-color);
   width: var(--strip-width);
 }
+.table-rank-frequency {
+  position: absolute;
+  height: 100%;
+  width: 30%;
+  overflow: hidden;
+  top: 0;
+  right: 0;
+  // background-color: rgba(84, 124, 192, 0.5);
+  // background-color: grey;
+}
 .weight-strip {
   display: flex;
   // display: inline-flex;
@@ -667,7 +713,7 @@ function MapQuantitativeData(attr) {
 .list-complete-enter, .list-complete-leave-to
 /* .list-complete-leave-active below version 2.1.8 */ {
   opacity: 0;
-  transform: translateY(30px) scale(0,0);
+  transform: translateY(30px) scale(0, 0);
   bottom: 0;
 }
 

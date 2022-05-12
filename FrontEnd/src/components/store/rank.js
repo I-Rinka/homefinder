@@ -27,19 +27,45 @@ export const useRankStore = defineStore("rankstore", {
         return {
             current_solutions: [],
             current_solutions_scale: [],
+            rank_frenquency_map: {},
+            sample_overall: 0
         };
     },
     actions: {
+        GetRankFrequency(record_id) {
+            if (this.rank_frenquency_map[record_id] == undefined) {
+                return {
+                    at_top: 0,
+                    in_top: 0,
+                }
+            }
+            else {
+                let ans = this.rank_frenquency_map[record_id];
+                return {
+                    at_top: ans.at_top / this.sample_overall,
+                    in_top: ans.in_top / this.sample_overall
+                }
+            }
+        },
         ChangeCurrentSolutions(top_solutions) {
             this.current_solutions = top_solutions;
+            this.sample_overall = 0;
+            this.rank_frenquency_map={};
         },
         ChangeCurrentScale(current_scale) {
             this.current_solutions_scale = current_scale;
+            this.sample_overall = 0;
+            this.rank_frenquency_map={};
         },
-        async ComputeGlobalRankFrequency(involved_criterias) {
-            // 5 times find min
-
-            // 
+        ComputeGlobalRankFrequency(origin_record_id, add_at_top, add_in_top) {
+            if (!this.rank_frenquency_map[origin_record_id]) {
+                this.rank_frenquency_map[origin_record_id] = {
+                    at_top: 0,
+                    in_top: 0
+                }
+            }
+            this.rank_frenquency_map[origin_record_id].at_top += add_at_top;
+            this.rank_frenquency_map[origin_record_id].in_top += add_in_top;
         },
         // current_criterias {name,weight}
         async Compute2WayRange(involved_criterias_top, involved_criterias_bottom, current_criterias) {
@@ -67,6 +93,8 @@ export const useRankStore = defineStore("rankstore", {
                 let record_scores = [];
                 if (this.current_solutions.length > 1) {
 
+                    this.sample_overall++;
+
                     this.current_solutions.forEach((d, i) => {
                         let score = 0;
                         let top = 0;
@@ -92,6 +120,7 @@ export const useRankStore = defineStore("rankstore", {
                     }
 
                     let flag = false;
+
                     for (let i = 0; i < n_record_scores.length; i++) {
                         const d = n_record_scores[i];
                         if (i < 5) {
@@ -100,8 +129,14 @@ export const useRankStore = defineStore("rankstore", {
                             }
                             if (d.index === 0) {
                                 change.currentStillInTop.push(c_b);
-                                break;
                             }
+                            if (i === 0) {
+                                this.ComputeGlobalRankFrequency(this.current_solutions[d.index]._id, 1, 1);
+                            }
+                            else {
+                                this.ComputeGlobalRankFrequency(this.current_solutions[d.index]._id, 0, 1);
+                            }
+
                         }
                         else {
                             break;
@@ -132,6 +167,7 @@ export const useRankStore = defineStore("rankstore", {
             change.topStillHasSb.forEach(d => max = d > max ? d : max);
             change.topStillHasSb = [min, max];
 
+            console.log("local rank frequency:", this.rank_frenquency_map)
             return change;
         },
 
@@ -164,6 +200,8 @@ export const useRankStore = defineStore("rankstore", {
 
                 for (let c1 = step; c1 <= end - step; c1 += step) {
                     for (let c2 = step; c2 + c1 <= end - step; c2 += step) {
+                        this.sample_overall++;
+
                         let c3 = 1 - (c1 + c2);
 
                         record_scores.forEach((d, i) => {
@@ -190,7 +228,13 @@ export const useRankStore = defineStore("rankstore", {
                                 }
                                 if (d.index === 0) {
                                     change.currentStillInTop.push([c1, c2, c3]);
-                                    break;
+                                }
+
+                                if (i === 0) {
+                                    this.ComputeGlobalRankFrequency(this.current_solutions[d.index]._id, 1, 1);
+                                }
+                                else {
+                                    this.ComputeGlobalRankFrequency(this.current_solutions[d.index]._id, 0, 1);
                                 }
                             }
                             else {
@@ -206,6 +250,7 @@ export const useRankStore = defineStore("rankstore", {
 
             }
 
+            console.log("local rank frequency:", this.rank_frenquency_map)
             return change;
         }
     },
