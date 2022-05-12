@@ -98,27 +98,15 @@
                 ></Filter>
               </template>
 
-              <!-- quantitative -->
-              <!-- <el-slider
-                v-if="!nominal_attr_name.includes(d.name)"
-                range
-                v-model="data.quantitative_filter[d.name]"
-                :min="
-                  data.quantitative_attr_range[d.name] == null
-                    ? 0
-                    : data.quantitative_attr_range[d.name].min
+              <div
+                style="
+                  font-size: 10px;
+                  margin-left: 20%;
+                  margin-bottom: 5%;
+                  margin-top: -13.5%;
                 "
-                :max="
-                  data.quantitative_attr_range[d.name] == null
-                    ? 0
-                    : data.quantitative_attr_range[d.name].max
-                "
-                @change="HandleQuanFilterChange(d.name)"
               >
-              </el-slider> -->
-
-              <div style="font-size: 10px; margin-left: 20%; margin-bottom: 5%;margin-top: -13.5%;">
-               {{ ScaleAndStep(d.name)[0] }} / unit
+                {{ ScaleAndStep(d.name)[0] }} / unit
               </div>
               <div
                 style="
@@ -181,13 +169,35 @@
         :key="item.index"
       >
         <div class="table-content-block">
-          <span> {{ item.origin.block }} </span>
+          <div class="table-content-block-text">{{ item.origin.block }}</div>
+          <div
+            class="function-button"
+            @click="AddToFavorite(item.origin.block)"
+          >
+            <el-icon v-if="house_store.favoriteHouse[item.origin.block]"
+              ><star-filled
+                color="#dd9449"
+                style="transform: scale(1.2, 1.2)"
+              />
+            </el-icon>
+            <el-icon v-else>
+              <star />
+            </el-icon>
+          </div>
+          <div
+            class="function-button"
+            @click="AddToBlackList(item.origin.block)"
+          >
+            <el-icon><hide /></el-icon>
+          </div>
         </div>
 
         <div class="table-content-weights">
           <template v-for="d in enabled_strip" :key="d.name">
             <el-tooltip
-              :content="item.origin[d.name].toString()+' '+ScaleAndStep(d.name)[0]"
+              :content="
+                item.origin[d.name].toString() + ' ' + ScaleAndStep(d.name)[0]
+              "
               :hide-after="0"
               placement="top"
               popper-class="popper"
@@ -268,16 +278,26 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "@vue/reactivity";
+import { reactive, ref, toRaw } from "@vue/reactivity";
 import { useStore } from "../store/weight";
 import { useRankStore } from "../store/rank.js";
+import { useHouseStore } from "../store/selectedHouse";
 import { computed, onMounted, watch } from "@vue/runtime-core";
 import * as d3 from "d3";
 import MapNominal from "./MapNominal.vue";
-import { Edit, TopRight, BottomRight, Filter } from "@element-plus/icons-vue";
+import {
+  Edit,
+  TopRight,
+  BottomRight,
+  Filter,
+  Star,
+  StarFilled,
+  Hide,
+} from "@element-plus/icons-vue";
 
 const store = useStore();
 const rank_store = useRankStore();
+const house_store = useHouseStore();
 const props = defineProps({
   origin_records: {
     type: Array,
@@ -655,6 +675,18 @@ function MapQuantitativeData(attr) {
   HandleScale(attr);
   CalculateScaledRecords(attr);
 }
+
+function AddToFavorite(name) {
+  if (house_store.IsFavoriteHouse(name)) {
+    house_store.RemoveFavoriteHouse(name);
+  } else {
+    house_store.AddFavoriteHouse(name);
+  }
+}
+
+function AddToBlackList(name) {
+  house_store.AddToBlackList(name);
+}
 </script>
 
 <style lang="less" scoped>
@@ -706,12 +738,16 @@ function MapQuantitativeData(attr) {
 }
 .table-content-block {
   width: 20%;
-  height: 100%;
+  position: relative;
+  top: 0.5px;
+  // height: 100%;
   border-right: solid 2px #eaeaea;
-  overflow: hidden;
+  overflow-x: scroll;
+  // overflow-y: hidden;
   white-space: nowrap;
   // padding-top: 5px;
   padding-left: 5px;
+
   display: inline-block;
 }
 
@@ -826,9 +862,33 @@ function MapQuantitativeData(attr) {
   transform: translateY(40vh);
 }
 
+.function-button {
+  // width: 5px;
+  margin: 4px 0px 0px 0px;
+  padding: 4px 7px 2px 7px;
+  // height: 30px;
+  // width: 30px;
+  transition: 0.5s;
+  border-radius: 3px;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  &:hover {
+    background-color: whitesmoke;
+  }
+  display: inline-block;
+}
+
+.table-content-block-text {
+  margin-left: 5px;
+  margin-right: 5px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 /* ensure leaving items are taken out of layout flow so that moving
    animations can be calculated correctly. */
-.list-leave-active {
-  // position: absolute;
-}
+// .list-leave-active {
+//   // position: absolute;
+// }
 </style>

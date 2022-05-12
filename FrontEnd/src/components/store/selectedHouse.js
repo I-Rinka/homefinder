@@ -18,14 +18,24 @@ export const useHouseStore = defineStore("selectedHouse", {
   state: () => {
     return {
       selectedHouse: {},
-      bannedHouse: { '王府井大街': {}, '天创科技大厦': {}, '绿城百合公寓霁雪苑': {}, '凤凰城三期': {},'珠江峰景':{} }
+      favoriteHouse: {},
+      bannedHouse: {
+        王府井大街: {},
+        天创科技大厦: {},
+        绿城百合公寓霁雪苑: {},
+        凤凰城三期: {},
+        珠江峰景: {},
+      },
     };
   },
   getters: {
     selectedHouseArrary() {
       let arr = [];
       for (const key in this.selectedHouse) {
-        if (Object.hasOwnProperty.call(this.selectedHouse, key) && !Object.hasOwnProperty.call(this.bannedHouse, key)) {
+        if (
+          Object.hasOwnProperty.call(this.selectedHouse, key) &&
+          !Object.hasOwnProperty.call(this.bannedHouse, key)
+        ) {
           const element = this.selectedHouse[key];
           arr.push(element);
         }
@@ -35,17 +45,29 @@ export const useHouseStore = defineStore("selectedHouse", {
     bannedHouseArray() {
       let arr = [];
       for (const key in this.bannedHouse) {
-        if (Object.hasOwnProperty.call(this.bannedHouse, key) && Object.hasOwnProperty.call(block_data_map, key)) {
+        if (
+          Object.hasOwnProperty.call(this.bannedHouse, key) &&
+          Object.hasOwnProperty.call(block_data_map, key)
+        ) {
           const element = block_data_map[key];
           arr.push(element);
         }
       }
       return arr;
-    }
+    },
   },
   actions: {
     IsSelectedHouse: function (name) {
-      if (this.selectedHouse.hasOwnProperty(name) && !this.bannedHouse.hasOwnProperty(name)) {
+      if (
+        this.selectedHouse.hasOwnProperty(name) &&
+        !this.bannedHouse.hasOwnProperty(name)
+      ) {
+        return true;
+      }
+      return false;
+    },
+    IsFavoriteHouse: function (name) {
+      if (this.favoriteHouse[name]) {
         return true;
       }
       return false;
@@ -81,11 +103,22 @@ export const useHouseStore = defineStore("selectedHouse", {
       await this.ConstructBlockDataMap();
       this.selectedHouse[house_name] = block_data_map[house_name];
     },
+    AddFavoriteHouse: async function (house_name) {
+      await this.ConstructBlockDataMap();
+      this.favoriteHouse[house_name] = block_data_map[house_name];
+    },
+    AddToBlackList: async function (house_name) {
+      await this.ConstructBlockDataMap();
+      this.bannedHouse[house_name] = block_data_map[house_name];
+    },
     RemoveHouse: async function (house_name) {
       delete this.selectedHouse[house_name];
     },
+    RemoveFavoriteHouse: async function (house_name) {
+      delete this.favoriteHouse[house_name];
+    },
     AddAnimation: function (start_ref) {
-      let rect = start_ref.getBoundingClientRect()
+      let rect = start_ref.getBoundingClientRect();
 
       let previous = document.getElementsByClassName("add-animation");
 
@@ -102,10 +135,10 @@ export const useHouseStore = defineStore("selectedHouse", {
       let x0 = `${rect.x + rect.width / 2}px`;
       let x1 = `${x * 0.95}px`;
       let y0 = `${rect.y + rect.height / 2}px`;
-      let y1 = '2.5vh';
+      let y1 = "2.5vh";
 
-      newDiv.style = `--x-start: ${x0}; --y-start: ${y0}; --x-end: ${x1}; --y-end:${y1}`
-      newDiv.classList.add('add-animation')
-    }
+      newDiv.style = `--x-start: ${x0}; --y-start: ${y0}; --x-end: ${x1}; --y-end:${y1}`;
+      newDiv.classList.add("add-animation");
+    },
   },
 });

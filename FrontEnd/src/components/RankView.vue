@@ -28,9 +28,7 @@ const houseStore = useHouseStore();
 
 const newest_records = computed(() => {
   if (houseStore.selectedHouseArrary.length <= 0) {
-    return data.newest_records.filter(
-      (d) => !houseStore.bannedHouse.hasOwnProperty(d.block)
-    );
+    return data.newest_records.filter((d) => !houseStore.bannedHouse[d.block]);
   } else {
     return data.newest_records.filter((d) =>
       houseStore.IsSelectedHouse(d.block)
