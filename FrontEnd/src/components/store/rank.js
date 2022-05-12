@@ -37,7 +37,9 @@ export const useRankStore = defineStore("rankstore", {
             this.current_solutions_scale = current_scale;
         },
         async ComputeGlobalRankFrequency(involved_criterias) {
+            // 5 times find min
 
+            // 
         },
         // current_criterias {name,weight}
         async Compute2WayRange(involved_criterias_top, involved_criterias_bottom, current_criterias) {
@@ -52,8 +54,8 @@ export const useRankStore = defineStore("rankstore", {
             let top_criterias = current_criterias.filter(d => involved_criterias_top.includes(d.name));
             let bottom_criterias = current_criterias.filter(d => involved_criterias_bottom.includes(d.name));
 
-            let step = 0.01;
-            let end = 0.99;
+            let step = 1 / 30;
+            let end = 1;
 
             let top_overall = 0;
             let bottom_overall = 0;

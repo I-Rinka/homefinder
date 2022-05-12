@@ -28,10 +28,12 @@ const houseStore = useHouseStore();
 
 const newest_records = computed(() => {
   if (houseStore.selectedHouseArrary.length <= 0) {
-    return data.newest_records;
+    return data.newest_records.filter(
+      (d) => !houseStore.bannedHouse.hasOwnProperty(d.block)
+    );
   } else {
     return data.newest_records.filter((d) =>
-      houseStore.selectedHouse.hasOwnProperty(d.block)
+      houseStore.IsSelectedHouse(d.block)
     );
   }
 });

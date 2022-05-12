@@ -51,8 +51,9 @@ export function selectHouse(req, res) {
     if (mode === "fromRegion") {
       let region = req.query.region;
       MongoClient.connect(url, (err, db) => {
-        if (err || region === undefined) {
+        if (err || region === undefined || !db) {
           res.status(404);
+          return;
         }
         let dbo = db.db("homefinder");
         try {

@@ -18,21 +18,38 @@ export const useHouseStore = defineStore("selectedHouse", {
   state: () => {
     return {
       selectedHouse: {},
+      bannedHouse: { '王府井大街': {}, '天创科技大厦': {}, '绿城百合公寓霁雪苑': {}, '凤凰城三期': {} }
     };
   },
   getters: {
     selectedHouseArrary() {
       let arr = [];
       for (const key in this.selectedHouse) {
-        if (Object.hasOwnProperty.call(this.selectedHouse, key)) {
+        if (Object.hasOwnProperty.call(this.selectedHouse, key) && !Object.hasOwnProperty.call(this.bannedHouse, key)) {
           const element = this.selectedHouse[key];
           arr.push(element);
         }
       }
       return arr;
     },
+    bannedHouseArray() {
+      let arr = [];
+      for (const key in this.bannedHouse) {
+        if (Object.hasOwnProperty.call(this.bannedHouse, key) && Object.hasOwnProperty.call(block_data_map, key)) {
+          const element = block_data_map[key];
+          arr.push(element);
+        }
+      }
+      return arr;
+    }
   },
   actions: {
+    IsSelectedHouse: function (name) {
+      if (this.selectedHouse.hasOwnProperty(name) && !this.bannedHouse.hasOwnProperty(name)) {
+        return true;
+      }
+      return false;
+    },
     AddHouseByRegionName: async function (region_name) {
       try {
         let res = await SelectHouseByRegion(region_name);

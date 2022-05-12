@@ -93,21 +93,21 @@
           class="slider-hinter"
           :style="{
             height: `${data.hinter.hinter_bottom.height}vh`,
-            top: `${data.hinter.hinter_bottom.top + 0.8}vh`,
+            top: `${data.hinter.hinter_bottom.top + 1.2}vh`,
           }"
         ></div>
         <div
           class="slider-hinter"
           :style="{
             height: `${data.hinter.hinter_middle.height}vh`,
-            top: `${data.hinter.hinter_middle.top + 0.8}vh`,
+            top: `${data.hinter.hinter_middle.top + 1.2}vh`,
           }"
         ></div>
         <div
           class="slider-hinter"
           :style="{
             height: `${data.hinter.hinter_top.height}vh`,
-            top: `${data.hinter.hinter_top.top + 0.8}vh`,
+            top: `${data.hinter.hinter_top.top + 1.2}vh`,
           }"
         ></div>
       </div>
@@ -466,7 +466,7 @@ async function LoadHinter() {
   position: absolute;
   background-color: rgb(84, 123, 192);
   opacity: 0.5;
-  left: 23.3px;
+  left: 23.5%;
   width: 50%;
 }
 
