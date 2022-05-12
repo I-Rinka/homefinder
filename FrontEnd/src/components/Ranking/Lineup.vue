@@ -200,12 +200,12 @@
                   '--strip-width': `${
                     (d.weight / strip_percentage_sum) *
                       data.scaled_records[item.index][d.name] *
-                      150 <
+                      100 <
                     5
                       ? 5
                       : (d.weight / strip_percentage_sum) *
                         data.scaled_records[item.index][d.name] *
-                        150
+                        100
                   }%`,
                 }"
               >
