@@ -78,7 +78,7 @@
           <div style="padding-left: 5px; padding-top: 7px; cursor: pointer">
             <el-popover
               placement="top"
-              :width="220"
+              :width="180"
               trigger="hover"
               title="filter"
               effect="customized"
@@ -101,9 +101,9 @@
               <div
                 style="
                   font-size: 10px;
-                  margin-left: 20%;
-                  margin-bottom: 5%;
-                  margin-top: -13.5%;
+                  margin-left: 40px;
+                  margin-bottom: 10px;
+                  margin-top: -27px;
                 "
               >
                 {{ ScaleAndStep(d.name)[0] }} / unit
@@ -116,6 +116,7 @@
                 "
               >
                 <el-input-number
+                  class="number-input"
                   v-if="
                     !nominal_attr_name.includes(d.name) &&
                     data.quantitative_filter[d.name]
@@ -124,12 +125,13 @@
                   :min="data.quantitative_attr_range[d.name].min"
                   :max="data.quantitative_filter[d.name][1]"
                   size="small"
-                  controls-position="left"
+                  controls-position="right"
                   @change="HandleQuanFilterChange(d.name)"
                   :step="ScaleAndStep(d.name)[1]"
                 />
                 <span style="margin: 2px 5px 2px 5px">~</span>
                 <el-input-number
+                  class="number-input"
                   v-if="
                     !nominal_attr_name.includes(d.name) &&
                     data.quantitative_filter[d.name]
@@ -140,7 +142,7 @@
                   @change="HandleQuanFilterChange(d.name)"
                   :step="ScaleAndStep(d.name)[1]"
                   size="small"
-                  controls-position="left"
+                  controls-position="right"
                 />
               </div>
 

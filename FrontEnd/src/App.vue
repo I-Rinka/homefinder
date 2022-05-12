@@ -37,8 +37,7 @@ function ChangeCurrentTime(t) {
 
 function ChangeSelection(t) {
   data.selection_time = t;
-  console.log("change")
-
+  console.log("change");
 }
 
 function ChangeSubtractor(t) {
@@ -61,8 +60,8 @@ function ChangeSubtracorMode(b) {
 
 function ChangeSelectMode(b) {
   // data.price_view = !b;
-  emitter.emit('change-view',b);
-  console.log("change")
+  emitter.emit("change-view", b);
+  console.log("change");
   if (!b) {
     data.selection_time = [
       { year: 0, month: 0 },
@@ -152,5 +151,10 @@ body {
 
 .el-dialog {
   border-radius: 5px !important;
+}
+
+.el-input__inner {
+  padding-right: 20px !important;
+  padding-left: 0px !important;
 }
 </style>
