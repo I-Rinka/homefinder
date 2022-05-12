@@ -534,9 +534,9 @@ function CaculateTimeOffset(year, month, offset) {
 
 function ProcessUnitPrice(unit_price) {
   if (props.open_corona == true && props.markArray.length > 0) {
-    return (unit_price / 10000).toFixed(2) + "w";
+    return (unit_price / 10000).toFixed(2) + " 万";
   }
-  return (unit_price / 10000).toFixed(3) + "w";
+  return (unit_price / 10000).toFixed(3) + " 万";
 }
 
 let interlop_function = d3.interpolateRgbBasis([

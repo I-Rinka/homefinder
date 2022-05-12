@@ -117,31 +117,40 @@
               >
               </el-slider> -->
 
-              <div style="width: 100% ;display: flex; justify-content: space-around;">
+              <div style="font-size: 10px; margin-left: 20%; margin-bottom: 5%;margin-top: -13.5%;">
+               {{ ScaleAndStep(d.name)[0] }} / unit
+              </div>
+              <div
+                style="
+                  width: 100%;
+                  display: flex;
+                  justify-content: space-around;
+                "
+              >
                 <el-input-number
-                  v-if="!nominal_attr_name.includes(d.name)"
-                  v-model="data.quantitative_filter[d.name][0]"
-                  :min="
-                    data.quantitative_attr_range[d.name] == null
-                      ? 0
-                      : data.quantitative_attr_range[d.name].min
+                  v-if="
+                    !nominal_attr_name.includes(d.name) &&
+                    data.quantitative_filter[d.name]
                   "
+                  v-model="data.quantitative_filter[d.name][0]"
+                  :min="data.quantitative_attr_range[d.name].min"
                   :max="data.quantitative_filter[d.name][1]"
                   size="small"
                   controls-position="right"
                   @change="HandleQuanFilterChange(d.name)"
+                  :step="ScaleAndStep(d.name)[1]"
                 />
-                <span style="margin:2px 5px 2px 5px">~</span>
+                <span style="margin: 2px 5px 2px 5px">~</span>
                 <el-input-number
-                  v-if="!nominal_attr_name.includes(d.name)"
+                  v-if="
+                    !nominal_attr_name.includes(d.name) &&
+                    data.quantitative_filter[d.name]
+                  "
                   v-model="data.quantitative_filter[d.name][1]"
                   :min="data.quantitative_filter[d.name][0]"
-                  :max="
-                    data.quantitative_attr_range[d.name] == null
-                      ? 0
-                      : data.quantitative_attr_range[d.name].max
-                  "
+                  :max="data.quantitative_attr_range[d.name].max"
                   @change="HandleQuanFilterChange(d.name)"
+                  :step="ScaleAndStep(d.name)[1]"
                   size="small"
                   controls-position="right"
                 />
@@ -178,7 +187,7 @@
         <div class="table-content-weights">
           <template v-for="d in enabled_strip" :key="d.name">
             <el-tooltip
-              :content="item.origin[d.name].toString()"
+              :content="item.origin[d.name].toString()+' '+ScaleAndStep(d.name)[0]"
               :hide-after="0"
               placement="top"
               popper-class="popper"
@@ -298,6 +307,20 @@ const data = reactive({
     type: [],
   },
 });
+
+function ScaleAndStep(name) {
+  switch (name) {
+    case "deal_price":
+      return ["万rmb", 10];
+    case "unit_price":
+      return ["rmb", 1000];
+    case "area":
+      return ["m²", 5];
+
+    default:
+      return ["", 1];
+  }
+}
 
 const nominal_attr_name = ["direction", "decoration", "position", "type"];
 const quantitative_attr_name = [

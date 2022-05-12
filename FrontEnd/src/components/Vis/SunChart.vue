@@ -82,12 +82,13 @@ let price_r = computed(() => {
   }
 });
 
+// font size
 let price_text_size = computed(() => {
   if (
     props.marks.length == 0 ||
     (props.open_corona != undefined && props.open_corona === false)
   ) {
-    return 13;
+    return 12;
   } else if (props.marks.length) {
     return 3;
   }
