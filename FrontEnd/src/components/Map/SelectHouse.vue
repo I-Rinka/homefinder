@@ -1,73 +1,64 @@
 <template>
   <div class="select-pannel">
+    <div class="select-pannel-switch">
+      <el-radio-group v-model="data.current_view" size="small">
+        <el-radio-button label="select" border
+          ><el-icon><Select /></el-icon
+        ></el-radio-button>
+        <el-radio-button label="favorite" border
+          ><el-icon><StarFilled /></el-icon
+        ></el-radio-button>
+        <el-radio-button label="hidden" border
+          ><el-icon><Hide /></el-icon
+        ></el-radio-button>
+      </el-radio-group>
+    </div>
     <div class="select-table">
-      <div
-        class="void-selection"
-        v-if="house_store.selectedHouseArrary.length === 0"
-      >
-        No Selected House
-      </div>
-      <TransitionGroup tag="div" name="list-complete">
-        <div
-          class="select-item"
-          v-for="house in house_store.selectedHouseArrary"
-          :key="house.block"
-          @dblclick="GotoBlock(house.block)"
-        >
-          <el-checkbox
-            :checked="true"
-            @change="ClickCheckBox(house.block)"
-            size="small"
-          >
-            {{ house.block }}</el-checkbox
-          >
-
-          <span
-            class="compared-price"
-            style="background-color: rgb(216, 151, 83); right: 15px"
-            >{{ house.sub_region }}</span
-          >
-          <span
-            class="compared-price"
-            style="background-color: rgb(195, 102, 98); right: 80px"
-            >{{ house.region }}</span
-          >
-        </div>
-      </TransitionGroup>
+      <select-house-list
+        v-if="data.current_view === 'select'"
+        :houses="house_store.selectedHouseArrary"
+        @delete="(name)=>{house_store.RemoveHouse(name)}"
+      ></select-house-list>
+      <select-house-list
+        v-else-if="data.current_view === 'favorite'"
+        :houses="house_store.favoriteHouseArray"
+        @delete="(name)=>{house_store.RemoveFavoriteHouse(name)}"
+      ></select-house-list>
+      <select-house-list
+        v-else-if="data.current_view === 'hidden'"
+        :houses="house_store.bannedHouseArray"
+        @delete="(name)=>{house_store.RemoveBannedHouse(name)}"
+      ></select-house-list>
     </div>
   </div>
 </template>
 
 <script setup>
 import { useHouseStore } from "../store/selectedHouse";
-import { emitter } from "../store/bus";
+import { reactive } from "@vue/reactivity";
+import SelectHouseList from "./SelectHouseList.vue";
+import {
+  Select,
+  StarFilled,
+  Hide,
+  CircleCloseFilled,
+} from "@element-plus/icons-vue";
+import { computed } from "@vue/runtime-core";
+
+const data = reactive({
+  current_view: "select",
+});
 
 const house_store = useHouseStore();
+
+house_store.ConstructBlockDataMap();
 
 function ClickCheckBox(name) {
   house_store.RemoveHouse(name);
 }
-
-function GotoBlock(name) {
-  emitter.emit("goto-block",name);
-}
 </script>
 
 <style lang="less" scoped>
-.list-complete-enter-from, .list-complete-leave-to
-/* .list-complete-leave-active below version 2.1.8 */ {
-  transform: translateY(45vh);
-  opacity: 0;
-}
-
-.list-complete-leave-from {
-  transform: translateY(0vh);
-}
-
-.list-complete-leave-active {
-  position: absolute;
-}
-
 .select-pannel {
   width: 30vw;
   background-color: white;
@@ -78,18 +69,15 @@ function GotoBlock(name) {
 
 .select-table {
   position: relative;
-  margin: 30px 5px 25px 5px;
+  margin: 38px 5px 25px 5px;
   height: 95%;
   overflow: scroll;
+}
 
-  .void-selection {
-    font-size: 20px;
-    font-weight: bold;
-    color: grey;
-    position: relative;
-    top: 40%;
-    animation: voidTextEnter 1s;
-  }
+.select-pannel-switch {
+  position: absolute;
+  left: 15px;
+  top: 7px;
 }
 
 @keyframes voidTextEnter {
@@ -104,19 +92,6 @@ function GotoBlock(name) {
   }
 }
 
-.select-item {
-  position: relative;
-  background-color: whitesmoke;
-  border-radius: 5px;
-  display: flex;
-  margin: 5px 5px 12px 12px;
-  padding: 7px;
-  font-size: 12px;
-  transition: 0.5s;
-  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
-  cursor: pointer;
-}
-
 @keyframes enter {
   from {
     transform: translateX(20px);
@@ -126,16 +101,5 @@ function GotoBlock(name) {
     opacity: 1;
     transform: translateX(0);
   }
-}
-
-.compared-price {
-  position: absolute;
-  border-radius: 3px;
-  padding: 2px 10px 2px 10px;
-  height: 16px;
-  margin-left: 2px;
-  margin-right: 2px;
-  color: white;
-  font-weight: 600;
 }
 </style>

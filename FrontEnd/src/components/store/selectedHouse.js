@@ -6,6 +6,7 @@ import {
   GetBlocksAvgPriceAllTime,
   GetRegionPrice,
   SelectHouseByRegion,
+  GetBlocks
 } from "../../database/query";
 
 // useStore could be anything like useUser, useCart
@@ -46,8 +47,22 @@ export const useHouseStore = defineStore("selectedHouse", {
       let arr = [];
       for (const key in this.bannedHouse) {
         if (
-          Object.hasOwnProperty.call(this.bannedHouse, key) &&
-          Object.hasOwnProperty.call(block_data_map, key)
+          this.bannedHouse[key] &&
+          block_data_map != null &&
+          block_data_map[key]
+        ) {
+          arr.push(block_data_map[key]);
+        }
+      }
+      return arr;
+    },
+    favoriteHouseArray() {
+      let arr = [];
+      for (const key in this.favoriteHouse) {
+        if (
+          this.favoriteHouse[key] &&
+          block_data_map != null &&
+          block_data_map[key]
         ) {
           const element = block_data_map[key];
           arr.push(element);
@@ -116,6 +131,9 @@ export const useHouseStore = defineStore("selectedHouse", {
     },
     RemoveFavoriteHouse: async function (house_name) {
       delete this.favoriteHouse[house_name];
+    },
+    RemoveBannedHouse: async function (house_name) {
+      delete this.bannedHouse[house_name];
     },
     AddAnimation: function (start_ref) {
       let rect = start_ref.getBoundingClientRect();

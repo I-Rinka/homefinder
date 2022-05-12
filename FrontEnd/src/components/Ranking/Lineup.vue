@@ -78,7 +78,7 @@
           <div style="padding-left: 5px; padding-top: 7px; cursor: pointer">
             <el-popover
               placement="top"
-              :width="200"
+              :width="220"
               trigger="hover"
               title="filter"
               effect="customized"
@@ -124,7 +124,7 @@
                   :min="data.quantitative_attr_range[d.name].min"
                   :max="data.quantitative_filter[d.name][1]"
                   size="small"
-                  controls-position="right"
+                  controls-position="left"
                   @change="HandleQuanFilterChange(d.name)"
                   :step="ScaleAndStep(d.name)[1]"
                 />
@@ -140,7 +140,7 @@
                   @change="HandleQuanFilterChange(d.name)"
                   :step="ScaleAndStep(d.name)[1]"
                   size="small"
-                  controls-position="right"
+                  controls-position="left"
                 />
               </div>
 
