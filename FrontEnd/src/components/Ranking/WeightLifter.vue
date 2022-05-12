@@ -242,6 +242,12 @@ const data = reactive({
   ],
 });
 
+watch(
+  () => data.tweakers,
+  (n_v) => (rank_store.current_tweakers = n_v.length)
+);
+
+
 function Root3(number) {
   return Math.sqrt(3) * number;
 }

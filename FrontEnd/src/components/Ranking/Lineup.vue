@@ -135,7 +135,7 @@
       </div>
     </div>
 
-    <TransitionGroup tag="div" name="list-complete" class="table">
+    <TransitionGroup tag="div" name="list" class="table">
       <div
         class="table-content"
         v-for="item in ranking_score"
@@ -169,15 +169,16 @@
           </el-tooltip>
         </template>
         {{ item.score.toFixed(2) }}
+
+        <!-- rank frequency -->
         <div class="table-rank-frequency">
-          <!-- opacity: 0.5; -->
           <div
             style="
               position: absolute;
               height: 100%;
               left: 0;
-              background-color: rgb(84, 123, 192);
               transition: 0.5s;
+              background-color: rgb(84, 123, 192);
             "
             :style="{
               opacity: `${
@@ -186,7 +187,6 @@
               width: `${80 * rank_store.GetRankFrequency(item.id).in_top}%`,
             }"
           ></div>
-          <!-- opacity: 0.75; -->
           <div
             style="
               position: absolute;
@@ -608,6 +608,7 @@ function MapQuantitativeData(attr) {
   height: 98%;
   width: 100%;
   overflow: scroll;
+  // filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
 }
 .table-content {
   position: relative;
@@ -710,29 +711,29 @@ function MapQuantitativeData(attr) {
   }
 }
 
-.list-complete-enter, .list-complete-leave-to
-/* .list-complete-leave-active below version 2.1.8 */ {
-  opacity: 0;
-  transform: translateY(30px) scale(0, 0);
-  bottom: 0;
-}
-
-.list-complete-leave-from
-/* .list-complete-leave-active below version 2.1.8 */ {
-  opacity: 0;
-  // transform: translateY(30px) scale(0,0);
-  bottom: 0;
-}
-
-.list-complete-leave-active {
-  position: absolute;
-}
-
 @keyframes enter {
   from {
     transform: scale(0, 0);
   }
   to {
   }
+}
+
+.list-move, /* apply transition to moving elements */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  // opacity: 0;
+  transform: translateY(40vh);
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.list-leave-active {
+  // position: absolute;
 }
 </style>
