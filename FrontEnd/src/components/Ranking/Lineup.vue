@@ -167,6 +167,7 @@
         class="table-content"
         v-for="item in ranking_score"
         :key="item.index"
+        @dblclick="GotoBlock(item.origin.block)"
       >
         <div class="table-content-block">
           <div class="table-content-block-text">{{ item.origin.block }}</div>
@@ -280,8 +281,9 @@
 <script setup>
 import { reactive, ref, toRaw } from "@vue/reactivity";
 import { useStore } from "../store/weight";
-import { useRankStore } from "../store/rank.js";
+import { useRankStore } from "../store/rank";
 import { useHouseStore } from "../store/selectedHouse";
+import { emitter } from "../store/bus";
 import { computed, onMounted, watch } from "@vue/runtime-core";
 import * as d3 from "d3";
 import MapNominal from "./MapNominal.vue";
@@ -687,6 +689,10 @@ function AddToFavorite(name) {
 function AddToBlackList(name) {
   house_store.AddToBlackList(name);
 }
+
+function GotoBlock(name) {
+  emitter.emit("goto-block",name);
+}
 </script>
 
 <style lang="less" scoped>
@@ -707,6 +713,7 @@ function AddToBlackList(name) {
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
 }
 .table-content {
+  cursor: pointer;
   position: relative;
   transition-delay: 0.2s;
   transition: 0.5s;

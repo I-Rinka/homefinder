@@ -12,6 +12,7 @@
           class="select-item"
           v-for="house in house_store.selectedHouseArrary"
           :key="house.block"
+          @dblclick="GotoBlock(house.block)"
         >
           <el-checkbox
             :checked="true"
@@ -39,11 +40,16 @@
 
 <script setup>
 import { useHouseStore } from "../store/selectedHouse";
+import { emitter } from "../store/bus";
 
 const house_store = useHouseStore();
 
 function ClickCheckBox(name) {
   house_store.RemoveHouse(name);
+}
+
+function GotoBlock(name) {
+  emitter.emit("goto-block",name);
 }
 </script>
 
@@ -108,6 +114,7 @@ function ClickCheckBox(name) {
   font-size: 12px;
   transition: 0.5s;
   filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+  cursor: pointer;
 }
 
 @keyframes enter {

@@ -202,6 +202,16 @@ const props = defineProps({
 });
 
 emitter.on("change-view", (d) => (data.price_view = !d));
+emitter.on("goto-block", (house_name) => {
+  map.getView().animate({
+    center: [
+      block_data.details_map[house_name].lng,
+      block_data.details_map[house_name].lat,
+    ],
+    zoom: 16.5,
+    duration: 500,
+  });
+});
 
 // the reactive data
 const data = reactive({
