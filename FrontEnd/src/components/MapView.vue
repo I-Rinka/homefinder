@@ -241,7 +241,6 @@ const view_choice = computed({
   },
 });
 
-
 const current_mode = computed(() => {
   if (data.real_zoom < global_config.subRegionZoom) {
     return "Region";
@@ -369,7 +368,14 @@ function ChangeUserMarks() {
     );
 
     if (i !== -1) {
-      weight_store.criterias[i].coord = f.getGeometry().flatCoordinates;
+      // console.log("old:", .coord);
+
+      let c = weight_store.criterias[i];
+
+      weight_store.criterias.splice(i, 1);
+      c.coord = f.getGeometry().flatCoordinates;
+
+      weight_store.criterias.push(c);
     }
   });
 

@@ -45,6 +45,9 @@ export const useStore = defineStore("weight", {
       criterias: criterias,
     };
   },
+  getters: {
+
+  },
   actions: {
     GetCriterias(expected_names?: Array<string>, is_all?: boolean): Criteria[] {
       if (!expected_names) {
@@ -57,15 +60,6 @@ export const useStore = defineStore("weight", {
       return this.criterias
         .filter((x: Criteria) => (is_all ? true : x.enabled))
         .filter((x: Criteria) => name_s.has(x.name));
-    },
-    GetUserMarkCriterias(is_all?: boolean) {
-      if (is_all) {
-        return this.criterias
-          .filter((d: Criteria) => d.type === "userMark")
-          .filter((x: Criteria) => (is_all ? true : x.enabled));
-      }
-
-      return this.criterias.filter((d: Criteria) => d.type === "userMark");
     },
     GetCriteria(expected_name: string, is_all?: boolean): Criteria {
       const found = this.criterias

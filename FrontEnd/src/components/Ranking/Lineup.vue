@@ -233,10 +233,10 @@
 
           <!-- todo: Distance Criteria reference -->
           <span
-            v-for="user_mark in store.GetUserMarkCriterias()"
-            :key="user_mark.coord.toString() + item.index"
+            v-for="coord in user_mark_criterias"
+            :key="coord.toString() + item.index"
           >
-            {{ GetBlockToPointDistance(item.origin.block, user_mark.coord) }}
+            {{ GetBlockToPointDistance(item.origin.block, coord) }}
             km
           </span>
         </div>
@@ -706,6 +706,13 @@ function AddToBlackList(name) {
 function GotoBlock(name) {
   emitter.emit("goto-block", name);
 }
+
+// todo: 可以加个enabled的filter来过滤
+const user_mark_criterias = computed(() => {
+  return store.criterias
+    .filter((d) => d.type === "userMark")
+    .map((d) => d.coord);
+});
 </script>
 
 <style lang="less" scoped>
