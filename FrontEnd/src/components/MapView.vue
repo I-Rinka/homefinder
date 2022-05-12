@@ -124,6 +124,8 @@ import {
 import { emitter } from "./store/bus";
 import { useStore as useWeightStore } from "./store/weight";
 
+import { config as global_config } from "../config";
+
 import TimeLine from "./TimeLine.vue";
 import VisAdaptor from "./Vis/VisAdaptor.vue";
 import SunChart from "./Vis/SunChart.vue";
@@ -152,15 +154,11 @@ import GeoJSON from "ol/format/GeoJSON";
 
 // the configuration
 const config = {
-  zoom: 10.5,
-  minZoom: 8,
-  // minZoom: 3,
-  maxZoom: 18,
-  center: [116.41142503729663, 39.87084407050692],
-  extend: [
-    112.91586151114309, 39.13767962555457, 119.71639862051808,
-    41.264546138018204,
-  ],
+  zoom: global_config.default_zoom,
+  minZoom: global_config.minZoom,
+  maxZoom: global_config.maxZoom,
+  center: global_config.center,
+  extend: global_config.extend,
 };
 
 const props = defineProps({
@@ -243,12 +241,11 @@ const view_choice = computed({
   },
 });
 
-const unfold_sub_region = 16;
 
 const current_mode = computed(() => {
-  if (data.real_zoom < 12.5) {
+  if (data.real_zoom < global_config.subRegionZoom) {
     return "Region";
-  } else if (data.real_zoom > unfold_sub_region) {
+  } else if (data.real_zoom >= global_config.blockZoom) {
     return "Blocks";
   } else {
     return "SubRegion";
@@ -256,30 +253,30 @@ const current_mode = computed(() => {
 });
 
 const current_mode_color = computed(() => {
-  if (data.real_zoom < 12.5) {
+  if (data.real_zoom < global_config.subRegionZoom) {
     return "rgb(209, 96, 94)";
-  } else if (data.real_zoom > unfold_sub_region) {
+  } else if (data.real_zoom >= global_config.blockZoom) {
     return "rgb(88, 120, 163)";
   } else {
     return "rgb(228, 147, 68)";
   }
 });
 
-function GetPixels() {
-  let view_port = [map.getSize()[0], map.getSize()[1]];
-  let currentExtent = map.getView().calculateExtent(view_port);
-  let h = currentExtent[3] - currentExtent[1];
-  let w = currentExtent[2] - currentExtent[0];
-  let re = map.getView().getResolution();
-  h = ((h / re) * 1000 * 145).toFixed(2);
-  w = ((w / re) * 1000 * 111).toFixed(2);
-  let rec = document
-    .getElementsByClassName("ol-layer")[0]
-    .getBoundingClientRect();
-  console.log(rec);
-  console.log("h:", h, "w:", w);
-  // console.log(map.getView().getResolutionForExtent(currentExtent));
-}
+// function GetPixels() {
+//   let view_port = [map.getSize()[0], map.getSize()[1]];
+//   let currentExtent = map.getView().calculateExtent(view_port);
+//   let h = currentExtent[3] - currentExtent[1];
+//   let w = currentExtent[2] - currentExtent[0];
+//   let re = map.getView().getResolution();
+//   h = ((h / re) * 1000 * 145).toFixed(2);
+//   w = ((w / re) * 1000 * 111).toFixed(2);
+//   let rec = document
+//     .getElementsByClassName("ol-layer")[0]
+//     .getBoundingClientRect();
+//   // console.log(rec);
+//   // console.log("h:", h, "w:", w);
+//   // console.log(map.getView().getResolutionForExtent(currentExtent));
+// }
 
 // -------------------------- Useful functions ---------------------------
 
