@@ -511,7 +511,7 @@ const ranking_score = computed(() => {
     let obj = { index: i, score: s };
     scores.push(obj);
   }
-  console.log("computed_ranking_score", scores);
+  // console.log("computed_ranking_score", scores);
 
   scores.sort((a, b) => {
     return a.score - b.score;
@@ -541,7 +541,7 @@ const ranking_score = computed(() => {
 
 function HandleConfirmMapping(mapping_data, attr) {
   data.mapping_dialog_visible = false;
-  console.log(mapping_data);
+  // console.log(mapping_data);
 
   for (let [key, value] of mapping_data) {
     data.nominal_mapping_map[attr].set(key, value);

@@ -167,7 +167,6 @@ export const useRankStore = defineStore("rankstore", {
             change.topStillHasSb.forEach(d => max = d > max ? d : max);
             change.topStillHasSb = [min, max];
 
-            console.log("local rank frequency:", this.rank_frenquency_map)
             return change;
         },
 
@@ -250,7 +249,6 @@ export const useRankStore = defineStore("rankstore", {
 
             }
 
-            console.log("local rank frequency:", this.rank_frenquency_map)
             return change;
         }
     },

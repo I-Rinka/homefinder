@@ -573,7 +573,7 @@ async function LoadHinter() {
     let coord = WeightToPoint(d);
     return [coord.x, coord.y];
   });
-  console.log(current_at_top);
+  // console.log(current_at_top);
   current_at_top = monotoneChainConvexHull(current_at_top);
   let AtTopStr = "";
   current_at_top.forEach((d) => (AtTopStr += ` ${d[0]},${d[1]} `));
@@ -597,7 +597,7 @@ async function LoadHinter() {
   top_in_top.forEach((d) => (TInTStr += ` ${d[0]},${d[1]} `));
   data.top_has_sb = TInTStr;
 
-  console.log("calculation used time:", Date.now() - start_time, "ms");
+  // console.log("calculation used time:", Date.now() - start_time, "ms");
 }
 
 onMounted(() => {

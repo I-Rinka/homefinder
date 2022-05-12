@@ -53,6 +53,7 @@
       >
         <div
           v-for="c in data.top"
+          style="pointer-events: all"
           :key="c"
           :style="{
             '--strip-width': `${(c.weight / top_percentage_sum) * 100}%`,
@@ -71,6 +72,7 @@
       >
         <div
           v-for="c in data.bottom"
+          style="pointer-events: all"
           :key="c"
           :style="{
             '--strip-width': `${(c.weight / bottom_percentage_sum) * 100}%`,
@@ -83,48 +85,47 @@
         </div>
       </vue-draggable-next>
 
-      <div class="slider-container">
-        <div
-          ref="SliderTrack"
-          class="slider-track"
-          @dblclick="TranslateSlider"
-        ></div>
-        <div
-          class="slider-hinter"
-          :style="{
-            height: `${data.hinter.hinter_bottom.height}vh`,
-            top: `${data.hinter.hinter_bottom.top + 1.2}vh`,
-          }"
-        ></div>
-        <div
-          class="slider-hinter"
-          :style="{
-            height: `${data.hinter.hinter_middle.height}vh`,
-            top: `${data.hinter.hinter_middle.top + 1.2}vh`,
-          }"
-        ></div>
-        <div
-          class="slider-hinter"
-          :style="{
-            height: `${data.hinter.hinter_top.height}vh`,
-            top: `${data.hinter.hinter_top.top + 1.2}vh`,
-          }"
-        ></div>
-      </div>
+      <div class="slider-container" ref="SliderTrack">
+        <div class="slider-track" @dblclick="TranslateSlider">
+          <div
+            class="slider-hinter"
+            :style="{
+              height: `${data.hinter.hinter_bottom.height}vh`,
+              top: `${data.hinter.hinter_bottom.top + 1.2}vh`,
+            }"
+          ></div>
+          <div
+            class="slider-hinter"
+            :style="{
+              height: `${data.hinter.hinter_middle.height}vh`,
+              top: `${data.hinter.hinter_middle.top + 1.2}vh`,
+            }"
+          ></div>
+          <div
+            class="slider-hinter"
+            :style="{
+              height: `${data.hinter.hinter_top.height}vh`,
+              top: `${data.hinter.hinter_top.top + 1.2}vh`,
+            }"
+          ></div>
+        </div>
 
-      <div
-        class="slider-cursor-frame"
-        :style="{
-          '--slider-y': `${slider_y + 1}vh`,
-        }"
-      >
-        <slider-cursor
+        <div
+          class="slider-cursor-frame"
+          :style="{
+            '--slider-y': `${slider_y - 2.75}vh`,
+          }"
           @pointerdown="PressSlider"
-          :closable="false"
-          :pressed="data.slider.pressed"
-          :color="data.slider.pressed ? 'rgb(255, 50, 20)' : 'rgb(200, 26, 10)'"
-          style="transform: rotate(90deg)"
-        ></slider-cursor>
+        >
+          <slider-cursor
+            :closable="false"
+            :pressed="data.slider.pressed"
+            :color="
+              data.slider.pressed ? 'rgb(255, 50, 20)' : 'rgb(200, 26, 10)'
+            "
+            style="transform: rotate(90deg) translateX(2vh)"
+          ></slider-cursor>
+        </div>
       </div>
     </div>
   </div>
@@ -213,7 +214,6 @@ const bottom_slider_percentage = computed({
     let value = v >= 0.99 ? 0.99 : v;
     value = v <= 0.01 ? 0.01 : v;
 
-    console.log("slider value:", value);
     let old_value = bottom_slider_percentage.value;
     let change = value / old_value;
 
@@ -258,6 +258,7 @@ function MoveSlider(e) {
   n_time = Date.now();
   if (data.slider.pressed) {
     let rect = SliderTrack.value.getBoundingClientRect();
+    // console.log("slider Y:", rect.y);
     let percentage = (e.clientY - rect.y) / rect.height;
     let y = 23.4 * percentage;
     slider_y.value = y;
@@ -344,8 +345,11 @@ async function LoadHinter() {
     top: res.topStillHasSb.at(0) * height,
     height: (res.topStillHasSb.at(-1) - res.topStillHasSb.at(0)) * height,
   };
-  console.log("slider compute spent time:", Date.now() - start_time);
+  // console.log("slider compute spent time:", Date.now() - start_time);
 }
+onMounted(() => {
+  LoadHinterTimeout();
+});
 </script>
 
 <style lang="less" scoped>
@@ -354,13 +358,7 @@ async function LoadHinter() {
   margin-left: 30px;
   margin-right: 30px;
   filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.3));
-
-  .el-slider {
-    position: relative;
-    left: 5px;
-    width: 90px;
-    --el-slider-runway-bg-color: #e7eae8;
-  }
+  pointer-events: none;
 }
 
 .global-weight-hinter {
@@ -416,6 +414,7 @@ async function LoadHinter() {
   width: 100px;
   border-radius: 5px;
   overflow: hidden;
+  pointer-events: none;
   cursor: grab;
 
   &:active {
@@ -466,8 +465,7 @@ async function LoadHinter() {
   position: absolute;
   background-color: rgb(84, 123, 192);
   opacity: 0.5;
-  left: 23.5%;
-  width: 50%;
+  width: 100%;
 }
 
 .slider-track {
@@ -477,20 +475,24 @@ async function LoadHinter() {
   position: relative;
   left: 22.5px;
   height: 100%;
+  overflow: hidden;
   width: 50%;
+  pointer-events: all;
 }
 
 .slider-cursor-frame {
+  pointer-events: all;
   position: absolute;
   display: inline-block;
-  top: 2.5vh;
+  top: 0vh;
   left: 48px;
   height: 50px;
   width: 10px;
   transition: 0.5s;
-  transform: translate(0, var(--slider-y));
+  transform: translate(0, calc(var(--slider-y)));
   // transition-delay: 0.1s;
   cursor: grab;
+  z-index: 25;
 
   &:active {
     transition-delay: 0s;

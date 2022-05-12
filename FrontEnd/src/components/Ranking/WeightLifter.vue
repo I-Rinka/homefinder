@@ -245,13 +245,6 @@ const data = reactive({
 function Root3(number) {
   return Math.sqrt(3) * number;
 }
-
-watch(
-  () => rank_store.quantitative_mapping,
-  () => {
-    console.log(toRaw(rank_store.quantitative_mapping));
-  }
-);
 </script>
 
 <style lang="less" scoped>
