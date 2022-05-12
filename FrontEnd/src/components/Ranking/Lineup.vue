@@ -168,6 +168,7 @@
         v-for="item in ranking_score"
         :key="item.index"
         @dblclick="GotoBlock(item.origin.block)"
+        title="Double Click to see where it is!"
       >
         <div class="table-content-block">
           <div class="table-content-block-text">{{ item.origin.block }}</div>
