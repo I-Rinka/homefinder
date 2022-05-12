@@ -230,6 +230,15 @@
           <div class="table-content-score">
             {{ item.score.toFixed(2) }}
           </div>
+
+          <!-- todo: Distance Criteria reference -->
+          <span
+            v-for="user_mark in store.GetUserMarkCriterias()"
+            :key="user_mark.coord.toString() + item.index"
+          >
+            {{ GetBlockToPointDistance(item.origin.block, user_mark.coord) }}
+            km
+          </span>
         </div>
 
         <!-- rank frequency -->
@@ -288,6 +297,9 @@ import { emitter } from "../store/bus";
 import { computed, onMounted, watch } from "@vue/runtime-core";
 import * as d3 from "d3";
 import MapNominal from "./MapNominal.vue";
+
+import { GetBlockToPointDistance } from "../Map/geoUtil";
+
 import {
   Edit,
   TopRight,
@@ -692,7 +704,7 @@ function AddToBlackList(name) {
 }
 
 function GotoBlock(name) {
-  emitter.emit("goto-block",name);
+  emitter.emit("goto-block", name);
 }
 </script>
 

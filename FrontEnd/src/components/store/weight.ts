@@ -20,6 +20,7 @@ class Criteria {
 
 class UserMark extends Criteria {
   ol_uid: string;
+  // lng lat
   coord: [number, number];
   constructor(
     name: string,
@@ -56,6 +57,15 @@ export const useStore = defineStore("weight", {
       return this.criterias
         .filter((x: Criteria) => (is_all ? true : x.enabled))
         .filter((x: Criteria) => name_s.has(x.name));
+    },
+    GetUserMarkCriterias(is_all?: boolean) {
+      if (is_all) {
+        return this.criterias
+          .filter((d: Criteria) => d.type === "userMark")
+          .filter((x: Criteria) => (is_all ? true : x.enabled));
+      }
+
+      return this.criterias.filter((d: Criteria) => d.type === "userMark");
     },
     GetCriteria(expected_name: string, is_all?: boolean): Criteria {
       const found = this.criterias
