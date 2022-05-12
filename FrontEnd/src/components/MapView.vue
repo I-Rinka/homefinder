@@ -122,6 +122,7 @@ import {
   GetRegionData,
 } from "./Map/cluster";
 import { emitter } from "./store/bus";
+import { useStore as useWeightStore } from "./store/weight";
 
 import TimeLine from "./TimeLine.vue";
 import VisAdaptor from "./Vis/VisAdaptor.vue";
@@ -213,6 +214,8 @@ emitter.on("goto-block", (house_name) => {
   });
 });
 
+const weight_store = useWeightStore();
+
 // the reactive data
 const data = reactive({
   zoom: Math.floor(
@@ -222,7 +225,6 @@ const data = reactive({
   price_view: true,
   features: [],
   user_marks: [],
-  user_marks_strip: [],
 
   open_select_pannel: false,
 });
@@ -337,6 +339,7 @@ onMounted(() => {
     if (feature) {
       // user mark
       if (feature.get("type") === "UserMark") {
+        weight_store.RemoveUserMark(feature.ol_uid);
         MarkSource.removeFeature(feature);
         remove_mark = true;
         // refresh
@@ -345,35 +348,34 @@ onMounted(() => {
     }
     if (!remove_mark && data.price_view) {
       let new_feature = GetNewMarkFeature(event.coordinate);
+
+      let w = weight_store.AddUserMark(
+        `User Mark ${data.user_marks.length + 1}`,
+        new_feature.get("color"),
+        new_feature.getGeometry(),
+        new_feature.ol_uid
+      );
+      new_feature.set("weight", w);
       data.user_marks.push(new_feature);
-      data.user_marks_strip.push(new UserStrip(new_feature));
       MarkSource.addFeature(new_feature);
     }
   });
 });
 
-function UserStrip(feature) {
-  this.ol_uid = feature.ol_uid;
-  this.color = feature.get("color");
-  this.weight = feature.get("weight");
-}
-
 function ChangeUserMarks() {
   let features = MarkSource.getFeatures();
 
-  if (features.length < data.user_marks_strip.length) {
-    // remove
-    let dic = {};
-    for (let i = 0; i < features.length; i++) {
-      dic[features[i].ol_uid] = i;
+  // user mark move
+  features.forEach((f) => {
+    let i = weight_store.criterias.findIndex(
+      (d) => d.type === "userMark" && d.ol_uid === f.ol_uid
+    );
+
+    if (i !== -1) {
+      weight_store.criterias[i].coord = f.getGeometry().flatCoordinates;
     }
-    for (let i = 0; i < data.user_marks_strip.length; i++) {
-      const element = toRaw(data.user_marks_strip[i]);
-      if (!dic.hasOwnProperty(element.ol_uid)) {
-        data.user_marks_strip.splice(i, 1);
-      }
-    }
-  }
+  });
+
   data.user_marks = features;
 }
 

@@ -11,7 +11,26 @@
       >
         Disabled Criterias
       </div>
-      <div class="disabled" v-for="d in disabled" :key="d.name">
+      <div
+        class="disabled-user"
+        v-for="d in disabled.filter((d) => d.type === 'userMark')"
+        :style="{ '--mark-color': d.color }"
+        :key="d.name"
+      >
+        <el-checkbox style="z-index: -0" v-model="d.enabled"></el-checkbox>
+        <span
+          contenteditable="true"
+          class="disabled-name"
+          @focusout="(e) => (d.name = e.target.innerText)"
+        >
+          {{ d.name }}
+        </span>
+      </div>
+      <div
+        class="disabled"
+        v-for="d in disabled.filter((d) => d.type !== 'userMark')"
+        :key="d.name"
+      >
         <el-checkbox style="z-index: -0" v-model="d.enabled"></el-checkbox>
         <span class="disabled-name">
           {{ d.name }}
@@ -247,7 +266,6 @@ watch(
   (n_v) => (rank_store.current_tweakers = n_v.length)
 );
 
-
 function Root3(number) {
   return Math.sqrt(3) * number;
 }
@@ -301,6 +319,36 @@ function Root3(number) {
     }
   }
 }
+
+.disabled-user {
+  display: flex;
+  justify-content: space-around;
+  transition: 0.5s;
+  user-select: none;
+  height: 25px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 0px 5px 5px 5px;
+  border-radius: 5px;
+  // background: linear-gradient(0deg, rgb(220, 220, 220), rgb(240, 240, 240));
+  border: solid var(--mark-color) 1px;
+  animation: enter 0.5s;
+  filter: drop-shadow(1px 1px 2px var(--mark-color));
+  cursor: pointer;
+  .el-checkbox {
+    margin-top: -3px;
+  }
+  .disabled-name {
+    margin-left: 5px;
+    padding: 5px 3px 0px 3px;
+    font-weight: 500;
+    font-size: 10px;
+    white-space: nowrap;
+    color: var(--mark-color);
+    filter: drop-shadow(0px 0px 0.5px var(--mark-color));
+  }
+}
+
 .choice-text {
   margin: 15px 5px 8px 5px;
 }
