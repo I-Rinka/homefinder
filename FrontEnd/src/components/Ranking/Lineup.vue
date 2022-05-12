@@ -78,12 +78,12 @@
           <div style="padding-left: 5px; padding-top: 7px; cursor: pointer">
             <el-popover
               placement="top"
-              :width="160"
+              :width="200"
               trigger="hover"
               title="filter"
               effect="customized"
               popper-style="box-shadow: rgb(14 18 22 / 35%) 0px 10px 38px -10px, rgb(14 18 22 / 20%) 0px 10px 20px -15px; 
-              padding: 20px; border: grey"
+              padding: 10px; border: grey"
             >
               <template #reference>
                 <Filter
@@ -99,7 +99,7 @@
               </template>
 
               <!-- quantitative -->
-              <el-slider
+              <!-- <el-slider
                 v-if="!nominal_attr_name.includes(d.name)"
                 range
                 v-model="data.quantitative_filter[d.name]"
@@ -115,7 +115,37 @@
                 "
                 @change="HandleQuanFilterChange(d.name)"
               >
-              </el-slider>
+              </el-slider> -->
+
+              <div style="width: 100% ;display: flex; justify-content: space-around;">
+                <el-input-number
+                  v-if="!nominal_attr_name.includes(d.name)"
+                  v-model="data.quantitative_filter[d.name][0]"
+                  :min="
+                    data.quantitative_attr_range[d.name] == null
+                      ? 0
+                      : data.quantitative_attr_range[d.name].min
+                  "
+                  :max="data.quantitative_filter[d.name][1]"
+                  size="small"
+                  controls-position="right"
+                  @change="HandleQuanFilterChange(d.name)"
+                />
+                <span style="margin:2px 5px 2px 5px">~</span>
+                <el-input-number
+                  v-if="!nominal_attr_name.includes(d.name)"
+                  v-model="data.quantitative_filter[d.name][1]"
+                  :min="data.quantitative_filter[d.name][0]"
+                  :max="
+                    data.quantitative_attr_range[d.name] == null
+                      ? 0
+                      : data.quantitative_attr_range[d.name].max
+                  "
+                  @change="HandleQuanFilterChange(d.name)"
+                  size="small"
+                  controls-position="right"
+                />
+              </div>
 
               <!-- nominal -->
               <el-checkbox-group
