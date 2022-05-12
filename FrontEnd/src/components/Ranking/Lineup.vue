@@ -144,31 +144,42 @@
         <div class="table-content-block">
           <span> {{ item.origin.block }} </span>
         </div>
-        <template v-for="d in enabled_strip" :key="d.name">
-          <el-tooltip
-            :content="item.origin[d.name].toString()"
-            :hide-after="0"
-            placement="top"
-            popper-class="popper"
-            effect="customized"
-          >
-            <div
-              class="table-content-weighted"
-              :style="{
-                '--strip-color': d.color,
-                '--strip-width': `${
-                  (d.weight / strip_percentage_sum) *
-                  data.scaled_records[item.index][d.name] *
-                  100 *
-                  0.9
-                }%`,
-              }"
+
+        <div class="table-content-weights">
+          <template v-for="d in enabled_strip" :key="d.name">
+            <el-tooltip
+              :content="item.origin[d.name].toString()"
+              :hide-after="0"
+              placement="top"
+              popper-class="popper"
+              effect="customized"
             >
-              {{ item.origin[d.name] }}
-            </div>
-          </el-tooltip>
-        </template>
-        {{ item.score.toFixed(2) }}
+              <div
+                class="table-content-weighted"
+                :style="{
+                  '--strip-color': d.color,
+                  '--strip-width': `${
+                    (d.weight / strip_percentage_sum) *
+                      data.scaled_records[item.index][d.name] *
+                      150 <
+                    5
+                      ? 5
+                      : (d.weight / strip_percentage_sum) *
+                        data.scaled_records[item.index][d.name] *
+                        150
+                  }%`,
+                }"
+              >
+                <div>
+                  {{ item.origin[d.name] }}
+                </div>
+              </div>
+            </el-tooltip>
+          </template>
+          <div class="table-content-score">
+            {{ item.score.toFixed(2) }}
+          </div>
+        </div>
 
         <!-- rank frequency -->
         <div class="table-rank-frequency">
@@ -608,7 +619,7 @@ function MapQuantitativeData(attr) {
   height: 98%;
   width: 100%;
   overflow: scroll;
-  // filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
 }
 .table-content {
   position: relative;
@@ -620,7 +631,9 @@ function MapQuantitativeData(attr) {
   // padding: 1px;
   border-radius: 5px;
 
-  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
+  display: flex;
+  justify-content: flex-start;
+  // filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
 
   // margin-bottom: 5px;
   // border-top: solid #eaeaea 2px;
@@ -639,7 +652,7 @@ function MapQuantitativeData(attr) {
   }
 }
 .table-content-block {
-  width: 15%;
+  width: 20%;
   height: 100%;
   border-right: solid 2px #eaeaea;
   overflow: hidden;
@@ -648,9 +661,15 @@ function MapQuantitativeData(attr) {
   padding-left: 5px;
   display: inline-block;
 }
+
+.table-content-weights {
+  // white-space: nowrap;
+  width: 80%;
+}
 .table-content-weighted {
   height: 100%;
   overflow: hidden;
+  padding: 0 2% 0 1%;
   white-space: nowrap;
   // padding-top: 5px;
   // padding-left: 5px;
@@ -659,17 +678,40 @@ function MapQuantitativeData(attr) {
 
   background-color: var(--strip-color);
   width: var(--strip-width);
+
+  transition: 0.5s;
+  position: relative;
+
+  &:hover {
+    padding: 0 5% 0 2%;
+  }
+  div {
+    position: absolute;
+    bottom: 10%;
+  }
 }
 .table-rank-frequency {
-  position: absolute;
+  position: relative;
   height: 100%;
-  width: 30%;
+  width: 25%;
   overflow: hidden;
   top: 0;
   right: 0;
   // background-color: rgba(84, 124, 192, 0.5);
   // background-color: grey;
 }
+
+.table-content-score {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  color: grey;
+  user-select: none;
+  font-size: 10px;
+  font-weight: 600;
+  transform: scale(0.8, 1) translateY(-10%);
+}
+
 .weight-strip {
   display: flex;
   // display: inline-flex;

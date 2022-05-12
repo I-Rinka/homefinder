@@ -466,6 +466,7 @@ onMounted(() => {
   background-color: rgb(84, 123, 192);
   opacity: 0.5;
   width: 100%;
+  transition: 0.5s;
 }
 
 .slider-track {

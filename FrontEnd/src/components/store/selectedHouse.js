@@ -18,7 +18,7 @@ export const useHouseStore = defineStore("selectedHouse", {
   state: () => {
     return {
       selectedHouse: {},
-      bannedHouse: { '王府井大街': {}, '天创科技大厦': {}, '绿城百合公寓霁雪苑': {}, '凤凰城三期': {} }
+      bannedHouse: { '王府井大街': {}, '天创科技大厦': {}, '绿城百合公寓霁雪苑': {}, '凤凰城三期': {},'珠江峰景':{} }
     };
   },
   getters: {
