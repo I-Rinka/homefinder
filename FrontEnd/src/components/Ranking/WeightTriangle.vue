@@ -17,7 +17,7 @@
           }"
         >
           <el-tooltip
-            :content="c.name"
+            :content="c.label"
             :popper-options="{
               modifiers: [
                 {
@@ -63,7 +63,7 @@
           }"
         >
           <div :style="{ '--text-length': data.tri[0].length }">
-            {{ data.tri[0].name }}
+            {{ data.tri[0].label }}
           </div>
         </div>
       </vue-draggable-next>
@@ -225,7 +225,7 @@
           }"
         >
           <div :style="{ '--text-length': data.tri[1].length }">
-            {{ data.tri[1].name }}
+            {{ data.tri[1].label }}
           </div>
         </div>
       </vue-draggable-next>
@@ -244,7 +244,7 @@
           }"
         >
           <div :style="{ '--text-length': data.tri[2].length }">
-            {{ data.tri[2].name }}
+            {{ data.tri[2].label }}
           </div>
         </div>
       </vue-draggable-next>

@@ -17,7 +17,7 @@
           }"
         >
           <el-tooltip
-            :content="c.name"
+            :content="c.label"
             :popper-options="{
               modifiers: [
                 {
@@ -60,7 +60,7 @@
             '--strip-color': c.color,
           }"
         >
-          <div :style="{ '--text-length': c.name.length }">{{ c.name }}</div>
+          <div :style="{ '--text-length': c.name.length }">{{ c.label }}</div>
         </div>
       </vue-draggable-next>
 
@@ -80,7 +80,7 @@
           }"
         >
           <div :style="{ '--text-length': c.name.length }">
-            {{ c.name }}
+            {{ c.label }}
           </div>
         </div>
       </vue-draggable-next>
