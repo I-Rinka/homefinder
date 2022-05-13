@@ -9,12 +9,18 @@ class Criteria {
   weight?: number;
   enabled?: boolean;
   type: string;
+  label: string;
   constructor(name: string, color: string, enabled?: boolean, weight?: number) {
     this.name = name;
     this.color = color;
     this.weight = weight ? weight : 0;
     this.enabled = enabled;
     this.type = "criteria";
+    this.label = name;
+    if (this.label.includes("_")) {
+      let arr = this.label.split("_");
+      this.label = arr.join(" ");
+    }
   }
 }
 
@@ -43,10 +49,17 @@ export const useStore = defineStore("weight", {
     return {
       count: 0,
       criterias: criterias,
+      criterias_map: new Map(),
     };
   },
   getters: {
-
+    overall() {
+      let sum = 0;
+      this.criterias.forEach((d) => {
+        sum += d.weight;
+      });
+      return sum;
+    },
   },
   actions: {
     GetCriterias(expected_names?: Array<string>, is_all?: boolean): Criteria[] {
@@ -62,10 +75,18 @@ export const useStore = defineStore("weight", {
         .filter((x: Criteria) => name_s.has(x.name));
     },
     GetCriteria(expected_name: string, is_all?: boolean): Criteria {
-      const found = this.criterias
-        .filter((x: Criteria) => (is_all ? true : x.enabled))
-        .find((element) => element.name == expected_name);
-      return found;
+      // added cache
+      if (!this.criterias_map.get(expected_name)) {
+        const found = this.criterias
+          .filter((x: Criteria) => (is_all ? true : x.enabled))
+          .find((element) => element.name == expected_name);
+
+        if (found) {
+          this.criterias_map.set(expected_name, found);
+        }
+        return found;
+      }
+      return this.criterias_map.get(expected_name);
     },
     GetCriteriaNames(exclude_names?: string[], is_all?: boolean) {
       let name_s = new Set(exclude_names);
@@ -89,6 +110,7 @@ export const useStore = defineStore("weight", {
       ol_uid: string
     ) {
       let w = this.GetDefaultWeight();
+      console.log("weight", w);
       let user_mark = new UserMark(name, color, coord, ol_uid, w);
 
       // console.log(user_mark instanceof UserMark);
@@ -96,9 +118,23 @@ export const useStore = defineStore("weight", {
       return w;
     },
     RemoveUserMark(ol_uid: string) {
-      this.criterias = this.criterias.filter(d =>
-        d.type != "userMark" || d.ol_uid != ol_uid
+      const findIndex = this.criterias.findIndex(
+        (d: Criteria) =>
+          d.type == "userMark" && (d as UserMark).ol_uid == ol_uid
       );
+
+      if (findIndex === -1) {
+        return;
+      }
+
+      let enlarge = 1 / (1 - this.criterias[findIndex].weight);
+      this.criterias_map.delete(this.criterias[findIndex].name);
+      this.criterias.splice(findIndex, 1);
+
+      for (let index = 0; index < this.criterias.length; index++) {
+        this.criterias[index].weight *= enlarge;
+      }
+      // make overall equals 1, and delete map
     },
     CreateCriteria(
       name: string,
@@ -110,6 +146,8 @@ export const useStore = defineStore("weight", {
         weight != undefined && 0 < weight && weight < 1
           ? weight
           : this.GetDefaultWeight();
+
+      console.log("get w", w);
 
       let c = color ? color : "grey";
       let e = enabled ? enabled : false;
@@ -123,6 +161,7 @@ export const useStore = defineStore("weight", {
       let sum_weights = 0;
       for (let i = 0; i < this.criterias.length; i++) {
         this.criterias[i].weight *= reduce_proportion;
+        console.log("reduced:", this.criterias[i].weight);
         sum_weights += this.criterias[i].weight;
       }
       return 1 - sum_weights;

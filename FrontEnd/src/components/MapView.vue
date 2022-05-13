@@ -306,6 +306,7 @@ const map = new Map({
 });
 map.getView().on("change", ChangeView);
 
+let marks_count = 1;
 onMounted(() => {
   map.setTarget("map");
   // AddPoint();
@@ -345,12 +346,14 @@ onMounted(() => {
     if (!remove_mark && data.price_view) {
       let new_feature = GetNewMarkFeature(event.coordinate);
 
+      // Add user mark
       let w = weight_store.AddUserMark(
-        `User Mark ${data.user_marks.length + 1}`,
+        `User Mark ${marks_count++}`,
         new_feature.get("color"),
         new_feature.getGeometry().flatCoordinates,
         new_feature.ol_uid
       );
+      console.log(weight_store.GetCriterias());
       new_feature.set("weight", w);
       data.user_marks.push(new_feature);
       MarkSource.addFeature(new_feature);

@@ -21,9 +21,9 @@
         <span
           contenteditable="true"
           class="disabled-name"
-          @focusout="(e) => (d.name = e.target.innerText)"
+          @focusout="(e) => (d.label = e.target.innerText)"
         >
-          {{ d.name }}
+          {{ d.label }}
         </span>
       </div>
       <div
@@ -33,7 +33,7 @@
       >
         <el-checkbox style="z-index: -0" v-model="d.enabled"></el-checkbox>
         <span class="disabled-name">
-          {{ d.name }}
+          {{ d.label }}
         </span>
       </div>
     </div>
@@ -315,6 +315,8 @@ function Root3(number) {
       font-weight: 500;
       font-size: 10px;
       color: grey;
+      white-space: nowrap;
+
       filter: drop-shadow(0px 0px 0.5px rgba(0, 0, 0, 0.5));
     }
   }

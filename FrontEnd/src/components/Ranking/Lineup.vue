@@ -1,5 +1,6 @@
 <template>
   <div class="line-up">
+    <!-- {{store.overall}} -->
     <div class="weight-strip">
       <div
         class="enabled"
@@ -14,7 +15,7 @@
           <!-- enable -->
           <div style="overflow: hidden; white-space: nowrap">
             <el-checkbox v-model="d.enabled"></el-checkbox>
-            {{ d.name }}
+            {{ d.label }}
           </div>
 
           <!-- mapping -->
@@ -373,19 +374,19 @@ const scale_list = new Map(); // the scale of each attr
 
 // Add default criteria, this should be name of records criteria. Like price, area etc.
 // name, color, enabled(default is disabled)
-let criteria = [];
-criteria.push(store.CreateCriteria("area", "#8dd3c7", true));
-criteria.push(store.CreateCriteria("direction", "#ffffb3"));
-criteria.push(store.CreateCriteria("decoration", "#fb8072"));
-criteria.push(store.CreateCriteria("deal_price", "#bebada", true));
-criteria.push(store.CreateCriteria("unit_price", "#80b1d3", true));
-criteria.push(store.CreateCriteria("position", "#fdb462"));
-criteria.push(store.CreateCriteria("room", "#b3de69"));
-criteria.push(store.CreateCriteria("hall", "#fccde5"));
-criteria.push(store.CreateCriteria("block_height", "#ffed6f"));
-criteria.push(store.CreateCriteria("built_year", "#bc80bd"));
-criteria.push(store.CreateCriteria("type", "#ccebc5"));
-store.criterias = criteria;
+// let criteria = [];
+store.criterias.push(store.CreateCriteria("area", "#8dd3c7", true));
+store.criterias.push(store.CreateCriteria("direction", "#ffffb3"));
+store.criterias.push(store.CreateCriteria("decoration", "#fb8072"));
+store.criterias.push(store.CreateCriteria("deal_price", "#bebada", true));
+store.criterias.push(store.CreateCriteria("unit_price", "#80b1d3", true));
+store.criterias.push(store.CreateCriteria("position", "#fdb462"));
+store.criterias.push(store.CreateCriteria("room", "#b3de69"));
+store.criterias.push(store.CreateCriteria("hall", "#fccde5"));
+store.criterias.push(store.CreateCriteria("block_height", "#ffed6f"));
+store.criterias.push(store.CreateCriteria("built_year", "#bc80bd"));
+store.criterias.push(store.CreateCriteria("type", "#ccebc5"));
+// store.criterias = criteria;
 
 const enabled_strip = computed(() => store.criterias.filter((d) => d.enabled));
 
@@ -667,7 +668,8 @@ const ranking_score = computed(() => {
         s += record[d.name] * d.weight;
       }
       else {
-        s += record[d.name] * 0.1  // user mark: manually set weight = 0.1
+        // console.log(d.weight)
+        s += record[d.name] * d.weight  // user mark: manually set weight = 0.1
       }
         
     }
