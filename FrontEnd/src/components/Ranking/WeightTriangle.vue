@@ -13,7 +13,7 @@
           class="reserved"
           :style="{
             '--strip-color': c.color,
-            '--strip-width': `${100 * c.weight}%`,
+            '--strip-width': `${(100 * c.weight) / enabled_weight_overall}%`,
           }"
         >
           <el-tooltip
@@ -40,7 +40,9 @@
         <div
           class="current"
           :style="{
-            '--strip-width': `${100 * current_weight_overall}%`,
+            '--strip-width': `${
+              (100 * current_weight_overall) / enabled_weight_overall
+            }%`,
           }"
         ></div>
       </vue-draggable-next>
@@ -338,6 +340,12 @@ const exclude_criterias = computed(() =>
 const current_weight_overall = computed(() => {
   let sum = 0;
   data.tri.forEach((x) => (sum += x.weight));
+  return sum;
+});
+
+const enabled_weight_overall = computed(() => {
+  let sum = current_weight_overall.value;
+  exclude_criterias.value.forEach((d) => (sum += d.weight));
   return sum;
 });
 

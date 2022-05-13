@@ -13,7 +13,7 @@
           class="reserved"
           :style="{
             '--strip-color': c.color,
-            '--strip-width': `${100 * c.weight}%`,
+            '--strip-width': `${(100 * c.weight) / overall_weight}%`,
           }"
         >
           <el-tooltip
@@ -40,7 +40,9 @@
         <div
           class="current"
           :style="{
-            '--strip-width': `${100 * current_weight_overall}%`,
+            '--strip-width': `${
+              (100 * current_weight_overall) / overall_weight
+            }%`,
           }"
         ></div>
       </vue-draggable-next>
@@ -174,6 +176,13 @@ const data = reactive({
     hinter_middle: { top: 0, height: 0 },
     hinter_bottom: { top: 0, height: 0 },
   },
+});
+
+const overall_weight = computed(() => {
+  let sum = 0;
+  exclude_criterias.value.forEach((d) => (sum += d.weight));
+  sum += current_weight_overall.value;
+  return sum;
 });
 
 const include_names = computed(() => {
