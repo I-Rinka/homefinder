@@ -348,7 +348,7 @@ onMounted(() => {
 
       // Add user mark
       let w = weight_store.AddUserMark(
-        `User Mark ${marks_count++}`,
+        `Mark ${marks_count++}`,
         new_feature.get("color"),
         new_feature.getGeometry().flatCoordinates,
         new_feature.ol_uid

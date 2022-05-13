@@ -226,6 +226,7 @@ export const useRankStore = defineStore("rankstore", {
 
     // current_criterias {name,weight}
     async Compute3WayRange(involved_criterias, current_criterias) {
+      console.log(involved_criterias,current_criterias)
       //
       let change = {
         notChangeCurrent: [],
@@ -242,6 +243,8 @@ export const useRankStore = defineStore("rankstore", {
       let static_criterias = current_criterias.filter(
         (d) => !involved_criterias.includes(d.name)
       );
+
+      // todo: debug
 
       let record_scores = [];
 

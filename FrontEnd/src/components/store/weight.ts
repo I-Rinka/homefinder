@@ -35,7 +35,7 @@ class UserMark extends Criteria {
     ol_uid: string,
     weight?: number
   ) {
-    super(name, color, false, weight);
+    super(name, color, true, weight);
 
     this.ol_uid = ol_uid;
     this.coord = coord;
