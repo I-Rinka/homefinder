@@ -5,6 +5,7 @@
       ref="visRef"
       class="adaptor"
       :id="props.feature.geometry.coordinates.toString()"
+      @click="ClickVis"
       v-click-outside="onClickOutside"
     >
       <sun-chart
@@ -19,7 +20,6 @@
         :color="sun_chart_color"
         :text="computed_price"
         :open_corona="props.open_corona"
-        @click="ClickVis"
       ></sun-chart>
       <trend-vis
         class="adaptor-trend-vis"
@@ -28,6 +28,7 @@
         :subregion_records="GetSubRegionData()"
         :selection_time="props.selection_time"
         :subregion_name="react_data.sub_region_name"
+        :feature_type="react_data.type"
       ></trend-vis>
       <div
         class="adaptor-title"
@@ -55,7 +56,7 @@
           {
             name: 'offset',
             options: {
-              offset: props.price_mode ? [0, -270] : [0, -20],
+              offset: props.price_mode ? [0, -270] : [0, -60],
             },
           },
         ],

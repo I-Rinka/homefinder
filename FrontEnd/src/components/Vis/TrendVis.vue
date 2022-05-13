@@ -2,9 +2,9 @@
   <div class="trend-vis">
     <svg
       ref="visMountPoint"
-      :width="props.subregion_name && props.subregion_name != '' ? 120 : 100"
-      :height="props.subregion_name && props.subregion_name != '' ? 200 : 200"
-      viewBox="0 0 200 100"
+      :width="200"
+      :height="200"
+      viewBox="0 0 400 100"
       xmlns="http://www.w3.org/2000/svg"
     ></svg>
   </div>
@@ -41,6 +41,10 @@ const props = defineProps({
   subregion_name: {
     type: String,
     default: "",
+    required: false,
+  },
+  feature_type: {
+    type: String,
     required: false,
   },
 });
@@ -128,6 +132,11 @@ function Update() {
 
   let svg = d3.select(visMountPoint.value);
 
+  if (props.feature_type !== "blocks") {
+    svg.selectAll("path").remove();
+    svg.selectAll("text").remove();
+  }
+
   svg.insert("g");
   let bar_group = svg.select("g").selectAll("g").data(data).join("g");
 
@@ -185,7 +194,6 @@ function Update() {
       return h > 0 ? h : 0;
     });
 
-  console.log(bar_group);
   bar_group
     .select("rect")
     .insert("title")
@@ -195,8 +203,6 @@ function Update() {
       }: ${d.price.toFixed(2)} rmb/m²`;
 
       if (props.subregion_name && props.subregion_name != "") {
-        console.log(props.subregion_records);
-
         let find_subregion = props.subregion_records.find(
           (d2) => d2.time >= d.time
         );
@@ -213,7 +219,6 @@ function Update() {
     }); // hover title
 
   // add sub region records
-
   svg.append("path");
   svg
     .select("path")
@@ -228,12 +233,36 @@ function Update() {
         .line()
         .curve(d3.curveMonotoneX)
         .x((d) => {
+          if (x(d.time) == NaN) {
+            console.log("x error", d);
+            return 0;
+          }
           return x(d.time);
         })
         .y((d) => {
+          if (y(d.price) == NaN) {
+            console.log("y error", d);
+            return height;
+          }
           return height - y(d.price);
         })
     );
+
+  if (props.feature_type === "blocks") {
+    if (
+      props.subregion_records.at(-1) &&
+      x(props.subregion_records.at(-1).time) != NaN &&
+      y(props.subregion_records.at(-1).price) != NaN
+    ) {
+      svg
+        .insert("text")
+        .attr("x", x(props.subregion_records.at(-1).time) + 2)
+        .attr("y", height - y(props.subregion_records.at(-1).price))
+        // .attr("fill", "#547bc0")
+        .attr("class", "subregion-text")
+        .text(props.subregion_name);
+    }
+  }
 }
 
 let visMountPoint = ref(null);
@@ -244,6 +273,7 @@ onMounted(() => {
 
 <style lang="less">
 .trend-vis {
+  left: 25%;
   position: relative;
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
 
@@ -261,5 +291,10 @@ onMounted(() => {
       }
     }
   }
+}
+
+.subregion-text {
+  fill: #547bc0;
+  font-weight: 900;
 }
 </style>
