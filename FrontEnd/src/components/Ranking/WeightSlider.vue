@@ -467,7 +467,7 @@ onMounted(() => {
   opacity: 0.5;
   width: 100%;
   transition: 0.5s;
-  transition-delay: 0.2s;
+  transition-delay: 0.3s;
 }
 
 .slider-track {

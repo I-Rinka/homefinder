@@ -525,14 +525,14 @@ async function ChangeWeight(v1, v2, v3) {
 
   if (weighchange_timeout == null) {
     weighchange_timeout = setTimeout(() => {
-      if (Date.now() - n_time > 10) {
+      if (Date.now() - n_time > 50) {
         wp0.value = wv1;
         wp1.value = wv2;
         wp2.value = wv3;
       }
 
       weighchange_timeout = null;
-    }, 500);
+    }, 100);
   }
 }
 
@@ -596,7 +596,7 @@ function LoadHinterTimeout() {
     solution_trigger = setTimeout(() => {
       LoadHinter();
       solution_trigger = null;
-    }, 100);
+    }, 50);
   }
 }
 
@@ -645,7 +645,7 @@ let new_old_str = function (old_points, new_points) {
 };
 
 async function LoadHinter() {
-  if (Date.now() - n_time < 20) {
+  if (Date.now() - n_time < 50) {
     return;
   }
   let start_time = Date.now();
@@ -707,7 +707,7 @@ async function LoadHinter() {
     currentAtTop.value.beginElement();
     currentInTop.value.beginElement();
     topHasSb.value.beginElement();
-  }, 200);
+  }, 300);
 }
 
 onMounted(() => {
