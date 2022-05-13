@@ -523,16 +523,20 @@ async function ChangeWeight(v1, v2, v3) {
   wv2 = v2;
   wv3 = v3;
 
-  if (weighchange_timeout == null) {
-    weighchange_timeout = setTimeout(() => {
-      if (Date.now() - n_time > 50) {
-        wp0.value = wv1;
-        wp1.value = wv2;
-        wp2.value = wv3;
-      }
-
+  let handler = () => {
+    if (!data.slider.pressed || Date.now() - n_time > 400) {
       weighchange_timeout = null;
-    }, 100);
+      wp0.value = wv1;
+      wp1.value = wv2;
+      wp2.value = wv3;
+    } else {
+      weighchange_timeout = setTimeout(handler, 50);
+      // handler();
+    }
+  };
+
+  if (weighchange_timeout == null) {
+    weighchange_timeout = setTimeout(handler, 50);
   }
 }
 
@@ -592,11 +596,11 @@ let solution_trigger = null;
 let n_time = 0;
 function LoadHinterTimeout() {
   // n_time = Date.now();
-  if (solution_trigger === null) {
+  if (solution_trigger === null && Date.now() - n_time > 20) {
     solution_trigger = setTimeout(() => {
       LoadHinter();
       solution_trigger = null;
-    }, 50);
+    }, 200);
   }
 }
 
@@ -645,9 +649,9 @@ let new_old_str = function (old_points, new_points) {
 };
 
 async function LoadHinter() {
-  if (Date.now() - n_time < 50) {
-    return;
-  }
+  // if (Date.now() - n_time < 20) {
+  //   return;
+  // }
   let start_time = Date.now();
   // console.log("start hinter calculation");
   let res = await rank_store.Compute3WayRange(

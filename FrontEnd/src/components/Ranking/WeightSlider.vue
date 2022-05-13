@@ -269,7 +269,7 @@ let weight_change_timeout = null;
 let weight_v = 0;
 const slider_y = computed({
   get() {
-    if (data.slider.pressed) {
+    if (data.slider.pressed || weight_change_timeout !== null) {
       return data.slider.y;
     } else {
       data.slider.y = 23.4 * bottom_slider_percentage.value;
@@ -283,8 +283,8 @@ const slider_y = computed({
 
     weight_v = y / 23.4;
 
-    if (weight_change_timeout === null) {
-      weight_change_timeout = setTimeout(() => {
+    let handler = () => {
+      if (!data.slider.pressed || Date.now() - n_time > 200) {
         if (weight_v >= 0.99) {
           bottom_slider_percentage.value = 0.99;
         } else if (weight_v <= 0.01) {
@@ -293,7 +293,13 @@ const slider_y = computed({
           bottom_slider_percentage.value = weight_v;
         }
         weight_change_timeout = null;
-      }, 200);
+      } else {
+        weight_change_timeout = setTimeout(handler, 200);
+      }
+    };
+
+    if (weight_change_timeout === null) {
+      weight_change_timeout = setTimeout(handler, 200);
     }
   },
 });
