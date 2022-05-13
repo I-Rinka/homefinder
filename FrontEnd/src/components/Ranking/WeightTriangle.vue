@@ -609,10 +609,30 @@ let new_old_str = function (old_points, new_points) {
   let o_points = old_points.concat([]);
 
   while (o_points.length < n_points.length) {
-    o_points.push(o_points.at(0));
+    let choose_index = Math.floor(Math.random() * o_points.length);
+    let l_point = o_points.at(choose_index);
+    let r_index = choose_index + 1 >= o_points.length ? 0 : choose_index + 1;
+
+    let r_point = o_points.at(r_index);
+
+    let n_point = [
+      (l_point[0] + r_point[0]) / 2,
+      (l_point[1] + r_point[1]) / 2,
+    ];
+
+    o_points.splice(r_index, 0, n_point);
   }
   while (n_points.length < o_points.length) {
-    n_points.push(n_points.at(0));
+    let choose_index = Math.floor(Math.random() * n_points.length);
+    let l_point = n_points.at(choose_index);
+    let r_index = choose_index + 1 >= n_points.length ? 0 : choose_index + 1;
+    let r_point = n_points.at(r_index);
+    let n_point = [
+      (l_point[0] + r_point[0]) / 2,
+      (l_point[1] + r_point[1]) / 2,
+    ];
+
+    n_points.splice(r_index, 0, n_point);
   }
 
   let old_str = "";
