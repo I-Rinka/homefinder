@@ -234,13 +234,13 @@
           </div>
 
           <!-- todo: Distance Criteria reference -->
-          <span
+          <!-- <span
             v-for="coord in user_mark_criterias"
             :key="coord.toString() + item.index"
           >
             {{ GetBlockToPointDistance(item.origin.block, coord) }}
             km
-          </span>
+          </span> -->
         </div>
 
         <!-- rank frequency -->
@@ -445,13 +445,32 @@ function CalculateQuanAttrRange(attr) {
   return { min: min, max: max };
 }
 
+const user_mark_records = {}  // record the origin user mark data(e.g. distance). the index is consistent with origin_records
+function CalculateUserMark(attr) {
+  let value_list = []
+  let coord = store.GetCriteria(attr,true).coord
+  props.origin_records.forEach((record) => {
+    // console.log(record.block)
+    let dis = GetBlockToPointDistance(record.block, coord)
+    value_list.push(dis)
+  })
+  user_mark_records[attr] = value_list
+  // console.log("value_list", value_list)
+
+  let min = Math.min(...value_list);
+  let max = Math.max(...value_list);
+  return { min: min, max: max };
+}
+
+
+
 function GenDefaultNominalMap(name) {
   let value_list = props.origin_records.map((record) => record[name]);
   let value_set = new Set(value_list);
   value_list = Array.from(value_set);
   value_list.forEach((v) => {
     data.nominal_mapping_map[name].set(v, 0.5);
-  }); // default value=0.5
+  }); // default value=0.5HandleConfirmMapping
 
   return value_list;
 }
@@ -469,7 +488,7 @@ watch(
           if (scale_list.has(new_list[i])) {
           } // already have scale, don't calculate again
           else {
-            HandleScale(new_list[i]); // todo: need user interaction
+            HandleScale(new_list[i]);
             CalculateScaledRecords(new_list[i]);
           }
           break;
@@ -502,7 +521,7 @@ function HandleScale(name) {
   }
 }
 
-// watch( // 非常丑陋
+// watch( // 非常丑陋CalculateScaledRecords
 //   data.quantitative_filter,
 //   (new_val, old_val) => {
 //     console.log("comp", new_val["area"][1], old_val["area"][1])
@@ -538,10 +557,16 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
 
 // 将所有input重新计算了value
 function CalculateScaledRecords(name) {
-  let value_list = props.origin_records.map((record) => {
-    if (name == "built_year") return Number(record[name]);
-    else return record[name];
-  });
+  let value_list = null
+  if (store.GetCriteria(name, true).type == "criteria") {
+    value_list = props.origin_records.map((record) => {
+      if (name == "built_year") return Number(record[name]);
+      else return record[name];
+    });
+  }
+  else {
+    value_list = user_mark_records[name]
+  }
 
   if (data.scaled_records.length == 0) {
     // the first time to calculate, create
@@ -572,26 +597,32 @@ function CalculateScaledRecords(name) {
 }
 
 function CheckFilter(index) {
-  let record = props.origin_records[index];
   let flag = true;
   for (let i = 0; i < enabled_strip.value.length; i++) {
     let attr = enabled_strip.value[i].name;
     if (nominal_attr_name.includes(attr)) {
       // nominal
+      let record = props.origin_records[index];
       if (!data.nominal_filter[attr].includes(record[attr])) {
         flag = false;
         break;
       }
-    } else {
+    } 
+    else {
       // quantitative
-      if (
-        !(
-          data.quantitative_filter[attr][0] <= record[attr] &&
-          data.quantitative_filter[attr][1] >= record[attr]
-        )
-      ) {
-        flag = false;
-        break;
+      if (store.GetCriteria(attr).type == "criteria") {
+        let record = props.origin_records[index];
+        if (!(data.quantitative_filter[attr][0] <= record[attr] && data.quantitative_filter[attr][1] >= record[attr])) {
+          flag = false;
+          break;
+        }
+      }
+      else {
+        let record = user_mark_records[attr][index];
+        if (!(data.quantitative_filter[attr][0] <= record && data.quantitative_filter[attr][1] >= record)) {
+          flag = false;
+          break;
+        }
       }
     }
   }
@@ -623,9 +654,15 @@ const ranking_score = computed(() => {
   let records = [];
   for (let i = 0; i < num; i++) {
     const element = scores[i];
+    // add user mark record to origin
+    let ori = props.origin_records[element.index]
+    for (let key in user_mark_records) {
+      ori[key] = user_mark_records[key][element.index]
+    } 
+
     records.push({
       index: element.index,
-      origin: props.origin_records[element.index],
+      origin: ori,
       id: props.origin_records[element.index]._id,
       score: element.score,
     });
@@ -715,6 +752,32 @@ const user_mark_criterias = computed(() => {
     .filter((d) => d.type === "userMark")
     .map((d) => d.coord);
 });
+
+// for user-mark criterias
+watch(
+  () => store.criterias.filter((d) => d.type === "userMark"),
+  (val) => {
+    console.log("new criteria", val)
+    // let user-mark be quantitative
+    for (let i=0; i<val.length; i++) {
+      if (!quantitative_attr_name.includes(val[i].name)) {  // new criteria
+        let attr = val[i].name
+        let res = CalculateUserMark(attr);
+        data.quantitative_attr_range[attr] = res;
+        data.quantitative_filter[attr] = [res.min, res.max];
+        data.quantitative_mapping_type[attr] = true;
+
+        quantitative_attr_name.push(attr)
+
+        HandleScale(attr);
+        CalculateScaledRecords(attr);
+
+        break;
+      }
+    }
+  }
+)
+
 </script>
 
 <style lang="less" scoped>
