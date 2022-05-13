@@ -201,7 +201,7 @@ function GetOrientation(
 
 <style lang="less" scoped>
 .arc {
-  transition: 0.5s;
+  transition: 0.5s 0.5s;
 }
 
 .sun-chart {

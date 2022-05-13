@@ -15,7 +15,22 @@
           <!-- enable -->
           <div style="overflow: hidden; white-space: nowrap">
             <el-checkbox v-model="d.enabled"></el-checkbox>
-            {{ d.label }}
+            <el-icon
+              v-if="d.type === 'userMark'"
+              style="position: relative; top: 1.5px; margin: 2px"
+              ><LocationFilled
+            /></el-icon>
+            <span
+              v-if="d.type === 'userMark'"
+              contenteditable="true"
+              style="margin: 2px;"
+              @focusout="(e) => (d.label = e.target.innerText)"
+            >
+              {{ d.label }}
+            </span>
+            <span v-else>
+              {{ d.label }}
+            </span>
           </div>
 
           <!-- mapping -->
@@ -311,6 +326,7 @@ import {
   Star,
   StarFilled,
   Hide,
+  LocationFilled,
 } from "@element-plus/icons-vue";
 
 const store = useStore();
@@ -446,24 +462,22 @@ function CalculateQuanAttrRange(attr) {
   return { min: min, max: max };
 }
 
-const user_mark_records = {}  // record the origin user mark data(e.g. distance). the index is consistent with origin_records
+const user_mark_records = {}; // record the origin user mark data(e.g. distance). the index is consistent with origin_records
 function CalculateUserMark(attr) {
-  let value_list = []
-  let coord = store.GetCriteria(attr,true).coord
+  let value_list = [];
+  let coord = store.GetCriteria(attr, true).coord;
   props.origin_records.forEach((record) => {
     // console.log(record.block)
-    let dis = GetBlockToPointDistance(record.block, coord)
-    value_list.push(dis)
-  })
-  user_mark_records[attr] = value_list
+    let dis = GetBlockToPointDistance(record.block, coord);
+    value_list.push(dis);
+  });
+  user_mark_records[attr] = value_list;
   // console.log("value_list", value_list)
 
   let min = Math.min(...value_list);
   let max = Math.max(...value_list);
   return { min: min, max: max };
 }
-
-
 
 function GenDefaultNominalMap(name) {
   let value_list = props.origin_records.map((record) => record[name]);
@@ -544,7 +558,6 @@ function HandleScale(name) {
 //   }
 //   // quantitative
 
-
 //   for (let i=0; i<quantitative_attr_name.length; i++) {
 //     if (quantitative_attr_name) {
 
@@ -553,7 +566,7 @@ function HandleScale(name) {
 
 //   // nominal
 //   nominal_attr_name.forEach((n) => {
-    
+
 //   })
 // }
 
@@ -581,15 +594,14 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
 
 // 将所有input重新计算了value
 function CalculateScaledRecords(name) {
-  let value_list = null
+  let value_list = null;
   if (store.GetCriteria(name, true).type == "criteria") {
     value_list = props.origin_records.map((record) => {
       if (name == "built_year") return Number(record[name]);
       else return record[name];
     });
-  }
-  else {
-    value_list = user_mark_records[name]
+  } else {
+    value_list = user_mark_records[name];
   }
 
   if (data.scaled_records.length == 0) {
@@ -631,19 +643,27 @@ function CheckFilter(index) {
         flag = false;
         break;
       }
-    } 
-    else {
+    } else {
       // quantitative
       if (store.GetCriteria(attr).type == "criteria") {
         let record = props.origin_records[index];
-        if (!(data.quantitative_filter[attr][0] <= record[attr] && data.quantitative_filter[attr][1] >= record[attr])) {
+        if (
+          !(
+            data.quantitative_filter[attr][0] <= record[attr] &&
+            data.quantitative_filter[attr][1] >= record[attr]
+          )
+        ) {
           flag = false;
           break;
         }
-      }
-      else {
+      } else {
         let record = user_mark_records[attr][index];
-        if (!(data.quantitative_filter[attr][0] <= record && data.quantitative_filter[attr][1] >= record)) {
+        if (
+          !(
+            data.quantitative_filter[attr][0] <= record &&
+            data.quantitative_filter[attr][1] >= record
+          )
+        ) {
           flag = false;
           break;
         }
@@ -666,12 +686,10 @@ const ranking_score = computed(() => {
       // user mark's weight just for test!!!!!!!!!!!!!
       if (store.GetCriteria(d.name).type == "criteria") {
         s += record[d.name] * d.weight;
-      }
-      else {
+      } else {
         // console.log(d.weight)
-        s += record[d.name] * d.weight  // user mark: manually set weight = 0.1
+        s += record[d.name] * d.weight; // user mark: manually set weight = 0.1
       }
-        
     }
     let obj = { index: i, score: s };
     scores.push(obj);
@@ -688,10 +706,10 @@ const ranking_score = computed(() => {
   for (let i = 0; i < num; i++) {
     const element = scores[i];
     // add user mark record to origin
-    let ori = props.origin_records[element.index]
+    let ori = props.origin_records[element.index];
     for (let key in user_mark_records) {
-      ori[key] = user_mark_records[key][element.index]
-    } 
+      ori[key] = user_mark_records[key][element.index];
+    }
 
     records.push({
       index: element.index,
@@ -779,28 +797,22 @@ function GotoBlock(name) {
   emitter.emit("goto-block", name);
 }
 
-// todo: 可以加个enabled的filter来过滤
-const user_mark_criterias = computed(() => {
-  return store.criterias
-    .filter((d) => d.type === "userMark")
-    .map((d) => d.coord);
-});
-
 // for user-mark criterias
 watch(
   () => store.criterias.filter((d) => d.type === "userMark"),
   (val) => {
-    console.log("new criteria", val)
+    console.log("new criteria", val);
     // let user-mark be quantitative
-    for (let i=0; i<val.length; i++) {
-      if (!quantitative_attr_name.includes(val[i].name)) {  // new criteria
-        let attr = val[i].name
+    for (let i = 0; i < val.length; i++) {
+      if (!quantitative_attr_name.includes(val[i].name)) {
+        // new criteria
+        let attr = val[i].name;
         let res = CalculateUserMark(attr);
         data.quantitative_attr_range[attr] = res;
         data.quantitative_filter[attr] = [res.min, res.max];
         data.quantitative_mapping_type[attr] = true;
 
-        quantitative_attr_name.push(attr)
+        quantitative_attr_name.push(attr);
 
         HandleScale(attr);
         CalculateScaledRecords(attr);
@@ -809,8 +821,7 @@ watch(
       }
     }
   }
-)
-
+);
 </script>
 
 <style lang="less" scoped>
