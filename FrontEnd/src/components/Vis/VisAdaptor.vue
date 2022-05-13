@@ -27,6 +27,7 @@
         :history_records="react_data.history_records"
         :subregion_records="GetSubRegionData()"
         :selection_time="props.selection_time"
+        :subregion_name="react_data.sub_region_name"
       ></trend-vis>
       <div
         class="adaptor-title"
@@ -185,6 +186,7 @@ const react_data = reactive({
   history_records: [],
   type: "blocks",
   name: "",
+  sub_region_name: "",
   tooltip_visibility: false,
 });
 
@@ -336,17 +338,13 @@ onMounted(() => {
         // todo: 2020,12 can be null
 
         let sub_region = props.feature.properties.sub_region;
-        // console.log("blocks",props.feature.properties);
+        react_data.sub_region_name = sub_region;
         if (!BlocksTimeCache[sub_region]) {
           BlocksTimeCache[sub_region] = {};
 
           GetSubRegionAvgPriceYearMonth(sub_region)
             .then((res) => {
               BlocksTimeCache[sub_region] = res;
-
-              console.log(res);
-
-              // console.log(BlocksTimeCache[sub_region])
             })
             .catch((err) => console.log(sub_region, "error"));
         }

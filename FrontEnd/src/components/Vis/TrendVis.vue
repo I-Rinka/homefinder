@@ -2,8 +2,8 @@
   <div class="trend-vis">
     <svg
       ref="visMountPoint"
-      width="100"
-      height="200"
+      :width="props.subregion_name && props.subregion_name != '' ? 120 : 100"
+      :height="props.subregion_name && props.subregion_name != '' ? 200 : 200"
       viewBox="0 0 200 100"
       xmlns="http://www.w3.org/2000/svg"
     ></svg>
@@ -36,6 +36,11 @@ const props = defineProps({
   selection_time: {
     type: Array,
     default: null,
+    required: false,
+  },
+  subregion_name: {
+    type: String,
+    default: "",
     required: false,
   },
 });
@@ -180,28 +185,48 @@ function Update() {
       return h > 0 ? h : 0;
     });
 
+  console.log(bar_group);
   bar_group
     .select("rect")
     .insert("title")
-    .text(
-      (d) =>
-        `${new Date(d.time).getUTCFullYear()}/${
-          new Date(d.time).getUTCMonth() + 1
-        }: ${d.price.toFixed(2)} rmb/m^2`
-    ); // hover title
+    .text((d) => {
+      let v = `${new Date(d.time).getUTCFullYear()}.${
+        new Date(d.time).getUTCMonth() + 1
+      }: ${d.price.toFixed(2)} rmb/m²`;
+
+      if (props.subregion_name && props.subregion_name != "") {
+        console.log(props.subregion_records);
+
+        let find_subregion = props.subregion_records.find(
+          (d2) => d2.time >= d.time
+        );
+        if (find_subregion) {
+          v +=
+            "\n" +
+            `sub region ${
+              props.subregion_name
+            } average price:${find_subregion.price.toFixed(2)} rmb/m²`;
+        }
+      }
+
+      return v;
+    }); // hover title
 
   // add sub region records
 
+  svg.append("path");
   svg
-    .insert("path")
+    .select("path")
     .datum(GetSubRegionRecords())
     .attr("fill", "none")
     .attr("stroke", "#547bc0")
-    .attr("stroke-width", 3)
+    .attr("stroke-width", 4)
+    .attr("stroke-linecap", "round")
     .attr(
       "d",
       d3
         .line()
+        .curve(d3.curveMonotoneX)
         .x((d) => {
           return x(d.time);
         })
@@ -227,9 +252,11 @@ onMounted(() => {
       pointer-events: all;
       cursor: pointer;
 
-      &:hover {
-        rect {
-          fill: rgb(255, 50, 20) !important;
+      g {
+        &:hover {
+          rect {
+            fill: rgb(255, 50, 20) !important;
+          }
         }
       }
     }
