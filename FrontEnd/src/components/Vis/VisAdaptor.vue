@@ -85,6 +85,20 @@
         <div>Select Houses in {{ react_data.name }}?</div>
       </template>
 
+      <div class="function-button-row">
+        <div class="function-button" @click="AddToFavorite()">
+          <el-icon v-if="isStared"
+            ><star-filled color="#dd9449" style="transform: scale(1.2, 1.2)" />
+          </el-icon>
+          <el-icon v-else>
+            <star />
+          </el-icon>
+        </div>
+        <div class="function-button" @click="AddToBlackList()">
+          <el-icon><hide /></el-icon>
+        </div>
+      </div>
+
       <div class="popover-content">
         <el-button type="danger" size="small" plain @click="RemoveHouse"
           ><el-icon><delete /></el-icon>
@@ -114,7 +128,17 @@ import {
   toRaw,
   watch,
 } from "@vue/runtime-core";
-import { Delete, CirclePlus } from "@element-plus/icons-vue";
+import {
+  Edit,
+  TopRight,
+  BottomRight,
+  Filter,
+  Star,
+  StarFilled,
+  Hide,
+  Delete,
+  CirclePlus,
+} from "@element-plus/icons-vue";
 
 import { ClickOutside as vClickOutside } from "element-plus";
 
@@ -617,6 +641,15 @@ function ClickVis() {
   react_data.tooltip_visibility = true;
   console.log(toRaw(props.feature));
 }
+
+let isStared = computed(() => true);
+
+function AddToBlackList() {
+  house_store.AddAnimation(visRef.value);
+}
+function AddToFavorite() {
+  house_store.AddAnimation(visRef.value);
+}
 </script>
 
 <style lang="less">
@@ -664,5 +697,23 @@ function ClickVis() {
   .popover-text {
     padding-left: 1px;
   }
+}
+
+.funtion-button-row {
+  margin: 0px 0px -5px 0px;
+  padding-left: 110px;
+}
+
+.function-button {
+  padding: 4px 7px 2px 7px;
+  transition: 0.5s;
+  border-radius: 3px;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  &:hover {
+    background-color: rgb(216, 216, 216);
+  }
+  display: inline-block;
 }
 </style>
