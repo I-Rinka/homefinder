@@ -534,7 +534,30 @@ function HandleScale(name) {
 //   },
 //   {deep: true}
 // )
+// function ChangeOtherFilter(attr) {
+//   let curr_value_list = []
+//   for (let i=0; i<props.origin_records.length; i++) {
+//     if (CheckFilter(i)) {
+//       curr_value_list.push(props.origin_records[i])
+//     }
+//   }
+//   // quantitative
+
+
+//   for (let i=0; i<quantitative_attr_name.length; i++) {
+//     if (quantitative_attr_name) {
+
+//     }
+//   }
+
+//   // nominal
+//   nominal_attr_name.forEach((n) => {
+    
+//   })
+// }
+
 function HandleQuanFilterChange(attr) {
+  // ChangeOtherFilter(attr)
   HandleScale(attr);
   CalculateScaledRecords(attr);
 }
