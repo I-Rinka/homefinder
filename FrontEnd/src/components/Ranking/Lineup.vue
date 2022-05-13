@@ -840,6 +840,7 @@ const user_mark_criterias = computed(() => {
   // overflow: scroll;
   white-space: nowrap;
   background-color: rgb(255, 255, 255);
+
   .enabled {
     height: 24px;
     border-radius: 5px;
@@ -847,7 +848,8 @@ const user_mark_criterias = computed(() => {
     padding: 0px 20px 5px 20px;
     background-color: rgb(207, 100, 100);
     animation: enter 0.5s;
-    transition: 0.4s;
+    transition: 1s;
+    transition-delay: 0.5s;
     color: white;
     font-size: 13px;
     font-weight: 600;
