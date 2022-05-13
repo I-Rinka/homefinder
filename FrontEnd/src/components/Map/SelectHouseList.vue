@@ -16,16 +16,18 @@
       </div>
       {{ house.block }}
 
-      <span
-        class="compared-price"
-        style="background-color: rgb(216, 151, 83); right: 15px"
-        >{{ house.sub_region }}</span
-      >
-      <span
-        class="compared-price"
-        style="background-color: rgb(195, 102, 98); right: 80px"
-        >{{ house.region }}</span
-      >
+      <div class="compared-frame">
+        <span
+          class="compared-price"
+          style="background-color: rgb(216, 151, 83); right: 15px"
+          >{{ house.sub_region }}</span
+        >
+        <span
+          class="compared-price"
+          style="background-color: rgb(195, 102, 98); right: 80px"
+          >{{ house.region }}</span
+        >
+      </div>
     </div>
   </TransitionGroup>
 </template>
@@ -48,7 +50,7 @@ function GotoBlock(name) {
   emitter.emit("goto-block", name);
 }
 function CloseItem(name) {
-  emits("delete",name);
+  emits("delete", name);
 }
 </script>
 
@@ -61,13 +63,22 @@ function CloseItem(name) {
   top: 40%;
   animation: voidTextEnter 1s;
 }
-.compared-price {
+
+.compared-frame {
+  display: flex;
+  justify-content: space-between;
   position: absolute;
+  // width: 100px;
+  right: 10px;
+}
+
+.compared-price {
+  // position: absolute;
   border-radius: 3px;
   padding: 2px 10px 2px 10px;
   height: 16px;
-  margin-left: 2px;
-  margin-right: 2px;
+  margin-left: 4px;
+  margin-right: 4px;
   color: white;
   font-weight: 600;
 }
