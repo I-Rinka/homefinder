@@ -12,22 +12,43 @@
           ><el-icon><Hide /></el-icon
         ></el-radio-button>
       </el-radio-group>
+      <el-button
+        style="position: relative; left: 10px; top: 5px"
+        type="danger"
+        :icon="Delete"
+        plain
+        size="small"
+        @click="RemoveAll"
+        >Remove All</el-button
+      >
     </div>
     <div class="select-table">
       <select-house-list
         v-if="data.current_view === 'select'"
         :houses="house_store.selectedHouseArrary"
-        @delete="(name)=>{house_store.RemoveHouse(name)}"
+        @delete="
+          (name) => {
+            house_store.RemoveHouse(name);
+          }
+        "
       ></select-house-list>
       <select-house-list
         v-else-if="data.current_view === 'favorite'"
         :houses="house_store.favoriteHouseArray"
-        @delete="(name)=>{house_store.RemoveFavoriteHouse(name)}"
+        @delete="
+          (name) => {
+            house_store.RemoveFavoriteHouse(name);
+          }
+        "
       ></select-house-list>
       <select-house-list
         v-else-if="data.current_view === 'hidden'"
         :houses="house_store.bannedHouseArray"
-        @delete="(name)=>{house_store.RemoveBannedHouse(name)}"
+        @delete="
+          (name) => {
+            house_store.RemoveBannedHouse(name);
+          }
+        "
       ></select-house-list>
     </div>
   </div>
@@ -42,6 +63,7 @@ import {
   StarFilled,
   Hide,
   CircleCloseFilled,
+  Delete,
 } from "@element-plus/icons-vue";
 import { computed } from "@vue/runtime-core";
 
@@ -53,8 +75,14 @@ const house_store = useHouseStore();
 
 house_store.ConstructBlockDataMap();
 
-function ClickCheckBox(name) {
-  house_store.RemoveHouse(name);
+function RemoveAll() {
+  if (data.current_view === "select") {
+    house_store.selectedHouse = {};
+  } else if (data.current_view === "favorite") {
+    house_store.favoriteHouse = {};
+  } else if (data.current_view === "hidden") {
+    house_store.bannedHouse = {};
+  }
 }
 </script>
 
