@@ -95,10 +95,34 @@ export const useHouseStore = defineStore("selectedHouse", {
         console.log("error!", error);
       }
     },
+    AddHouse2BlackListByRegionName: async function (region_name) {
+      try {
+        let res = await SelectHouseByRegion(region_name);
+        res.forEach((d) => this.AddToBlackList(d.block));
+      } catch (error) {
+        console.log("error!", error);
+      }
+    },
+    AddHouse2FavoriteByRegionName: async function (region_name) {
+      try {
+        let res = await SelectHouseByRegion(region_name);
+        res.forEach((d) => this.AddFavoriteHouse(d.block));
+      } catch (error) {
+        console.log("error!", error);
+      }
+    },
     RemoveHouseByRegionName: async function (region_name) {
       try {
         let res = await SelectHouseByRegion(region_name);
         res.forEach((d) => this.RemoveHouse(d.block));
+      } catch (error) {
+        console.log("error!", error);
+      }
+    },
+    RemoveFavoriteHouseByRegionName: async function (region_name) {
+      try {
+        let res = await SelectHouseByRegion(region_name);
+        res.forEach((d) => this.RemoveFavoriteHouse(d.block));
       } catch (error) {
         console.log("error!", error);
       }

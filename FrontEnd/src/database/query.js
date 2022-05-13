@@ -60,7 +60,6 @@ export async function GetBlocksAvgPriceAllTime(blocks, controller) {
 
 export async function GetRegionPrice(region_name, controller) {
   let query = url + "regionprice";
-  console.log("requet region");
   try {
     let res = await axios.get(query, {
       params: {

@@ -87,7 +87,7 @@
 
       <div class="function-button-row">
         <div class="function-button" @click="AddToFavorite()">
-          <el-icon v-if="isStared"
+          <el-icon v-if="react_data.is_stared"
             ><star-filled color="#dd9449" style="transform: scale(1.2, 1.2)" />
           </el-icon>
           <el-icon v-else>
@@ -213,6 +213,7 @@ const react_data = reactive({
   name: "",
   sub_region_name: "",
   tooltip_visibility: false,
+  is_stared: false,
 });
 
 const ol_data = {
@@ -642,13 +643,44 @@ function ClickVis() {
   console.log(toRaw(props.feature));
 }
 
-let isStared = computed(() => true);
-
 function AddToBlackList() {
+  // console.log(toRaw(props.feature));
+  if (react_data.type === "region") {
+    // SelectHouseByRegion(react_data.name).then((res) => console.log(res));
+    house_store.AddHouse2BlackListByRegionName(react_data.name);
+  } else {
+    for (let i = 0; i < react_data.contained_blocks.length; i++) {
+      const house_name = react_data.contained_blocks[i];
+      house_store.AddToBlackList(house_name);
+    }
+  }
+  react_data.tooltip_visibility = false;
   house_store.AddAnimation(visRef.value);
 }
 function AddToFavorite() {
-  house_store.AddAnimation(visRef.value);
+  // console.log(toRaw(props.feature));
+  if (react_data.is_stared) {
+    if (react_data.type === "region") {
+      house_store.RemoveFavoriteHouseByRegionName(react_data.name);
+    } else {
+      for (let i = 0; i < react_data.contained_blocks.length; i++) {
+        const house_name = react_data.contained_blocks[i];
+        house_store.RemoveFavoriteHouse(house_name);
+      }
+    }
+  } else {
+    if (react_data.type === "region") {
+      house_store.AddHouse2FavoriteByRegionName(react_data.name);
+    } else {
+      for (let i = 0; i < react_data.contained_blocks.length; i++) {
+        const house_name = react_data.contained_blocks[i];
+        house_store.AddFavoriteHouse(house_name);
+      }
+    }
+    house_store.AddAnimation(visRef.value);
+  }
+  react_data.is_stared = !react_data.is_stared;
+  react_data.tooltip_visibility = false;
 }
 </script>
 
@@ -699,12 +731,13 @@ function AddToFavorite() {
   }
 }
 
-.funtion-button-row {
-  margin: 0px 0px -5px 0px;
-  padding-left: 110px;
+.function-button-row {
+  margin: 0px 0px -2px 0px;
+  padding-left: 100px;
 }
 
 .function-button {
+  margin: 0 2px -5px 2px;
   padding: 4px 7px 2px 7px;
   transition: 0.5s;
   border-radius: 3px;
