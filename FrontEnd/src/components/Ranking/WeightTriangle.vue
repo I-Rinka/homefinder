@@ -609,10 +609,10 @@ let new_old_str = function (old_points, new_points) {
   let o_points = old_points.concat([]);
 
   while (o_points.length < n_points.length) {
-    o_points.push(o_points.at(-1));
+    o_points.push(o_points.at(0));
   }
   while (n_points.length < o_points.length) {
-    n_points.push(n_points.at(-1));
+    n_points.push(n_points.at(0));
   }
 
   let old_str = "";
