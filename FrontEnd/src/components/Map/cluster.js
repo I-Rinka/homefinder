@@ -176,6 +176,7 @@ export function GetFeatures(zoom, currentExtent) {
           f.properties.real_coord = element.geometry.coordinates;
           f.properties.contained_features = [element.properties.name];
           f.properties.type = "blocks";
+          f.properties.sub_region = block_data.details_map[element.properties.name].sub_region;
 
           features.push(element);
         }

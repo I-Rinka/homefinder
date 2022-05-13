@@ -340,11 +340,15 @@ onMounted(() => {
         if (!BlocksTimeCache[sub_region]) {
           BlocksTimeCache[sub_region] = {};
 
-          GetSubRegionAvgPriceYearMonth(sub_region).then((res) => {
-            BlocksTimeCache[sub_region] = res;
+          GetSubRegionAvgPriceYearMonth(sub_region)
+            .then((res) => {
+              BlocksTimeCache[sub_region] = res;
 
-            // console.log(BlocksTimeCache[sub_region])
-          });
+              console.log(res);
+
+              // console.log(BlocksTimeCache[sub_region])
+            })
+            .catch((err) => console.log(sub_region, "error"));
         }
       }
     }
@@ -373,8 +377,8 @@ function GetSubRegionData() {
         if (Object.hasOwnProperty.call(BlocksTimeCache[sub_region], key)) {
           const element = BlocksTimeCache[sub_region][key];
           history_records.push({
-            time: Date.UTC(element.year, element.year),
-            price: element.unit_price
+            time: Date.UTC(element.year, element.month),
+            price: element.unit_price,
           });
         }
       }

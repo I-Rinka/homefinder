@@ -3,7 +3,7 @@
     <svg
       ref="visMountPoint"
       width="100"
-      height="100"
+      height="200"
       viewBox="0 0 200 100"
       xmlns="http://www.w3.org/2000/svg"
     ></svg>
@@ -38,10 +38,6 @@ const props = defineProps({
     default: null,
     required: false,
   },
-});
-
-onMounted(() => {
-  console.log(props.subregion_records);
 });
 
 watch(
@@ -83,6 +79,31 @@ function GetRecords() {
   }
 }
 
+function GetSubRegionRecords() {
+  if (props.selection_time === null || props.selection_time[0].year === 0) {
+    return props.subregion_records.filter(
+      (d) =>
+        d.time >=
+          Date.UTC(config.timeRange[0].year, config.timeRange[0].month) &&
+        d.time <= Date.UTC(config.timeRange[1].year, config.timeRange[1].month)
+    );
+  } else {
+    let l = Date.UTC(
+      props.selection_time[0].year,
+      props.selection_time[0].month - 1
+    );
+    let r = Date.UTC(
+      props.selection_time[1].year,
+      props.selection_time[1].month - 1
+    );
+    return props.subregion_records
+      .filter((d) => d.time >= l && d.time <= r)
+      .map((d) => {
+        return { time: d.time, price: d.price };
+      });
+  }
+}
+
 function Update() {
   const width = 200;
   let data = GetRecords();
@@ -102,7 +123,8 @@ function Update() {
 
   let svg = d3.select(visMountPoint.value);
 
-  let bar_group = svg.selectAll("g").data(data).join("g");
+  svg.insert("g");
+  let bar_group = svg.select("g").selectAll("g").data(data).join("g");
 
   bar_group
     .attr("transform", (d, i, nodes) =>
@@ -168,7 +190,25 @@ function Update() {
         }: ${d.price.toFixed(2)} rmb/m^2`
     ); // hover title
 
-  bar_group.append;
+  // add sub region records
+
+  svg
+    .insert("path")
+    .datum(GetSubRegionRecords())
+    .attr("fill", "none")
+    .attr("stroke", "#547bc0")
+    .attr("stroke-width", 3)
+    .attr(
+      "d",
+      d3
+        .line()
+        .x((d) => {
+          return x(d.time);
+        })
+        .y((d) => {
+          return height - y(d.price);
+        })
+    );
 }
 
 let visMountPoint = ref(null);
