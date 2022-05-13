@@ -96,8 +96,8 @@ export const useStore = defineStore("weight", {
       return w;
     },
     RemoveUserMark(ol_uid: string) {
-      this.criterias = this.criterias.filter(
-        (d: any) => (!d as any) instanceof UserMark || d.ol_uid != ol_uid
+      this.criterias = this.criterias.filter(d =>
+        d.type != "userMark" || d.ol_uid != ol_uid
       );
     },
     CreateCriteria(

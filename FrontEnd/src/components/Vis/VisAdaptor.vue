@@ -25,6 +25,7 @@
         class="adaptor-trend-vis"
         v-else-if="!props.price_mode"
         :history_records="react_data.history_records"
+        :subregion_records="GetSubRegionData()"
         :selection_time="props.selection_time"
       ></trend-vis>
       <div
@@ -341,32 +342,6 @@ onMounted(() => {
 
           GetSubRegionAvgPriceYearMonth(sub_region).then((res) => {
             BlocksTimeCache[sub_region] = res;
-            console.log(res);
-
-            let i = -1;
-            let n_year, n_month;
-            let n_price = BlocksTimeCache[sub_region]["2020,12"];
-            do {
-              [n_year, n_month] = CaculateTimeOffset(
-                config.timeRange[1].year,
-                config.timeRange[1].month,
-                i
-              );
-              i--;
-              let token = n_year + "," + n_month;
-              if (
-                BlocksTimeCache[sub_region][token] &&
-                BlocksTimeCache[sub_region][token] != -1
-              ) {
-                n_price = BlocksTimeCache[sub_region][token];
-              } else {
-                BlocksTimeCache[sub_region][token] = n_price;
-              }
-
-            } while (
-              n_year > config.timeRange[0].year ||
-              n_month > config.timeRange[0].month
-            );
 
             // console.log(BlocksTimeCache[sub_region])
           });
@@ -387,6 +362,29 @@ onBeforeUnmount(() => {
     props.map.removeOverlay(ol_data.overlay);
   }
 });
+
+function GetSubRegionData() {
+  if (react_data.type === "blocks") {
+    let sub_region = props.feature.properties.sub_region;
+
+    if (BlocksTimeCache[sub_region]) {
+      let history_records = [];
+      for (const key in BlocksTimeCache[sub_region]) {
+        if (Object.hasOwnProperty.call(BlocksTimeCache[sub_region], key)) {
+          const element = BlocksTimeCache[sub_region][key];
+          history_records.push({
+            time: Date.UTC(element.year, element.year),
+            price: element.unit_price
+          });
+        }
+      }
+      history_records.sort((a, b) => a.time - b.time);
+      return history_records;
+    }
+  }
+
+  return [];
+}
 
 async function GetAndCacheRegionPrice() {
   try {

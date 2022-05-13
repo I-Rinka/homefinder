@@ -28,11 +28,20 @@ const props = defineProps({
     default: [],
     required: true,
   },
+  subregion_records: {
+    type: Array,
+    default: [],
+    required: false,
+  },
   selection_time: {
     type: Array,
     default: null,
     required: false,
   },
+});
+
+onMounted(() => {
+  console.log(props.subregion_records);
 });
 
 watch(
