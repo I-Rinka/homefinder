@@ -125,6 +125,7 @@ import {
   GetBlocksAvgPriceAllTime,
   GetRegionPrice,
   SelectHouseByRegion,
+  GetSubRegionAvgPriceYearMonth,
 } from "../../database/query";
 
 import { BlocksTimeCache } from "./valueCache";
@@ -181,7 +182,7 @@ const data = {
 const react_data = reactive({
   contained_blocks: [],
   history_records: [],
-  type: "block",
+  type: "blocks",
   name: "",
   tooltip_visibility: false,
 });
@@ -330,8 +331,46 @@ onMounted(() => {
     if (props.feature.properties.type) {
       react_data.type = props.feature.properties.type;
 
-      if (react_data.type === "block") {
-        console.log("block");
+      if (react_data.type === "blocks") {
+        // todo: 2020,12 can be null
+
+        let sub_region = props.feature.properties.sub_region;
+        // console.log("blocks",props.feature.properties);
+        if (!BlocksTimeCache[sub_region]) {
+          BlocksTimeCache[sub_region] = {};
+
+          GetSubRegionAvgPriceYearMonth(sub_region).then((res) => {
+            BlocksTimeCache[sub_region] = res;
+            console.log(res);
+
+            let i = -1;
+            let n_year, n_month;
+            let n_price = BlocksTimeCache[sub_region]["2020,12"];
+            do {
+              [n_year, n_month] = CaculateTimeOffset(
+                config.timeRange[1].year,
+                config.timeRange[1].month,
+                i
+              );
+              i--;
+              let token = n_year + "," + n_month;
+              if (
+                BlocksTimeCache[sub_region][token] &&
+                BlocksTimeCache[sub_region][token] != -1
+              ) {
+                n_price = BlocksTimeCache[sub_region][token];
+              } else {
+                BlocksTimeCache[sub_region][token] = n_price;
+              }
+
+            } while (
+              n_year > config.timeRange[0].year ||
+              n_month > config.timeRange[0].month
+            );
+
+            // console.log(BlocksTimeCache[sub_region])
+          });
+        }
       }
     }
 
@@ -371,6 +410,7 @@ async function GetAndCacheRegionPrice() {
         }
       }
 
+      // todo: for region 2020,12 can be null
       patch_cache();
       BlocksTimeCache[props.feature.properties.name] = data.history_cache;
     }
@@ -573,8 +613,8 @@ let sun_chart_color = computed(() => {
 });
 
 function ClickVis() {
-  react_data.tooltip_visibility = true
-  console.log(toRaw(props.feature))
+  react_data.tooltip_visibility = true;
+  console.log(toRaw(props.feature));
 }
 </script>
 

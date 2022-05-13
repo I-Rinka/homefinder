@@ -75,11 +75,8 @@ export async function GetRegionPrice(region_name, controller) {
   }
 }
 
-export async function GetSubRegionAvgPriceYearMonth(
-  sub_region,
-  controller
-) {
-  let query_url = url + "subregionprice";
+export async function GetSubRegionAvgPriceYearMonth(sub_region, controller) {
+  let query = url + "subregionprice";
   console.log("requet sub_region");
   try {
     let res = await axios.get(query, {

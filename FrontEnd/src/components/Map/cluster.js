@@ -138,6 +138,7 @@ export function GetFeatures(zoom, currentExtent) {
                   (d) => d.properties.name
                 );
                 f.properties.type = "blocks";
+                f.properties.sub_region = sub_region.toString();
 
                 features.push(f);
               }
@@ -174,7 +175,7 @@ export function GetFeatures(zoom, currentExtent) {
         ) {
           f.properties.real_coord = element.geometry.coordinates;
           f.properties.contained_features = [element.properties.name];
-          f.properties.type = "block";
+          f.properties.type = "blocks";
 
           features.push(element);
         }
