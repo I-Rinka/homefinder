@@ -371,6 +371,7 @@ onMounted(() => {
   display: flex;
   margin-left: 5px;
   margin-bottom: 0.9px;
+  pointer-events: all;
   height: 1vh;
   width: 90px;
 
