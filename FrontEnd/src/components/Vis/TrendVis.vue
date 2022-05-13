@@ -254,6 +254,7 @@ function Update() {
       x(props.subregion_records.at(-1).time) != NaN &&
       y(props.subregion_records.at(-1).price) != NaN
     ) {
+      svg.selectAll("text").remove();
       svg
         .insert("text")
         .attr("x", x(props.subregion_records.at(-1).time) + 2)
