@@ -88,11 +88,22 @@
           @click="PrintData"
         />
 
-        <polygon class="hinter" :points="data.top_has_sb" />
+        <!-- <polygon class="hinter" :points="data.top_has_sb" /> -->
 
-        <polygon class="hinter" :points="data.current_in_top" />
+        <!-- <polygon class="hinter" :points="data.current_in_top" /> -->
 
-        <polygon class="hinter" :points="data.current_not_change" />
+        <polygon class="hinter" :points="data.current_at_top.current">
+          <animate
+            ref="currentAtTop"
+            attributeType="XML"
+            attributeName="points"
+            :from="data.current_at_top.old"
+            :to="data.current_at_top.current"
+            dur="0.5s"
+            repeatCount="1"
+            restart="always"
+          />
+        </polygon>
 
         <line
           class="slider-height-line"
@@ -255,9 +266,21 @@ const data = reactive({
     y: Root3((100 * 2) / 3),
   },
 
-  current_not_change: "",
-  current_in_top: "",
-  top_has_sb: "",
+  current_at_top: {
+    old_points: [[100, Root3((100 * 2) / 3)]],
+    old: "",
+    current: "",
+  },
+  current_in_top: {
+    old_points: [[100, Root3((100 * 2) / 3)]],
+    old: "",
+    current: "",
+  },
+  top_has_sb: {
+    old_points: [[100, Root3((100 * 2) / 3)]],
+    old: "",
+    current: "",
+  },
 });
 
 watch(
@@ -555,6 +578,7 @@ function LoadHinterTimeout() {
   }
 }
 
+let currentAtTop = ref();
 async function LoadHinter() {
   if (Date.now() - n_time < 20) {
     return;
@@ -566,35 +590,81 @@ async function LoadHinter() {
     store.GetCriterias().map((d) => toRaw(d))
   );
 
-  let current_at_top = res.notChangeCurrent.map((d) => {
+  let at_top_points = res.notChangeCurrent.map((d) => {
     let coord = WeightToPoint(d);
     return [coord.x, coord.y];
   });
-  // console.log(current_at_top);
-  current_at_top = monotoneChainConvexHull(current_at_top);
-  let AtTopStr = "";
-  current_at_top.forEach((d) => (AtTopStr += ` ${d[0]},${d[1]} `));
-  data.current_not_change = AtTopStr;
 
-  let current_in_top = res.currentStillInTop.map((d) => {
-    let coord = WeightToPoint(d);
-    return [coord.x, coord.y];
-  });
-  current_in_top = monotoneChainConvexHull(current_in_top);
-  let InTopStr = "";
-  current_in_top.forEach((d) => (InTopStr += ` ${d[0]},${d[1]} `));
-  data.current_in_top = InTopStr;
+  if (at_top_points.length == 0) {
+    return;
+  }
 
-  let top_in_top = res.topStillHasSb.map((d) => {
-    let coord = WeightToPoint(d);
-    return [coord.x, coord.y];
-  });
-  top_in_top = monotoneChainConvexHull(top_in_top);
-  let TInTStr = "";
-  top_in_top.forEach((d) => (TInTStr += ` ${d[0]},${d[1]} `));
-  data.top_has_sb = TInTStr;
+  setTimeout(() => {
+    at_top_points = monotoneChainConvexHull(at_top_points);
 
-  console.log(data.current_not_change);
+    let temp = at_top_points.concat([]);
+
+    while (data.current_at_top.old_points.length < temp.length) {
+      data.current_at_top.old_points.push(
+        data.current_at_top.old_points.at(-1)
+      );
+    }
+    while (temp.length < data.current_at_top.old_points.length) {
+      temp.push(temp.at(-1));
+    }
+
+    console.log(temp, toRaw(data.current_at_top.old_points));
+
+    // let old_AtTopStr = "";
+    // data.current_at_top.old_points.forEach(
+    //   (d) => (old_AtTopStr += ` ${d[0]},${d[1]} `)
+    // );
+
+    // data.current_at_top.old = old_AtTopStr;
+
+    // data.current_at_top.old_points = at_top_points;
+
+    // let AtTopStr = "";
+    // temp.forEach((d) => (AtTopStr += ` ${d[0]},${d[1]} `));
+    // data.current_at_top.current = AtTopStr;
+
+    let old_AtTopStr = "";
+    data.current_at_top.old_points.forEach(
+      (d) => (old_AtTopStr += ` ${d[0]},${d[1]} `)
+    );
+
+    data.current_at_top.old = old_AtTopStr;
+
+    data.current_at_top.old_points = at_top_points;
+
+    let AtTopStr = "";
+    temp.forEach((d) => (AtTopStr += ` ${d[0]},${d[1]} `));
+    data.current_at_top.current = AtTopStr;
+    currentAtTop.value.beginElement();
+  }, 200);
+  // ();
+
+  // data.current_not_change = AtTopStr;
+
+  // let current_in_top = res.currentStillInTop.map((d) => {
+  //   let coord = WeightToPoint(d);
+  //   return [coord.x, coord.y];
+  // });
+  // current_in_top = monotoneChainConvexHull(current_in_top);
+  // let InTopStr = "";
+  // current_in_top.forEach((d) => (InTopStr += ` ${d[0]},${d[1]} `));
+  // data.current_in_top = InTopStr;
+
+  // let top_in_top = res.topStillHasSb.map((d) => {
+  //   let coord = WeightToPoint(d);
+  //   return [coord.x, coord.y];
+  // });
+  // top_in_top = monotoneChainConvexHull(top_in_top);
+  // let TInTStr = "";
+  // top_in_top.forEach((d) => (TInTStr += ` ${d[0]},${d[1]} `));
+  // data.top_has_sb = TInTStr;
+
+  // console.log(data.current_not_change);
 
   // console.log("calculation used time:", Date.now() - start_time, "ms");
 }
