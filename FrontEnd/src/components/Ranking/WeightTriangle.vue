@@ -88,9 +88,31 @@
           @click="PrintData"
         />
 
-        <!-- <polygon class="hinter" :points="data.top_has_sb" /> -->
+        <polygon class="hinter" :points="data.top_has_sb.current">
+          <animate
+            ref="topHasSb"
+            attributeType="XML"
+            attributeName="points"
+            :from="data.top_has_sb.old"
+            :to="data.top_has_sb.current"
+            dur="0.5s"
+            repeatCount="1"
+            restart="always"
+          />
+        </polygon>
 
-        <!-- <polygon class="hinter" :points="data.current_in_top" /> -->
+        <polygon class="hinter" :points="data.current_in_top.current">
+          <animate
+            ref="currentInTop"
+            attributeType="XML"
+            attributeName="points"
+            :from="data.current_in_top.old"
+            :to="data.current_in_top.current"
+            dur="0.5s"
+            repeatCount="1"
+            restart="always"
+          />
+        </polygon>
 
         <polygon class="hinter" :points="data.current_at_top.current">
           <animate
@@ -579,6 +601,29 @@ function LoadHinterTimeout() {
 }
 
 let currentAtTop = ref();
+let currentInTop = ref();
+let topHasSb = ref();
+
+let new_old_str = function (old_points, new_points) {
+  let n_points = new_points.concat([]);
+  let o_points = old_points.concat([]);
+
+  while (o_points.length < n_points.length) {
+    o_points.push(o_points.at(-1));
+  }
+  while (n_points.length < o_points.length) {
+    n_points.push(n_points.at(-1));
+  }
+
+  let old_str = "";
+  o_points.forEach((d) => (old_str += ` ${d[0]},${d[1]} `));
+
+  let new_str = "";
+  n_points.forEach((d) => (new_str += ` ${d[0]},${d[1]} `));
+
+  return [new_str, old_str];
+};
+
 async function LoadHinter() {
   if (Date.now() - n_time < 20) {
     return;
@@ -599,74 +644,50 @@ async function LoadHinter() {
     return;
   }
 
+  let in_top_points = res.currentStillInTop.map((d) => {
+    let coord = WeightToPoint(d);
+    return [coord.x, coord.y];
+  });
+
+  if (in_top_points.length == 0) {
+    return;
+  }
+
+  let top_points = res.topStillHasSb.map((d) => {
+    let coord = WeightToPoint(d);
+    return [coord.x, coord.y];
+  });
+
+  if (top_points.length == 0) {
+    return;
+  }
+
   setTimeout(() => {
     at_top_points = monotoneChainConvexHull(at_top_points);
-
-    let temp = at_top_points.concat([]);
-
-    while (data.current_at_top.old_points.length < temp.length) {
-      data.current_at_top.old_points.push(
-        data.current_at_top.old_points.at(-1)
-      );
-    }
-    while (temp.length < data.current_at_top.old_points.length) {
-      temp.push(temp.at(-1));
-    }
-
-    console.log(temp, toRaw(data.current_at_top.old_points));
-
-    // let old_AtTopStr = "";
-    // data.current_at_top.old_points.forEach(
-    //   (d) => (old_AtTopStr += ` ${d[0]},${d[1]} `)
-    // );
-
-    // data.current_at_top.old = old_AtTopStr;
-
-    // data.current_at_top.old_points = at_top_points;
-
-    // let AtTopStr = "";
-    // temp.forEach((d) => (AtTopStr += ` ${d[0]},${d[1]} `));
-    // data.current_at_top.current = AtTopStr;
-
-    let old_AtTopStr = "";
-    data.current_at_top.old_points.forEach(
-      (d) => (old_AtTopStr += ` ${d[0]},${d[1]} `)
+    [data.current_at_top.current, data.current_at_top.old] = new_old_str(
+      toRaw(data.current_at_top.old_points),
+      at_top_points
     );
-
-    data.current_at_top.old = old_AtTopStr;
-
     data.current_at_top.old_points = at_top_points;
 
-    let AtTopStr = "";
-    temp.forEach((d) => (AtTopStr += ` ${d[0]},${d[1]} `));
-    data.current_at_top.current = AtTopStr;
+    in_top_points = monotoneChainConvexHull(in_top_points);
+    [data.current_in_top.current, data.current_in_top.old] = new_old_str(
+      toRaw(data.current_in_top.old_points),
+      in_top_points
+    );
+    data.current_in_top.old_points = in_top_points;
+
+    top_points = monotoneChainConvexHull(top_points);
+    [data.top_has_sb.current, data.top_has_sb.old] = new_old_str(
+      toRaw(data.top_has_sb.old_points),
+      top_points
+    );
+    data.top_has_sb.old_points = top_points;
+
     currentAtTop.value.beginElement();
+    currentInTop.value.beginElement();
+    topHasSb.value.beginElement();
   }, 200);
-  // ();
-
-  // data.current_not_change = AtTopStr;
-
-  // let current_in_top = res.currentStillInTop.map((d) => {
-  //   let coord = WeightToPoint(d);
-  //   return [coord.x, coord.y];
-  // });
-  // current_in_top = monotoneChainConvexHull(current_in_top);
-  // let InTopStr = "";
-  // current_in_top.forEach((d) => (InTopStr += ` ${d[0]},${d[1]} `));
-  // data.current_in_top = InTopStr;
-
-  // let top_in_top = res.topStillHasSb.map((d) => {
-  //   let coord = WeightToPoint(d);
-  //   return [coord.x, coord.y];
-  // });
-  // top_in_top = monotoneChainConvexHull(top_in_top);
-  // let TInTStr = "";
-  // top_in_top.forEach((d) => (TInTStr += ` ${d[0]},${d[1]} `));
-  // data.top_has_sb = TInTStr;
-
-  // console.log(data.current_not_change);
-
-  // console.log("calculation used time:", Date.now() - start_time, "ms");
 }
 
 onMounted(() => {
