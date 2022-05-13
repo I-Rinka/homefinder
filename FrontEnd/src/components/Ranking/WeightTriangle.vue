@@ -481,13 +481,13 @@ async function ChangeWeight(v1, v2, v3) {
   if (weighchange_timeout == null) {
     weighchange_timeout = setTimeout(() => {
       if (Date.now() - n_time > 10) {
-        wp0.value = v1;
-        wp1.value = v2;
-        wp2.value = v3;
+        wp0.value = wv1;
+        wp1.value = wv2;
+        wp2.value = wv3;
       }
 
       weighchange_timeout = null;
-    }, 300);
+    }, 500);
   }
 }
 
@@ -524,9 +524,6 @@ function TranslateSlider(e) {
       let v3 = d3 / overall;
 
       ChangeWeight(v1, v2, v3);
-      // wp0.value = v1;
-      // wp1.value = v2;
-      // wp2.value = v3;
 
       // point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
       if (data.slider.x - point.x < 5 && data.slider.y - point.y < 5) {
@@ -554,7 +551,7 @@ function LoadHinterTimeout() {
     solution_trigger = setTimeout(() => {
       LoadHinter();
       solution_trigger = null;
-    }, 1000);
+    }, 100);
   }
 }
 
@@ -596,6 +593,8 @@ async function LoadHinter() {
   let TInTStr = "";
   top_in_top.forEach((d) => (TInTStr += ` ${d[0]},${d[1]} `));
   data.top_has_sb = TInTStr;
+
+  console.log(data.current_not_change);
 
   // console.log("calculation used time:", Date.now() - start_time, "ms");
 }
