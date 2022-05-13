@@ -588,7 +588,7 @@ function CalculateScaledRecords(name) {
         data.scaled_records[i][name] = scale_list.get(name).get(value_list[i]);
       }
     } else {
-      // quantitative: map
+      // quantitative: scale
       for (let i = 0; i < value_list.length; i++) {
         data.scaled_records[i][name] = scale_list.get(name)(value_list[i]);
       }
@@ -638,7 +638,15 @@ const ranking_score = computed(() => {
     let s = 0;
     for (let j = 0; j < enabled_strip.value.length; j++) {
       let d = enabled_strip.value[j];
-      s += record[d.name] * d.weight;
+
+      // user mark's weight just for test!!!!!!!!!!!!!
+      if (store.GetCriteria(d.name).type == "criteria") {
+        s += record[d.name] * d.weight;
+      }
+      else {
+        s += record[d.name] * 0.1  // user mark: manually set weight = 0.1
+      }
+        
     }
     let obj = { index: i, score: s };
     scores.push(obj);
