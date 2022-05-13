@@ -216,6 +216,60 @@ export function getRegionAvgPrice(req, res) {
   });
 }
 
+export function getSubRegionAvgPrice(req, res) {
+    let region = req.query.sub_region;
+    MongoClient.connect(url, (err, db) => {
+      if (err || region === undefined) {
+        res.status(404);
+      }
+      try {
+        if (!db) {
+          return
+        }
+        db.db("homefinder")
+          .collection("sales_records")
+          .aggregate([
+            {
+              $match: { sub_region: region },
+            },
+            {
+              $group: {
+                _id: { year: "$year", month: "$month" },
+                unit_price: { $avg: "$unit_price" },
+                deal_price: { $avg: "$deal_price" },
+              },
+            },
+            {
+              $project: {
+                year: "$_id.year",
+                month: "$_id.month",
+                unit_price: "$unit_price",
+                deal_price: "$deal_price",
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+              },
+            },
+          ])
+          .toArray((err, result) => {
+            if (err) {
+              console.log(err);
+              res.status(404);
+            } else {
+              res.send(result);
+            }
+            db.close();
+          });
+      } catch (error) {
+        res.status(502);
+        res.send(error);
+      }
+    });
+  }
+  
+
 export function getAvgPrice(req, res) {
   let block_set = req.body;
   if (req.query.year) {

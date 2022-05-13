@@ -19,7 +19,7 @@
         :color="sun_chart_color"
         :text="computed_price"
         :open_corona="props.open_corona"
-        @click="react_data.tooltip_visibility = true"
+        @click="ClickVis"
       ></sun-chart>
       <trend-vis
         class="adaptor-trend-vis"
@@ -62,7 +62,7 @@
       popper-class="popper"
       effect="customized"
     >
-      <template v-if="react_data.type === 'block'">
+      <template v-if="react_data.type !== 'region'">
         <template v-if="react_data.contained_blocks.length > 1">
           <div>Select Houses?</div>
           <div style="text-align: left; font-size: 10px">
@@ -97,6 +97,7 @@
 </template>
 
 <script setup>
+// todo: add to black list
 import {
   computed,
   onBeforeMount,
@@ -328,7 +329,13 @@ onMounted(() => {
 
     if (props.feature.properties.type) {
       react_data.type = props.feature.properties.type;
+
+      if (react_data.type === "block") {
+        console.log("block");
+      }
     }
+
+    // console.log(toRaw(props.feature));
 
     props.map.addOverlay(ol_data.overlay);
     UpdatePrice();
@@ -564,6 +571,11 @@ let sun_chart_color = computed(() => {
     return interlop_function(1 - unit_price.value / 50000);
   }
 });
+
+function ClickVis() {
+  react_data.tooltip_visibility = true
+  console.log(toRaw(props.feature))
+}
 </script>
 
 <style lang="less">

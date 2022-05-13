@@ -75,6 +75,26 @@ export async function GetRegionPrice(region_name, controller) {
   }
 }
 
+export async function GetSubRegionAvgPriceYearMonth(
+  sub_region,
+  controller
+) {
+  let query_url = url + "subregionprice";
+  console.log("requet sub_region");
+  try {
+    let res = await axios.get(query, {
+      params: {
+        sub_region: sub_region,
+      },
+      signal: controller ? controller.signal : undefined,
+    });
+
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function GetNewestRecords() {
   let res = await axios.get("http://localhost:3000/newest_records.json");
   return res.data;
