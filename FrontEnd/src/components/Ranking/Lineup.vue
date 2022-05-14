@@ -11,7 +11,7 @@
           '--strip-width': `${(100 * d.weight) / strip_percentage_sum}%`,
         }"
       >
-        <div class="strip" :title="d.name">
+        <div class="strip" :title="d.label">
           <!-- enable -->
           <div style="overflow: hidden; white-space: nowrap">
             <el-checkbox v-model="d.enabled"></el-checkbox>
