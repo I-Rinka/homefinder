@@ -229,8 +229,8 @@
                   '--strip-color': d.color,
                   '--strip-width': `${
                     (d.weight / strip_percentage_sum) *
-                        data.scaled_records[item.index][d.name] *
-                        100
+                        data.scaled_records[item.index][d.name] /
+                    10
                   }%`,
                 }"
               >
@@ -241,7 +241,7 @@
             </el-tooltip>
           </template>
           <div class="table-content-score">
-            {{ item.score.toFixed(2) }}
+            {{ (item.score/10).toFixed(2) }}
           </div>
 
           <!-- todo: Distance Criteria reference -->
@@ -589,7 +589,7 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
   let min = data.quantitative_filter[name][0];
   let max = data.quantitative_filter[name][1];
 
-  let scale = d3.scaleLinear().range([0.01, 1]);
+  let scale = d3.scaleLinear().range([10, 1000]);
   if (is_positive_correlation) {
     scale.domain([min, max]);
   } else {
@@ -801,6 +801,17 @@ function AddToBlackList(name) {
 
 function GotoBlock(name) {
   emitter.emit("goto-block", name);
+}
+
+// for position change of user mark
+function HandleUserMarkChange(attr) {   // attr is the changed mark's name
+  let res = CalculateUserMark(attr);
+  data.quantitative_attr_range[attr] = res;
+  data.quantitative_filter[attr] = [res.min, res.max];
+  data.quantitative_mapping_type[attr] = true;
+
+  HandleScale(attr);
+  CalculateScaledRecords(attr);
 }
 
 // for user-mark criterias
