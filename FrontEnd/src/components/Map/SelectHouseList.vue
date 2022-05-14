@@ -103,7 +103,7 @@ function CloseItem(name) {
 .list-complete-enter-from, .list-complete-leave-to
 /* .list-complete-leave-active below version 2.1.8 */ {
   transform: translateY(45vh);
-  opacity: 0;
+  // opacity: 0;
 }
 
 .list-complete-leave-from {
@@ -111,7 +111,7 @@ function CloseItem(name) {
 }
 
 .list-complete-leave-active {
-  position: absolute;
+  position: relative;
 }
 
 .delete-button {
