@@ -229,11 +229,6 @@
                   '--strip-color': d.color,
                   '--strip-width': `${
                     (d.weight / strip_percentage_sum) *
-                      data.scaled_records[item.index][d.name] *
-                      100 <
-                    5
-                      ? 5
-                      : (d.weight / strip_percentage_sum) *
                         data.scaled_records[item.index][d.name] *
                         100
                   }%`,
@@ -583,7 +578,7 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
   let min = data.quantitative_filter[name][0];
   let max = data.quantitative_filter[name][1];
 
-  let scale = d3.scaleLinear().range([0, 1]);
+  let scale = d3.scaleLinear().range([0.3, 1]);
   if (is_positive_correlation) {
     scale.domain([min, max]);
   } else {
