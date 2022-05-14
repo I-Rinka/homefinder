@@ -498,8 +498,19 @@ watch(
           if (scale_list.has(new_list[i])) {
           } // already have scale, don't calculate again
           else {
-            HandleScale(new_list[i]);
-            CalculateScaledRecords(new_list[i]);
+            let attr = new_list[i];
+
+            if (!quantitative_attr_name.includes(attr)) { // new user mark
+              let res = CalculateUserMark(attr);
+              data.quantitative_attr_range[attr] = res;
+              data.quantitative_filter[attr] = [res.min, res.max];
+              data.quantitative_mapping_type[attr] = true;
+
+              quantitative_attr_name.push(attr);
+            }
+            
+            HandleScale(attr);
+            CalculateScaledRecords(attr);
           }
           break;
         }
@@ -578,7 +589,7 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
   let min = data.quantitative_filter[name][0];
   let max = data.quantitative_filter[name][1];
 
-  let scale = d3.scaleLinear().range([0.3, 1]);
+  let scale = d3.scaleLinear().range([0.01, 1]);
   if (is_positive_correlation) {
     scale.domain([min, max]);
   } else {
@@ -793,30 +804,30 @@ function GotoBlock(name) {
 }
 
 // for user-mark criterias
-watch(
-  () => store.criterias.filter((d) => d.type === "userMark"),
-  (val) => {
-    console.log("new criteria", val);
-    // let user-mark be quantitative
-    for (let i = 0; i < val.length; i++) {
-      if (!quantitative_attr_name.includes(val[i].name)) {
-        // new criteria
-        let attr = val[i].name;
-        let res = CalculateUserMark(attr);
-        data.quantitative_attr_range[attr] = res;
-        data.quantitative_filter[attr] = [res.min, res.max];
-        data.quantitative_mapping_type[attr] = true;
+// watch(
+//   () => store.criterias.filter((d) => d.type === "userMark"),
+//   (val) => {
+//     console.log("new criteria", val);
+//     // let user-mark be quantitative
+//     for (let i = 0; i < val.length; i++) {
+//       if (!quantitative_attr_name.includes(val[i].name)) {
+//         // new criteria
+//         let attr = val[i].name;
+//         let res = CalculateUserMark(attr);
+//         data.quantitative_attr_range[attr] = res;
+//         data.quantitative_filter[attr] = [res.min, res.max];
+//         data.quantitative_mapping_type[attr] = true;
 
-        quantitative_attr_name.push(attr);
+//         quantitative_attr_name.push(attr);
 
-        HandleScale(attr);
-        CalculateScaledRecords(attr);
+//         HandleScale(attr);
+//         CalculateScaledRecords(attr);
 
-        break;
-      }
-    }
-  }
-);
+//         break;
+//       }
+//     }
+//   }
+// );
 </script>
 
 <style lang="less" scoped>
