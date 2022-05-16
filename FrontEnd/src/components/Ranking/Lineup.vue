@@ -500,7 +500,7 @@ watch(
           else {
             let attr = new_list[i];
 
-            if (!quantitative_attr_name.includes(attr)) { // new user mark
+            if (!nominal_attr_name.includes(attr) && !quantitative_attr_name.includes(attr)) { // new user mark
               let res = CalculateUserMark(attr);
               data.quantitative_attr_range[attr] = res;
               data.quantitative_filter[attr] = [res.min, res.max];
