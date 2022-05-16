@@ -2,7 +2,7 @@
   <div id="MapView">
     <!-- The Map -->
     <div class="map-frame">
-      <div id="map" class="map"></div>
+      <div id="map" class="map" title="Double Click To Add Feature!"></div>
     </div>
 
     <div class="zoom-slider">
@@ -325,7 +325,7 @@ onMounted(() => {
 
       // user mark
       map.getTargetElement().style.cursor =
-        feature.get("type") === "UserMark" ? "pointer" : "";
+        feature.get("type") === "UserMark" ? "grab" : "move";
     }
   });
 

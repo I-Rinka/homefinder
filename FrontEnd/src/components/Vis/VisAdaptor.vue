@@ -7,6 +7,7 @@
       :id="props.feature.geometry.coordinates.toString()"
       @click="ClickVis"
       v-click-outside="onClickOutside"
+      title="Click to Select Houses"
     >
       <sun-chart
         class="adaptor-sun-chart"
