@@ -229,8 +229,7 @@
                   '--strip-color': d.color,
                   '--strip-width': `${
                     (d.weight / strip_percentage_sum) *
-                        data.scaled_records[item.index][d.name] /
-                    10
+                        data.scaled_records[item.index][d.name] * 100
                   }%`,
                 }"
               >
@@ -241,7 +240,7 @@
             </el-tooltip>
           </template>
           <div class="table-content-score">
-            {{ (item.score/10).toFixed(2) }}
+            {{ (item.score).toFixed(2) }}
           </div>
 
           <!-- todo: Distance Criteria reference -->
@@ -591,7 +590,7 @@ function CalculateQuantitativeScale(name, is_positive_correlation) {
   let min = data.quantitative_filter[name][0];
   let max = data.quantitative_filter[name][1];
 
-  let scale = d3.scaleLinear().range([10, 1000]);
+  let scale = d3.scaleLinear().range([0.1, 1]);
   if (is_positive_correlation) {
     scale.domain([min, max]);
   } else {
