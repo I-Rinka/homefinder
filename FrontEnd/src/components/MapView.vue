@@ -372,6 +372,8 @@ function ChangeUserMarks() {
 
     if (i !== -1) {
       weight_store.criterias[i].coord = f.getGeometry().flatCoordinates;
+
+      emitter.emit("change-point", weight_store.criterias[i].name);
     }
   });
 

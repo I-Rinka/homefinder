@@ -371,7 +371,7 @@ function ScaleAndStep(name) {
   }
 }
 
-const nominal_attr_name = ["direction", "decoration", "position", "type"];
+const nominal_attr_name = ["direction", "decoration", "position", "type","region","sub_region"];
 const quantitative_attr_name = [
   "area",
   "deal_price",
@@ -391,6 +391,8 @@ store.criterias.push(store.CreateCriteria("direction", "#ffffb3"));
 store.criterias.push(store.CreateCriteria("decoration", "#fb8072"));
 store.criterias.push(store.CreateCriteria("deal_price", "#bebada", true));
 store.criterias.push(store.CreateCriteria("unit_price", "#80b1d3", true));
+store.criterias.push(store.CreateCriteria("region", "#e05e63",true));
+store.criterias.push(store.CreateCriteria("sub_region", "#e5cee6"));
 store.criterias.push(store.CreateCriteria("position", "#fdb462"));
 store.criterias.push(store.CreateCriteria("room", "#b3de69"));
 store.criterias.push(store.CreateCriteria("hall", "#fccde5"));
@@ -813,6 +815,7 @@ function HandleUserMarkChange(attr) {   // attr is the changed mark's name
   HandleScale(attr);
   CalculateScaledRecords(attr);
 }
+emitter.on("change-point",HandleUserMarkChange);
 
 // for user-mark criterias
 // watch(
