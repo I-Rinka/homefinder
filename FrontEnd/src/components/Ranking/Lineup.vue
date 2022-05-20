@@ -183,7 +183,7 @@
     <TransitionGroup tag="div" name="list" class="table">
       <div
         class="table-content"
-        v-for="item in ranking_score"
+        v-for="(item, ii) in ranking_score"
         :key="item.index"
         @dblclick="GotoBlock(item.origin.block)"
         title="Double Click to see where it is!"
@@ -229,7 +229,8 @@
                   '--strip-color': d.color,
                   '--strip-width': `${
                     (d.weight / strip_percentage_sum) *
-                        data.scaled_records[item.index][d.name] * 100
+                      data.weight_strip_scaled_data[ii][d.name] 
+                      * 100
                   }%`,
                 }"
               >
@@ -240,7 +241,7 @@
             </el-tooltip>
           </template>
           <div class="table-content-score">
-            {{ (item.score).toFixed(2) }}
+            {{ (item.score * 100).toFixed(2) }}
           </div>
 
           <!-- todo: Distance Criteria reference -->
@@ -354,6 +355,8 @@ const data = reactive({
     position: [],
     type: [],
   },
+
+  weight_strip_scaled_data: []
 });
 
 function ScaleAndStep(name) {
@@ -699,10 +702,10 @@ const ranking_score = computed(() => {
 
       // user mark's weight just for test!!!!!!!!!!!!!
       if (store.GetCriteria(d.name).type == "criteria") {
-        s += record[d.name] * d.weight;
+        s += record[d.name] * d.weight / strip_percentage_sum.value;
       } else {
         // console.log(d.weight)
-        s += record[d.name] * d.weight; // user mark: manually set weight = 0.1
+        s += record[d.name] * d.weight / strip_percentage_sum.value; // user mark: manually set weight = 0.1
       }
     }
     let obj = { index: i, score: s };
@@ -733,6 +736,54 @@ const ranking_score = computed(() => {
     });
   }
 
+  // change strip width!!!!!!!!!
+  data.weight_strip_scaled_data = []
+  let ranked_val = []
+  let all_val = []
+  for (let i=0; i<records.length; i++) {
+    let val_obj = {}
+    for (let d of enabled_strip.value) {
+      let cur_val = data.scaled_records[records[i].index][d.name]
+      val_obj[d.name] = cur_val
+      all_val.push(cur_val)
+    }
+    ranked_val.push(val_obj) 
+  }
+
+  //calculate min and max
+  let strip_scale = {}
+  for (let d of enabled_strip.value) {
+    let r = ranked_val.map((value) => value[d.name])
+    let min = Math.min(...r)
+    let max = Math.max(...r)
+    // let min = Math.min(...all_val)
+    // let max = Math.max(...all_val)
+    let scale = d3.scaleLinear().range([0.1, 1]).domain([min, max])
+    strip_scale[d.name] = scale
+  }
+  
+  // re-calculate score
+  for (let i=0; i<ranked_val.length; i++) {
+    let obj = {}
+    let score = 0
+    for (let d of enabled_strip.value) {
+      let vv = strip_scale[d.name](ranked_val[i][d.name])
+      obj[d.name] = vv
+      score += vv * d.weight / strip_percentage_sum.value
+    }
+    obj["score"] = score
+    data.weight_strip_scaled_data.push(obj)
+
+    records[i].score = score
+  }   
+
+  records.sort((a, b) => {
+    return a.score - b.score;
+  });
+  data.weight_strip_scaled_data.sort((a, b) => {
+    return a.score - b.score;
+  });
+
   // We can use this to compute rank frequency
   rank_store.ChangeCurrentSolutions(records.map((d) => d.origin));
   let scaled_records = [];
@@ -741,6 +792,15 @@ const ranking_score = computed(() => {
 
   return records.slice(0, 99);
 });
+
+watch(
+  () => ranking_score.value,
+  () => {
+    console.log("ranking_score", ranking_score.value)
+    console.log("weight_strip", data.weight_strip_scaled_data)
+  }
+)
+
 
 function HandleConfirmMapping(mapping_data, attr) {
   data.mapping_dialog_visible = false;
