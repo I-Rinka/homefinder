@@ -2,30 +2,34 @@
   <div class="void-selection" v-if="props.houses.length === 0">
     No Selected House
   </div>
-  <TransitionGroup tag="div" name="list-complete">
+  <TransitionGroup
+    tag="div"
+    name="list-complete"
+    v-infinite-scroll="load"
+  >
     <div
       class="select-item"
-      v-for="house in props.houses"
-      :key="house.block"
+      v-for="i in list_count"
+      :key="props.houses[i].block"
       title="Double Click to see where it is!"
-      @dblclick="GotoBlock(house.block)"
+      @dblclick="GotoBlock(props.houses[i].block)"
     >
       <!-- <el-button type="danger" :icon="Close" circle size="small" /> -->
-      <div class="delete-button" @click="CloseItem(house.block)">
+      <div class="delete-button" @click="CloseItem(props.houses[i].block)">
         <el-icon><CircleCloseFilled /></el-icon>
       </div>
-      {{ house.block }}
+      {{ props.houses[i].block }}
 
       <div class="compared-frame">
         <span
           class="compared-price"
           style="background-color: rgb(216, 151, 83); right: 15px"
-          >{{ house.sub_region }}</span
+          >{{ props.houses[i].sub_region }}</span
         >
         <span
           class="compared-price"
           style="background-color: rgb(195, 102, 98); right: 80px"
-          >{{ house.region }}</span
+          >{{ props.houses[i].region }}</span
         >
       </div>
     </div>
@@ -35,12 +39,33 @@
 <script setup>
 import { emitter } from "../store/bus";
 import { CircleCloseFilled } from "@element-plus/icons-vue";
-import { ref } from "@vue/reactivity";
+import { reactive, ref } from "@vue/reactivity";
+import { computed, watch } from "@vue/runtime-core";
 
 const props = defineProps({
   houses: {
     type: Array,
     default: [],
+  },
+});
+
+const data = reactive({
+  count: 20,
+});
+
+function load() {
+  data.count += 5;
+}
+
+watch(
+  () => props.houses.length,
+  () => (data.count = 20)
+);
+
+const list_count = computed({
+  set() {},
+  get() {
+    return props.houses.length < data.count ? props.houses.length : data.count;
   },
 });
 
@@ -102,12 +127,12 @@ function CloseItem(name) {
 
 .list-complete-enter-from, .list-complete-leave-to
 /* .list-complete-leave-active below version 2.1.8 */ {
-  transform: translateY(45vh);
-  // opacity: 0;
+  transform: translateY(100%);
+  opacity: 0;
 }
 
 .list-complete-leave-from {
-  transform: translateY(0vh);
+  transform: translateY(0);
 }
 
 .list-complete-leave-active {

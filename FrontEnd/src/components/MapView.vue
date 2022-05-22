@@ -633,7 +633,7 @@ function ChangeView() {
     transform: translateY(var(--y-start)) translateX(var(--x-start)) scale(1,1);
   }
 
-  66% {
+  50% {
     opacity: 0.8;
     transform: translateY(var(--y-mid)) translateX(var(--x-mid)) scale(1.5,1.5);
 
