@@ -657,7 +657,7 @@ function CheckFilter(index) {
   else return false;
 }
 
-let ranking_worker = new Worker("webworker.js");
+let ranking_worker = new Worker("lineup_webworker.js");
 
 // ranking change: weight change / enable change
 watch(
@@ -668,21 +668,6 @@ watch(
     // data.ranking_score = RankingScore();
   }
 );
-
-// watch(
-//   () => [
-//     enabled_strip.value,
-//     props.origin_records,
-//     data.quantitative_filter,
-//     data.nominal_filter,
-//     data.scaled_records,
-//     strip_percentage_sum.value,
-//   ],
-//   () => {
-//     // console.log(user_mark_records);
-//     MT_UpdateData();
-//   }
-// );
 
 function MT_UpdateData() {
   ranking_worker.postMessage({
@@ -801,113 +786,20 @@ function MT_ReceiveCalculatedScore(scores) {
   records.forEach((d) => scaled_records.push(data.scaled_records[d.index]));
   rank_store.ChangeCurrentScale(scaled_records.slice(0, 100));
 
-  data.ranking_score = records.slice(0, 99);
+  record_update = records.slice(0, 99);
+
+  if (record_timeout === null) {
+    record_timeout = setTimeout(() => {
+      data.ranking_score = record_update;
+      record_timeout = null;
+    }, 1000);
+  }
+
   console.log("update used time:", Date.now() - start);
 }
 
-function RankingScore() {
-  // ranking_worker.postMessage({ val: "hello" });
-
-  let scores = [];
-  for (let i = 0; i < data.scaled_records.length; i++) {
-    if (!CheckFilter(i)) continue; // filtering
-
-    let record = data.scaled_records[i];
-    let s = 0;
-    for (let j = 0; j < enabled_strip.value.length; j++) {
-      let d = enabled_strip.value[j];
-
-      if (store.GetCriteria(d.name).type == "criteria") {
-        s += (record[d.name] * d.weight) / strip_percentage_sum.value;
-      } else {
-        s += (record[d.name] * d.weight) / strip_percentage_sum.value; // user mark: manually set weight = 0.1
-      }
-    }
-    let obj = { index: i, score: s };
-    scores.push(obj);
-  }
-
-  //
-
-  scores.sort((a, b) => {
-    return a.score - b.score;
-  });
-
-  // select Top100
-  let num = scores.length < 100 ? scores.length : 100;
-  let records = [];
-  for (let i = 0; i < num; i++) {
-    const element = scores[i];
-    // add user mark record to origin
-    let ori = props.origin_records[element.index];
-    for (let key in user_mark_records) {
-      ori[key] = user_mark_records[key][element.index];
-    }
-
-    records.push({
-      index: element.index,
-      origin: ori,
-      id: props.origin_records[element.index]._id,
-      score: element.score,
-    });
-  }
-
-  // change strip width!!!!!!!!!
-  data.weight_strip_scaled_data = [];
-  let ranked_val = [];
-  let all_val = [];
-  for (let i = 0; i < records.length; i++) {
-    let val_obj = {};
-    for (let d of enabled_strip.value) {
-      let cur_val = data.scaled_records[records[i].index][d.name];
-      val_obj[d.name] = cur_val;
-      all_val.push(cur_val);
-    }
-    ranked_val.push(val_obj);
-  }
-
-  //calculate min and max
-  let strip_scale = {};
-  for (let d of enabled_strip.value) {
-    let r = ranked_val.map((value) => value[d.name]);
-    let min = Math.min(...r);
-    let max = Math.max(...r);
-    // let min = Math.min(...all_val)
-    // let max = Math.max(...all_val)
-    let scale = d3.scaleLinear().range([0.1, 1]).domain([min, max]);
-    strip_scale[d.name] = scale;
-  }
-
-  // re-calculate score
-  for (let i = 0; i < ranked_val.length; i++) {
-    let obj = {};
-    let score = 0;
-    for (let d of enabled_strip.value) {
-      let vv = strip_scale[d.name](ranked_val[i][d.name]);
-      obj[d.name] = vv;
-      score += (vv * d.weight) / strip_percentage_sum.value;
-    }
-    obj["score"] = score;
-    data.weight_strip_scaled_data.push(obj);
-
-    records[i].score = score;
-  }
-
-  records.sort((a, b) => {
-    return a.score - b.score;
-  });
-  data.weight_strip_scaled_data.sort((a, b) => {
-    return a.score - b.score;
-  });
-
-  // We can use this to compute rank frequency
-  rank_store.ChangeCurrentSolutions(records.map((d) => d.origin));
-  let scaled_records = [];
-  records.forEach((d) => scaled_records.push(data.scaled_records[d.index]));
-  rank_store.ChangeCurrentScale(scaled_records.slice(0, 100));
-
-  data.ranking_score = records.slice(0, 99);
-}
+let record_timeout = null;
+let record_update = [];
 
 // watch(
 //   () => ranking_score.value,
@@ -1133,8 +1025,8 @@ emitter.on("change-point", HandleUserMarkChange);
     padding: 0px 20px 5px 20px;
     background-color: rgb(207, 100, 100);
     animation: enter 0.5s;
-    transition: 1s;
-    transition-delay: 0.5s;
+    transition: 0.5s;
+    // transition-delay: 0.5s;
     color: white;
     font-size: 13px;
     font-weight: 600;

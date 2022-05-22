@@ -719,7 +719,7 @@ async function LoadHinter() {
     currentAtTop.value.beginElement();
     currentInTop.value.beginElement();
     topHasSb.value.beginElement();
-  }, 300);
+  }, 800);
 }
 
 onMounted(() => {

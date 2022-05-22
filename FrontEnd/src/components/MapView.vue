@@ -577,7 +577,7 @@ function ChangeView() {
 
 .map-frame {
   width: 99.8%;
-  height: 99.8%;
+  height: 99.5%;
 }
 
 .zoom-slider {
