@@ -618,34 +618,30 @@ function ChangeView() {
   background-color: grey;
   opacity: 0;
   border-radius: 25px;
-  animation: addSelection 0.5s ease-in-out;
+  animation: addSelection 0.5s linear;
+
+  height: 30px;
+  width: 30px;
+  top: 0;
+  left: 0;
 }
 
 @keyframes addSelection {
   from {
-    height: 30px;
-    width: 30px;
-
     opacity: 0.2;
 
-    top: var(--y-start);
-    left: var(--x-start);
+    transform: translateY(var(--y-start)) translateX(var(--x-start)) scale(1,1);
   }
 
   66% {
     opacity: 0.8;
-    height: 40px;
-    width: 40px;
-    top: calc(var(--y-end)-1vh);
+    transform: translateY(var(--y-mid)) translateX(var(--x-mid)) scale(1.5,1.5);
+
   }
   to {
-    height: 20px;
-    width: 20px;
+    opacity: 0;
 
-    opacity: 0.2;
-
-    top: var(--y-end);
-    left: var(--x-end);
+    transform: translateY(var(--y-end)) translateX(var(--x-end)) scale(0.5,0.5);
   }
 }
 </style>

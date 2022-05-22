@@ -6,7 +6,7 @@ import {
   GetBlocksAvgPriceAllTime,
   GetRegionPrice,
   SelectHouseByRegion,
-  GetBlocks
+  GetBlocks,
 } from "../../database/query";
 
 // useStore could be anything like useUser, useCart
@@ -174,12 +174,14 @@ export const useHouseStore = defineStore("selectedHouse", {
 
       let x = document.getElementById("app").clientWidth;
 
-      let x0 = `${rect.x + rect.width / 2}px`;
-      let x1 = `${x * 0.95}px`;
-      let y0 = `${rect.y + rect.height / 2}px`;
-      let y1 = "2.5vh";
+      let x0 = rect.x + rect.width / 2;
+      let x1 = x * 0.95;
+      let y0 = rect.y + rect.height / 2;
+      let y1 = 10;
 
-      newDiv.style = `--x-start: ${x0}; --y-start: ${y0}; --x-end: ${x1}; --y-end:${y1}`;
+      newDiv.style = `--x-start: ${x0}px; --y-start: ${y0}px; --x-mid: ${
+        ((x1 - x0) * 2) / 3 + x0
+      }px; --y-mid:${y1 - 15}px; --x-end: ${x1}px; --y-end:${y1}px`;
       newDiv.classList.add("add-animation");
     },
   },
