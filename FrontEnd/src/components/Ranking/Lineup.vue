@@ -23,7 +23,7 @@
             <span
               v-if="d.type === 'userMark'"
               contenteditable="true"
-              style="margin: 2px;"
+              style="margin: 2px"
               @focusout="(e) => (d.label = e.target.innerText)"
             >
               {{ d.label }}
@@ -183,7 +183,7 @@
     <TransitionGroup tag="div" name="list" class="table">
       <div
         class="table-content"
-        v-for="(item, ii) in ranking_score"
+        v-for="(item, ii) in data.ranking_score"
         :key="item.index"
         @dblclick="GotoBlock(item.origin.block)"
         title="Double Click to see where it is!"
@@ -229,8 +229,8 @@
                   '--strip-color': d.color,
                   '--strip-width': `${
                     (d.weight / strip_percentage_sum) *
-                      data.weight_strip_scaled_data[ii][d.name] 
-                      * 100
+                    data.weight_strip_scaled_data[ii][d.name] *
+                    100
                   }%`,
                 }"
               >
@@ -356,7 +356,9 @@ const data = reactive({
     type: [],
   },
 
-  weight_strip_scaled_data: []
+  weight_strip_scaled_data: [],
+
+  ranking_score: [],
 });
 
 function ScaleAndStep(name) {
@@ -373,7 +375,14 @@ function ScaleAndStep(name) {
   }
 }
 
-const nominal_attr_name = ["direction", "decoration", "position", "type","region","sub_region"];
+const nominal_attr_name = [
+  "direction",
+  "decoration",
+  "position",
+  "type",
+  "region",
+  "sub_region",
+];
 const quantitative_attr_name = [
   "area",
   "deal_price",
@@ -393,7 +402,7 @@ store.criterias.push(store.CreateCriteria("direction", "#ffffb3"));
 store.criterias.push(store.CreateCriteria("decoration", "#fb8072"));
 store.criterias.push(store.CreateCriteria("deal_price", "#bebada", true));
 store.criterias.push(store.CreateCriteria("unit_price", "#80b1d3", true));
-store.criterias.push(store.CreateCriteria("region", "#e05e63",true));
+store.criterias.push(store.CreateCriteria("region", "#e05e63", true));
 store.criterias.push(store.CreateCriteria("sub_region", "#e5cee6"));
 store.criterias.push(store.CreateCriteria("position", "#fdb462"));
 store.criterias.push(store.CreateCriteria("room", "#b3de69"));
@@ -427,23 +436,22 @@ function PreProcess() {
     data.nominal_filter[attr] = res;
   });
   quantitative_attr_name.forEach((attr) => {
-    let res = null
-    if (store.GetCriteria(attr,true).type == "criteria") {
+    let res = null;
+    if (store.GetCriteria(attr, true).type == "criteria") {
       res = CalculateQuanAttrRange(attr);
       data.quantitative_mapping_type[attr] = [
-      "deal_price",
-      "unit_price",
-    ].includes(attr)
-      ? true
-      : false;
-    }
-    else {
-      res = CalculateUserMark(attr)
-      data.quantitative_mapping_type[attr] = true
+        "deal_price",
+        "unit_price",
+      ].includes(attr)
+        ? true
+        : false;
+    } else {
+      res = CalculateUserMark(attr);
+      data.quantitative_mapping_type[attr] = true;
     }
     data.quantitative_attr_range[attr] = res;
     data.quantitative_filter[attr] = [res.min, res.max];
-    
+
     // data.quantitative_details[attr] = {}
     // data.quantitative_details[attr].origin_range = res
     // data.quantitative_details[attr].mapping_type = ["deal_price", "unit_price"].includes(attr) ? true : false
@@ -511,7 +519,11 @@ watch(
           else {
             let attr = new_list[i];
 
-            if (!nominal_attr_name.includes(attr) && !quantitative_attr_name.includes(attr)) { // new user mark
+            if (
+              !nominal_attr_name.includes(attr) &&
+              !quantitative_attr_name.includes(attr)
+            ) {
+              // new user mark
               let res = CalculateUserMark(attr);
               data.quantitative_attr_range[attr] = res;
               data.quantitative_filter[attr] = [res.min, res.max];
@@ -519,7 +531,7 @@ watch(
 
               quantitative_attr_name.push(attr);
             }
-            
+
             HandleScale(attr);
             CalculateScaledRecords(attr);
           }
@@ -533,16 +545,6 @@ watch(
   { deep: true }
 );
 
-// function HandleFilter(name) {
-//   // data.filter_popover_visible[name] = true
-//   if (nominal_attr_name.includes(name)) { // nominal
-
-//   }
-//   else {  // quantitative
-
-//   }
-// }
-
 function HandleScale(name) {
   if (!nominal_attr_name.includes(name)) {
     // quantitative
@@ -552,40 +554,6 @@ function HandleScale(name) {
     scale_list.set(name, data.nominal_mapping_map[name]);
   }
 }
-
-// watch( // 非常丑陋CalculateScaledRecords
-//   data.quantitative_filter,
-//   (new_val, old_val) => {
-//     console.log("comp", new_val["area"][1], old_val["area"][1])
-//     quantitative_attr_name.forEach((attr) => {
-//       if (new_val[attr] != old_val[attr]) {
-//         HandleScale(attr)
-//         CalculateScaledRecords(attr)
-//       }
-//     })
-//   },
-//   {deep: true}
-// )
-// function ChangeOtherFilter(attr) {
-//   let curr_value_list = []
-//   for (let i=0; i<props.origin_records.length; i++) {
-//     if (CheckFilter(i)) {
-//       curr_value_list.push(props.origin_records[i])
-//     }
-//   }
-//   // quantitative
-
-//   for (let i=0; i<quantitative_attr_name.length; i++) {
-//     if (quantitative_attr_name) {
-
-//     }
-//   }
-
-//   // nominal
-//   nominal_attr_name.forEach((n) => {
-
-//   })
-// }
 
 function HandleQuanFilterChange(attr) {
   // ChangeOtherFilter(attr)
@@ -690,7 +658,21 @@ function CheckFilter(index) {
   if (flag) return true;
   else return false;
 }
-const ranking_score = computed(() => {
+
+let ranking_worker = new Worker("webworker.js");
+
+// ranking change: weight change / enable change
+watch(
+  () => [enabled_strip.value, strip_percentage_sum.value, props.origin_records],
+  () => {
+    console.log("watch ranking");
+    data.ranking_score = RankingScore();
+  }
+);
+
+function RankingScore() {
+  // ranking_worker.postMessage({ val: "hello" });
+
   let scores = [];
   for (let i = 0; i < data.scaled_records.length; i++) {
     if (!CheckFilter(i)) continue; // filtering
@@ -700,18 +682,17 @@ const ranking_score = computed(() => {
     for (let j = 0; j < enabled_strip.value.length; j++) {
       let d = enabled_strip.value[j];
 
-      // user mark's weight just for test!!!!!!!!!!!!!
       if (store.GetCriteria(d.name).type == "criteria") {
-        s += record[d.name] * d.weight / strip_percentage_sum.value;
+        s += (record[d.name] * d.weight) / strip_percentage_sum.value;
       } else {
-        // console.log(d.weight)
-        s += record[d.name] * d.weight / strip_percentage_sum.value; // user mark: manually set weight = 0.1
+        s += (record[d.name] * d.weight) / strip_percentage_sum.value; // user mark: manually set weight = 0.1
       }
     }
     let obj = { index: i, score: s };
     scores.push(obj);
   }
-  // console.log("computed_ranking_score", scores);
+
+  //
 
   scores.sort((a, b) => {
     return a.score - b.score;
@@ -737,45 +718,45 @@ const ranking_score = computed(() => {
   }
 
   // change strip width!!!!!!!!!
-  data.weight_strip_scaled_data = []
-  let ranked_val = []
-  let all_val = []
-  for (let i=0; i<records.length; i++) {
-    let val_obj = {}
+  data.weight_strip_scaled_data = [];
+  let ranked_val = [];
+  let all_val = [];
+  for (let i = 0; i < records.length; i++) {
+    let val_obj = {};
     for (let d of enabled_strip.value) {
-      let cur_val = data.scaled_records[records[i].index][d.name]
-      val_obj[d.name] = cur_val
-      all_val.push(cur_val)
+      let cur_val = data.scaled_records[records[i].index][d.name];
+      val_obj[d.name] = cur_val;
+      all_val.push(cur_val);
     }
-    ranked_val.push(val_obj) 
+    ranked_val.push(val_obj);
   }
 
   //calculate min and max
-  let strip_scale = {}
+  let strip_scale = {};
   for (let d of enabled_strip.value) {
-    let r = ranked_val.map((value) => value[d.name])
-    let min = Math.min(...r)
-    let max = Math.max(...r)
+    let r = ranked_val.map((value) => value[d.name]);
+    let min = Math.min(...r);
+    let max = Math.max(...r);
     // let min = Math.min(...all_val)
     // let max = Math.max(...all_val)
-    let scale = d3.scaleLinear().range([0.1, 1]).domain([min, max])
-    strip_scale[d.name] = scale
+    let scale = d3.scaleLinear().range([0.1, 1]).domain([min, max]);
+    strip_scale[d.name] = scale;
   }
-  
-  // re-calculate score
-  for (let i=0; i<ranked_val.length; i++) {
-    let obj = {}
-    let score = 0
-    for (let d of enabled_strip.value) {
-      let vv = strip_scale[d.name](ranked_val[i][d.name])
-      obj[d.name] = vv
-      score += vv * d.weight / strip_percentage_sum.value
-    }
-    obj["score"] = score
-    data.weight_strip_scaled_data.push(obj)
 
-    records[i].score = score
-  }   
+  // re-calculate score
+  for (let i = 0; i < ranked_val.length; i++) {
+    let obj = {};
+    let score = 0;
+    for (let d of enabled_strip.value) {
+      let vv = strip_scale[d.name](ranked_val[i][d.name]);
+      obj[d.name] = vv;
+      score += (vv * d.weight) / strip_percentage_sum.value;
+    }
+    obj["score"] = score;
+    data.weight_strip_scaled_data.push(obj);
+
+    records[i].score = score;
+  }
 
   records.sort((a, b) => {
     return a.score - b.score;
@@ -791,16 +772,15 @@ const ranking_score = computed(() => {
   rank_store.ChangeCurrentScale(scaled_records.slice(0, 100));
 
   return records.slice(0, 99);
-});
+}
 
-watch(
-  () => ranking_score.value,
-  () => {
-    console.log("ranking_score", ranking_score.value)
-    console.log("weight_strip", data.weight_strip_scaled_data)
-  }
-)
-
+// watch(
+//   () => ranking_score.value,
+//   () => {
+//     console.log("ranking_score", ranking_score.value);
+//     console.log("weight_strip", data.weight_strip_scaled_data);
+//   }
+// );
 
 function HandleConfirmMapping(mapping_data, attr) {
   data.mapping_dialog_visible = false;
@@ -872,7 +852,8 @@ function GotoBlock(name) {
 }
 
 // for position change of user mark
-function HandleUserMarkChange(attr) {   // attr is the changed mark's name
+function HandleUserMarkChange(attr) {
+  // attr is the changed mark's name
   let res = CalculateUserMark(attr);
   data.quantitative_attr_range[attr] = res;
   data.quantitative_filter[attr] = [res.min, res.max];
@@ -881,33 +862,7 @@ function HandleUserMarkChange(attr) {   // attr is the changed mark's name
   HandleScale(attr);
   CalculateScaledRecords(attr);
 }
-emitter.on("change-point",HandleUserMarkChange);
-
-// for user-mark criterias
-// watch(
-//   () => store.criterias.filter((d) => d.type === "userMark"),
-//   (val) => {
-//     console.log("new criteria", val);
-//     // let user-mark be quantitative
-//     for (let i = 0; i < val.length; i++) {
-//       if (!quantitative_attr_name.includes(val[i].name)) {
-//         // new criteria
-//         let attr = val[i].name;
-//         let res = CalculateUserMark(attr);
-//         data.quantitative_attr_range[attr] = res;
-//         data.quantitative_filter[attr] = [res.min, res.max];
-//         data.quantitative_mapping_type[attr] = true;
-
-//         quantitative_attr_name.push(attr);
-
-//         HandleScale(attr);
-//         CalculateScaledRecords(attr);
-
-//         break;
-//       }
-//     }
-//   }
-// );
+emitter.on("change-point", HandleUserMarkChange);
 </script>
 
 <style lang="less" scoped>
