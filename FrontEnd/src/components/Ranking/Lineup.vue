@@ -180,7 +180,12 @@
       </div>
     </div>
 
-    <TransitionGroup tag="div" name="list" class="table">
+    <TransitionGroup
+      tag="div"
+      name="list"
+      class="table"
+      v-infinite-scroll="LoadMoreScore"
+    >
       <div
         class="table-content"
         v-for="(item, ii) in data.ranking_score"
@@ -215,6 +220,11 @@
         <div class="table-content-weights">
           <template v-for="d in enabled_strip" :key="d.name">
             <el-tooltip
+              v-if="
+                item.origin[d.name] &&
+                data.weight_strip_scaled_data[ii] &&
+                d.color
+              "
               :content="item.origin[d.name] + ' ' + ScaleAndStep(d.name)[0]"
               :hide-after="0"
               placement="top"
@@ -615,57 +625,24 @@ function CalculateScaledRecords(name) {
   }
 }
 
-function CheckFilter(index) {
-  let flag = true;
-  for (let i = 0; i < enabled_strip.value.length; i++) {
-    let attr = enabled_strip.value[i].name;
-    if (nominal_attr_name.includes(attr)) {
-      // nominal
-      let record = props.origin_records[index];
-      if (!data.nominal_filter[attr].includes(record[attr])) {
-        flag = false;
-        break;
-      }
-    } else {
-      // quantitative
-      if (store.GetCriteria(attr).type == "criteria") {
-        let record = props.origin_records[index];
-        if (
-          !(
-            data.quantitative_filter[attr][0] <= record[attr] &&
-            data.quantitative_filter[attr][1] >= record[attr]
-          )
-        ) {
-          flag = false;
-          break;
-        }
-      } else {
-        let record = user_mark_records[attr][index];
-        if (
-          !(
-            data.quantitative_filter[attr][0] <= record &&
-            data.quantitative_filter[attr][1] >= record
-          )
-        ) {
-          flag = false;
-          break;
-        }
-      }
-    }
-  }
-  if (flag) return true;
-  else return false;
-}
-
-let ranking_worker = new Worker("lineup_webworker.js");
-
 // ranking change: weight change / enable change
 watch(
-  () => [enabled_strip.value, strip_percentage_sum.value, props.origin_records],
+  () => [
+    enabled_strip.value,
+    strip_percentage_sum.value,
+    props.origin_records,
+    data.nominal_filter,
+    data.quantitative_filter,
+    data.nominal_mapping_map,
+    data.quantitative_mapping_type,
+  ],
   () => {
     console.log("watch ranking");
     MT_RankingScore();
     // data.ranking_score = RankingScore();
+  },
+  {
+    deep: true,
   }
 );
 
@@ -710,8 +687,6 @@ function MT_RankingScore() {
   });
   console.log("post data used time:", Date.now() - start);
 }
-
-ranking_worker.onmessage = (e) => MT_ReceiveCalculatedScore(e.data.scores);
 
 function UpdateWeight(records) {
   // change strip width!!!!!!!!!
@@ -761,6 +736,8 @@ function UpdateWeight(records) {
   data.weight_strip_scaled_data.sort((a, b) => {
     return a.score - b.score;
   });
+
+  return records;
 }
 
 function MT_ReceiveCalculatedScore(scores) {
@@ -782,7 +759,7 @@ function MT_ReceiveCalculatedScore(scores) {
     });
   }
 
-  UpdateWeight(records);
+  records = UpdateWeight(records);
 
   // We can use this to compute rank frequency
   rank_store.ChangeCurrentSolutions(records.map((d) => d.origin));
@@ -897,8 +874,24 @@ function HandleUserMarkChange(attr) {
 }
 emitter.on("change-point", HandleUserMarkChange);
 
-function LoadMoreScore() {
-  let num = scores.length < 100 ? scores.length : 100;
+// multi thread
+let ranking_worker = new Worker("lineup_webworker.js");
+ranking_worker.onmessage = (e) => {
+  switch (e.data.op) {
+    case "ranking":
+      MT_ReceiveCalculatedScore(e.data.scores);
+      break;
+    case "moreRanking":
+      AddRanking(e.data.scores);
+      break;
+    default:
+      break;
+  }
+};
+
+function AddRanking(new_scores) {
+  let num = data.ranking_score.length + new_scores.length;
+  let scores = toRaw(data.ranking_score).concat(new_scores);
   let records = [];
   for (let i = 0; i < num; i++) {
     const element = scores[i];
@@ -913,6 +906,21 @@ function LoadMoreScore() {
       origin: ori,
       id: props.origin_records[element.index]._id,
       score: element.score,
+    });
+  }
+
+  UpdateWeight(records);
+  for (let i = data.ranking_score.length; i < records.length; i++) {
+    data.ranking_score.push(records[i]);
+  }
+}
+
+function LoadMoreScore() {
+  if (data.ranking_score.length > 0) {
+    console.log("loading");
+    ranking_worker.postMessage({
+      op: "moreRanking",
+      offset: data.ranking_score.length + 1,
     });
   }
 }

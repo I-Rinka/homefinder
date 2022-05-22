@@ -18,7 +18,10 @@ let DATA = {};
 let latest_ranking = [];
 function MoreRanking(data) {
   let offset = data.offset;
-  postMessage({ scores: latest_ranking.splice(offset + 1, offset + 100 + 1) });
+  postMessage({
+    op: "moreRanking",
+    scores: latest_ranking.slice(offset + 1, offset + 5 + 1),
+  });
 }
 function Ranking(data) {
   let scores = [];
@@ -45,7 +48,7 @@ function Ranking(data) {
 
   scores.sort((a, b) => a.score - b.score);
   latest_ranking = scores;
-  postMessage({ scores: scores });
+  postMessage({ op: "ranking", scores: scores });
 }
 
 function UpdateDATA(DATA) {
