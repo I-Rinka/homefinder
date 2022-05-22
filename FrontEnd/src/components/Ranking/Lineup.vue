@@ -215,9 +215,7 @@
         <div class="table-content-weights">
           <template v-for="d in enabled_strip" :key="d.name">
             <el-tooltip
-              :content="
-                item.origin[d.name].toString() + ' ' + ScaleAndStep(d.name)[0]
-              "
+              :content="item.origin[d.name] + ' ' + ScaleAndStep(d.name)[0]"
               :hide-after="0"
               placement="top"
               popper-class="popper"
@@ -402,7 +400,7 @@ store.criterias.push(store.CreateCriteria("direction", "#ffffb3"));
 store.criterias.push(store.CreateCriteria("decoration", "#fb8072"));
 store.criterias.push(store.CreateCriteria("deal_price", "#bebada", true));
 store.criterias.push(store.CreateCriteria("unit_price", "#80b1d3", true));
-store.criterias.push(store.CreateCriteria("region", "#e05e63", true));
+store.criterias.push(store.CreateCriteria("region", "#e05e63"));
 store.criterias.push(store.CreateCriteria("sub_region", "#e5cee6"));
 store.criterias.push(store.CreateCriteria("position", "#fdb462"));
 store.criterias.push(store.CreateCriteria("room", "#b3de69"));
@@ -671,26 +669,61 @@ watch(
   }
 );
 
+// watch(
+//   () => [
+//     enabled_strip.value,
+//     props.origin_records,
+//     data.quantitative_filter,
+//     data.nominal_filter,
+//     data.scaled_records,
+//     strip_percentage_sum.value,
+//   ],
+//   () => {
+//     // console.log(user_mark_records);
+//     MT_UpdateData();
+//   }
+// );
+
+function MT_UpdateData() {
+  ranking_worker.postMessage({
+    op: "uploadDATA",
+    DATA: {
+      origin_records: JSON.parse(JSON.stringify(toRaw(props.origin_records))),
+      enabled_strip: JSON.parse(JSON.stringify(enabled_strip.value)),
+      quantitative_filter: JSON.parse(
+        JSON.stringify(toRaw(data.quantitative_filter))
+      ),
+      nominal_filter: JSON.parse(JSON.stringify(toRaw(data.nominal_filter))),
+      scaled_records: JSON.parse(JSON.stringify(toRaw(data.scaled_records))),
+      strip_percentage_sum: JSON.parse(
+        JSON.stringify(toRaw(strip_percentage_sum.value))
+      ),
+    },
+  });
+}
+
+let start = 0;
 function MT_RankingScore() {
-  let scores = [];
-  for (let i = 0; i < data.scaled_records.length; i++) {
-    if (!CheckFilter(i)) continue; // filtering
-
-    let record = data.scaled_records[i];
-    let s = 0;
-    for (let j = 0; j < enabled_strip.value.length; j++) {
-      let d = enabled_strip.value[j];
-
-      if (store.GetCriteria(d.name).type == "criteria") {
-        s += (record[d.name] * d.weight) / strip_percentage_sum.value;
-      } else {
-        s += (record[d.name] * d.weight) / strip_percentage_sum.value; // user mark: manually set weight = 0.1
-      }
-    }
-    let obj = { index: i, score: s };
-    scores.push(obj);
-  }
-  ranking_worker.postMessage({ op: "ranking", scores: scores });
+  // MT_UpdateData();
+  start = Date.now();
+  ranking_worker.postMessage({
+    op: "ranking",
+    DATA: {
+      origin_records: JSON.parse(JSON.stringify(toRaw(props.origin_records))),
+      enabled_strip: JSON.parse(JSON.stringify(enabled_strip.value)),
+      quantitative_filter: JSON.parse(
+        JSON.stringify(toRaw(data.quantitative_filter))
+      ),
+      nominal_filter: JSON.parse(JSON.stringify(toRaw(data.nominal_filter))),
+      nominal_attr_name: JSON.parse(JSON.stringify(nominal_attr_name)),
+      scaled_records: JSON.parse(JSON.stringify(toRaw(data.scaled_records))),
+      strip_percentage_sum: JSON.parse(
+        JSON.stringify(toRaw(strip_percentage_sum.value))
+      ),
+      user_mark_records: JSON.parse(JSON.stringify(user_mark_records)),
+    },
+  });
+  console.log("post data used time:", Date.now() - start);
 }
 
 ranking_worker.onmessage = (e) => MT_ReceiveCalculatedScore(e.data.scores);
@@ -769,6 +802,7 @@ function MT_ReceiveCalculatedScore(scores) {
   rank_store.ChangeCurrentScale(scaled_records.slice(0, 100));
 
   data.ranking_score = records.slice(0, 99);
+  console.log("update used time:", Date.now() - start);
 }
 
 function RankingScore() {
