@@ -713,25 +713,7 @@ function MT_RankingScore() {
 
 ranking_worker.onmessage = (e) => MT_ReceiveCalculatedScore(e.data.scores);
 
-function MT_ReceiveCalculatedScore(scores) {
-  let num = scores.length < 100 ? scores.length : 100;
-  let records = [];
-  for (let i = 0; i < num; i++) {
-    const element = scores[i];
-    // add user mark record to origin
-    let ori = props.origin_records[element.index];
-    for (let key in user_mark_records) {
-      ori[key] = user_mark_records[key][element.index];
-    }
-
-    records.push({
-      index: element.index,
-      origin: ori,
-      id: props.origin_records[element.index]._id,
-      score: element.score,
-    });
-  }
-
+function UpdateWeight(records) {
   // change strip width!!!!!!!!!
   data.weight_strip_scaled_data = [];
   let ranked_val = [];
@@ -779,6 +761,28 @@ function MT_ReceiveCalculatedScore(scores) {
   data.weight_strip_scaled_data.sort((a, b) => {
     return a.score - b.score;
   });
+}
+
+function MT_ReceiveCalculatedScore(scores) {
+  let num = scores.length < 100 ? scores.length : 100;
+  let records = [];
+  for (let i = 0; i < num; i++) {
+    const element = scores[i];
+    // add user mark record to origin
+    let ori = props.origin_records[element.index];
+    for (let key in user_mark_records) {
+      ori[key] = user_mark_records[key][element.index];
+    }
+
+    records.push({
+      index: element.index,
+      origin: ori,
+      id: props.origin_records[element.index]._id,
+      score: element.score,
+    });
+  }
+
+  UpdateWeight(records);
 
   // We can use this to compute rank frequency
   rank_store.ChangeCurrentSolutions(records.map((d) => d.origin));
@@ -892,6 +896,26 @@ function HandleUserMarkChange(attr) {
   RankingScore();
 }
 emitter.on("change-point", HandleUserMarkChange);
+
+function LoadMoreScore() {
+  let num = scores.length < 100 ? scores.length : 100;
+  let records = [];
+  for (let i = 0; i < num; i++) {
+    const element = scores[i];
+    // add user mark record to origin
+    let ori = props.origin_records[element.index];
+    for (let key in user_mark_records) {
+      ori[key] = user_mark_records[key][element.index];
+    }
+
+    records.push({
+      index: element.index,
+      origin: ori,
+      id: props.origin_records[element.index]._id,
+      score: element.score,
+    });
+  }
+}
 </script>
 
 <style lang="less" scoped>

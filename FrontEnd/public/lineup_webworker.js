@@ -3,19 +3,26 @@ onmessage = function (e) {
     case "ranking":
       Ranking(e.data);
       break;
+    case "moreRanking":
+      MoreRanking(e.data);
+      break;
     case "uploadDATA":
       UpdateDATA(e.data);
       break;
-      default:
-          break;
-        }
+    default:
+      break;
+  }
 };
 
 let DATA = {};
-
+let latest_ranking = [];
+function MoreRanking(data) {
+  let offset = data.offset;
+  postMessage({ scores: latest_ranking.splice(offset + 1, offset + 100 + 1) });
+}
 function Ranking(data) {
   let scores = [];
-  DATA=data.DATA
+  DATA = data.DATA;
   if (DATA.scaled_records) {
     for (let i = 0; i < DATA.scaled_records.length; i++) {
       if (!CheckFilter(i)) continue; // filtering
@@ -37,9 +44,9 @@ function Ranking(data) {
   }
 
   scores.sort((a, b) => a.score - b.score);
+  latest_ranking = scores;
   postMessage({ scores: scores });
 }
-
 
 function UpdateDATA(DATA) {
   DATA = DATA.DATA;
