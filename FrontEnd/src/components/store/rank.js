@@ -3,27 +3,18 @@ import { config } from "../../config";
 
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
-
-// for (let i = 0; i < data.scaled_records.length; i++) {
-//     if (!CheckFilter(i)) continue; // filtering
-
-//     let record = data.scaled_records[i];
-//     let s = 0;
-//     for (let j = 0; j < enabled_strip.value.length; j++) {
-//       let d = enabled_strip.value[j];
-//       s += record[d.name] * d.weight;
-//     }
-//     let obj = { index: i, score: s };
-//     scores.push(obj);
-//   }
-//   console.log("computed_ranking_score", scores);
-
-//   scores.sort((a, b) => {
-//     return a.score - b.score;
-//   });
-
+const call_back_set = {
+  twowaycallback: () => {
+    console.log("null callback");
+  },
+  threewaycallback: () => {
+    console.log("null callback");
+  },
+};
 export const useRankStore = defineStore("rankstore", {
   state: () => {
+    let rank_thread = new Worker("rank_webworker.js");
+
     return {
       current_solutions: [],
       current_solutions_scale: [],
@@ -31,6 +22,7 @@ export const useRankStore = defineStore("rankstore", {
       sample_overall: 0,
       current_tweakers: 2,
       rank_frequency_array: [],
+      rank_thread: rank_thread,
     };
   },
   actions: {
@@ -86,6 +78,69 @@ export const useRankStore = defineStore("rankstore", {
         this.rank_frequency_array = [];
       }
     },
+    Compute2wayMT(
+      involved_criterias_top,
+      involved_criterias_bottom,
+      current_criterias,
+      call_back
+    ) {
+      this.rank_thread.postMessage({
+        op: "compute3way",
+        involved_criterias_top: JSON.parse(
+          JSON.stringify(involved_criterias_top)
+        ),
+        involved_criterias_bottom: JSON.parse(
+          JSON.stringify(involved_criterias_bottom)
+        ),
+        current_criterias: JSON.parse(JSON.stringify(current_criterias)),
+        current_solutions: JSON.parse(JSON.stringify(this.current_solutions)),
+      });
+      call_back_set.twowaycallback = call_back;
+      this.rank_thread.onmessage = (e) => {
+        switch (e.data.op) {
+          case "compute2way":
+            // this.EmitRankFrequency(e.data.rank_map, e.data.sample_times);
+            call_back_set.twowaycallback(e.data.change);
+            break;
+          case "compute3way":
+            // this.EmitRankFrequency(e.data.rank_map, e.data.sample_times);
+            call_back_set.threewaycallback(e.data.change);
+            break;
+          default:
+            break;
+        }
+      };
+    },
+
+    Compute3WayRangeMT(involved_criterias, current_criterias, call_back) {
+      this.rank_thread.onmessage = (e) => {
+        switch (e.data.op) {
+          case "compute2way":
+            // this.EmitRankFrequency(e.data.rank_map, e.data.sample_times);
+            call_back_set.twowaycallback(e.data.change);
+            break;
+          case "compute3way":
+            // this.EmitRankFrequency(e.data.rank_map, e.data.sample_times);
+            // call_back_set.threewaycallback(e.data.change);
+            console.log("compute three way");
+            call_back(e.data.change);
+            break;
+          default:
+            break;
+        }
+      };
+      this.rank_thread.postMessage({
+        op: "compute3way",
+        involved_criterias: JSON.parse(JSON.stringify(involved_criterias)),
+        current_criterias: JSON.parse(JSON.stringify(current_criterias)),
+        current_solutions: JSON.parse(JSON.stringify(this.current_solutions)),
+        current_solutions_scale: JSON.parse(
+          JSON.stringify(this.current_solutions_scale)
+        ),
+      });
+      call_back_set.threewaycallback = call_back;
+    },
+
     // current_criterias {name,weight}
     async Compute2WayRange(
       involved_criterias_top,
@@ -226,7 +281,6 @@ export const useRankStore = defineStore("rankstore", {
 
     // current_criterias {name,weight}
     async Compute3WayRange(involved_criterias, current_criterias) {
-      console.log(involved_criterias,current_criterias)
       //
       let change = {
         notChangeCurrent: [],
@@ -243,8 +297,8 @@ export const useRankStore = defineStore("rankstore", {
       let static_criterias = current_criterias.filter(
         (d) => !involved_criterias.includes(d.name)
       );
-
-      // todo: debug
+      let static_weight_overall = 0;
+      static_criterias.forEach((c) => (static_weight_overall += c.weight));
 
       let record_scores = [];
 
@@ -259,11 +313,11 @@ export const useRankStore = defineStore("rankstore", {
           record_scores.push({ index: i, score, new_score: 0 });
         });
 
-        for (let c1 = step; c1 <= end - step; c1 += step) {
-          for (let c2 = step; c2 + c1 <= end - step; c2 += step) {
+        for (let c3 = step; c3 <= end - step; c3 += step) {
+          for (let c2 = step; c2 + c3 <= end - step; c2 += step) {
             sample_times++;
 
-            let c3 = 1 - (c1 + c2);
+            let c1 = 1 - (c3 + c2);
 
             record_scores.forEach((d, i) => {
               let ic1 =
@@ -274,8 +328,11 @@ export const useRankStore = defineStore("rankstore", {
                 this.current_solutions_scale[i][involved_criterias[2]] * c3;
 
               record_scores[i].new_score =
-                record_scores[i].score + ic1 + ic2 + ic3;
+                record_scores[i].score +
+                (ic1 + ic2 + ic3) * (1 - static_weight_overall);
             });
+
+            // todo: calc other criterias
 
             let n_record_scores = record_scores.map((d) => d);
             n_record_scores.sort((a, b) => a.new_score - b.new_score);

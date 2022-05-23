@@ -606,7 +606,7 @@ function LoadHinterTimeout() {
   // n_time = Date.now();
   if (solution_trigger === null && Date.now() - n_time > 20) {
     solution_trigger = setTimeout(() => {
-      LoadHinter();
+      LoadHinterMT();
       solution_trigger = null;
     }, 200);
   }
@@ -721,6 +721,85 @@ async function LoadHinter() {
     topHasSb.value.beginElement();
   }, 800);
 }
+
+
+function LoadHinterMT() {
+  // if (Date.now() - n_time < 20) {
+  //   return;
+  // }
+  // let start_time = Date.now();
+  // // console.log("start hinter calculation");
+  // let res = await rank_store.Compute3WayRange(
+  //   data.tri.map((d) => d.name),
+  //   store.GetCriterias().map((d) => toRaw(d))
+  // );
+
+  let load_hinter = (res)=>{
+
+  let at_top_points = res.notChangeCurrent.map((d) => {
+    let coord = WeightToPoint(d);
+    return [coord.x, coord.y];
+  });
+
+  if (at_top_points.length == 0) {
+    return;
+  }
+
+  let in_top_points = res.currentStillInTop.map((d) => {
+    let coord = WeightToPoint(d);
+    return [coord.x, coord.y];
+  });
+
+  if (in_top_points.length == 0) {
+    return;
+  }
+
+  let top_points = res.topStillHasSb.map((d) => {
+    let coord = WeightToPoint(d);
+    return [coord.x, coord.y];
+  });
+
+  if (top_points.length == 0) {
+    return;
+  }
+
+  setTimeout(() => {
+    at_top_points = monotoneChainConvexHull(at_top_points);
+    [data.current_at_top.current, data.current_at_top.old] = new_old_str(
+      toRaw(data.current_at_top.old_points),
+      at_top_points
+    );
+    data.current_at_top.old_points = at_top_points;
+
+    in_top_points = monotoneChainConvexHull(in_top_points);
+    [data.current_in_top.current, data.current_in_top.old] = new_old_str(
+      toRaw(data.current_in_top.old_points),
+      in_top_points
+    );
+    data.current_in_top.old_points = in_top_points;
+
+    top_points = monotoneChainConvexHull(top_points);
+    [data.top_has_sb.current, data.top_has_sb.old] = new_old_str(
+      toRaw(data.top_has_sb.old_points),
+      top_points
+    );
+    data.top_has_sb.old_points = top_points;
+
+    currentAtTop.value.beginElement();
+    currentInTop.value.beginElement();
+    topHasSb.value.beginElement();
+  }, 800);
+}
+
+  rank_store.Compute3WayRangeMT(    data.tri.map((d) => d.name),
+    store.GetCriterias().map((d) => toRaw(d)),load_hinter)
+  // console.log("start hinter calculation");
+  // let res = await rank_store.Compute3WayRange(
+  //   data.tri.map((d) => d.name),
+  //   store.GetCriterias().map((d) => toRaw(d))
+  // );
+}
+
 
 onMounted(() => {
   point = WeightToPoint([wp0.value, wp1.value, wp2.value]);
