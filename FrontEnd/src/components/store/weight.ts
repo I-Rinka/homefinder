@@ -3,12 +3,14 @@ import { defineStore } from "pinia";
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
 
+type criteria_type = "userMark" | "criteria";
+
 class Criteria {
   name: string;
   color: string;
   weight?: number;
   enabled?: boolean;
-  type: string;
+  type: criteria_type;
   label: string;
   constructor(name: string, color: string, enabled?: boolean, weight?: number) {
     this.name = name;

@@ -99,7 +99,7 @@
         :key="feature.properties.name"
         :map="map"
         :feature="feature"
-        :markArray="data.user_marks"
+        :markArray="enabled_user_mark"
         :price_mode="data.price_view"
         :current_time="props.current_time"
         :selection_time="props.selection_time"
@@ -238,6 +238,14 @@ emitter.on("goto-coord", (coord) => {
 
 const weight_store = useWeightStore();
 
+const enabled_user_mark = computed(() => {
+  let enabled_mark = weight_store
+    .GetCriterias()
+    .filter((d) => d.type == "userMark")
+    .map((d) => d.ol_uid);
+  return data.user_marks.filter((d) => enabled_mark.includes(d.ol_uid));
+});
+
 // the reactive data
 const data = reactive({
   zoom: Math.floor(
@@ -284,22 +292,6 @@ const current_mode_color = computed(() => {
     return "rgb(228, 147, 68)";
   }
 });
-
-// function GetPixels() {
-//   let view_port = [map.getSize()[0], map.getSize()[1]];
-//   let currentExtent = map.getView().calculateExtent(view_port);
-//   let h = currentExtent[3] - currentExtent[1];
-//   let w = currentExtent[2] - currentExtent[0];
-//   let re = map.getView().getResolution();
-//   h = ((h / re) * 1000 * 145).toFixed(2);
-//   w = ((w / re) * 1000 * 111).toFixed(2);
-//   let rec = document
-//     .getElementsByClassName("ol-layer")[0]
-//     .getBoundingClientRect();
-//   // console.log(rec);
-//   // console.log("h:", h, "w:", w);
-//   // console.log(map.getView().getResolutionForExtent(currentExtent));
-// }
 
 // -------------------------- Useful functions ---------------------------
 
