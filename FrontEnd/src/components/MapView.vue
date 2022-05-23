@@ -228,6 +228,13 @@ emitter.on("goto-block", (house_name) => {
     duration: 500,
   });
 });
+emitter.on("goto-coord", (coord) => {
+  map.getView().animate({
+    center: coord,
+    zoom: 16.5,
+    duration: 500,
+  });
+});
 
 const weight_store = useWeightStore();
 

@@ -23,6 +23,7 @@
         :key="res.addr_name"
         class="location-list-item"
         :title="`Click to Go to ${res.addr_name}`"
+        @click="ClickLocation(res.coord)"
       >
         <span>
           <el-icon style="position: relative; top: 2px"><Position /></el-icon>
@@ -52,6 +53,7 @@ import { reactive } from "@vue/reactivity";
 import { ClickOutside as vClickOutside } from "element-plus";
 import { SearchLocation } from "../../database/onlineMapQuery";
 import coordtransform from "coordtransform";
+import { emitter } from "../store/bus";
 
 const data = reactive({
   input: "",
@@ -76,6 +78,15 @@ function UserSearch() {
     }
   });
 }
+
+function ClickLocation(coord) {
+  let lng_lat = coord.split(",");
+  let wgs84_coord = coordtransform.gcj02towgs84(
+    Number.parseFloat(lng_lat[0]),
+    Number.parseFloat(lng_lat[1])
+  );
+  emitter.emit("goto-coord", wgs84_coord);
+}
 </script>
 
 <style lang="less">
@@ -98,14 +109,16 @@ function UserSearch() {
   color: #8b8c8f;
   margin-top: 10px;
   background-color: white;
-  padding: 10px;
+  padding: 5px 0;
 }
+
 .location-list-item {
   display: flex;
   justify-content: space-between;
   border-radius: 3px;
+  margin: 5px 10px;
   padding: 7.5px;
-  transition: 0.5s;
+  transition: 0.3s;
 
   &:hover {
     background-color: whitesmoke;
