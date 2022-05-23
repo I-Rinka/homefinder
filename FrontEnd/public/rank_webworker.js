@@ -48,7 +48,7 @@ function Compute2way(
     involved_criterias_bottom.includes(d.name)
   );
 
-  let step = 1 / 30;
+  let step = 1 / 60;
   let end = 1;
 
   let top_overall = 0;
@@ -171,7 +171,7 @@ function Compute3way(
     currentStillInTop: [],
     topStillHasSb: [],
   };
-  let step = 1 / 30;
+  let step = 1 / 60;
   let end = 1;
 
   let sample_times = 0; // rank frequency
@@ -202,7 +202,6 @@ function Compute3way(
         sample_times++;
 
         let c1 = 1 - (c3 + c2);
-
         record_scores.forEach((d, i) => {
           let ic1 = current_solutions_scale[i][involved_criterias[0]] * c1;
           let ic2 = current_solutions_scale[i][involved_criterias[1]] * c2;

@@ -742,6 +742,7 @@ function UpdateWeight(records) {
 
 function MT_ReceiveCalculatedScore(scores) {
   let num = scores.length < 100 ? scores.length : 100;
+  // let num = scores.length;
   let records = [];
   for (let i = 0; i < num; i++) {
     const element = scores[i];
@@ -759,10 +760,9 @@ function MT_ReceiveCalculatedScore(scores) {
     });
   }
 
-  records = UpdateWeight(records);
+  records = UpdateWeight(records.slice(0, 100));
 
-  // We can use this to compute rank frequency
-  rank_store.ChangeCurrentSolutions(records.map((d) => d.origin));
+  rank_store.ChangeCurrentSolutions(records.slice(0, 100).map((d) => d.origin));
   let scaled_records = [];
   records.forEach((d) => scaled_records.push(data.scaled_records[d.index]));
   rank_store.ChangeCurrentScale(scaled_records.slice(0, 100));
