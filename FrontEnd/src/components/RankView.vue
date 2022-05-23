@@ -28,10 +28,15 @@ const houseStore = useHouseStore();
 
 const newest_records = computed(() => {
   if (houseStore.selectedHouseArrary.length <= 0) {
-    return data.newest_records.filter((d) => !houseStore.bannedHouse[d.block]);
+    return data.newest_records.filter(
+      (d) =>
+        !houseStore.bannedHouse[d.block] && !houseStore.IsInBannedRules(d.block)
+    );
   } else {
-    return data.newest_records.filter((d) =>
-      houseStore.IsSelectedHouse(d.block)
+    return data.newest_records.filter(
+      (d) =>
+        houseStore.IsSelectedHouse(d.block) &&
+        !houseStore.IsInBannedRules(d.block)
     );
   }
 });

@@ -26,18 +26,28 @@ export const useHouseStore = defineStore("selectedHouse", {
         绿城百合公寓霁雪苑: {},
         凤凰城三期: {},
         珠江峰景: {},
+        K2玉蘭湾: {},
+        "8哩岛": {},
       },
+      banned_rules: [
+        /.*[a-z]{2,}.*/i,
+        /.*墅.*/,
+        /.*大厦.*/,
+        /.*公馆.*/,
+        /.*公寓.*/,
+      ],
     };
   },
   getters: {
     selectedHouseArrary() {
       let arr = [];
-      for (const key in this.selectedHouse) {
+      for (const name in this.selectedHouse) {
         if (
-          Object.hasOwnProperty.call(this.selectedHouse, key) &&
-          !Object.hasOwnProperty.call(this.bannedHouse, key)
+          Object.hasOwnProperty.call(this.selectedHouse, name) &&
+          !Object.hasOwnProperty.call(this.bannedHouse, name) &&
+          !this.IsInBannedRules(name)
         ) {
-          const element = this.selectedHouse[key];
+          const element = this.selectedHouse[name];
           arr.push(element);
         }
       }
@@ -72,6 +82,16 @@ export const useHouseStore = defineStore("selectedHouse", {
     },
   },
   actions: {
+    IsInBannedRules: function (name) {
+      for (let i = 0; i < this.banned_rules.length; i++) {
+        const element = this.banned_rules[i];
+        if (element.test(name)) {
+          console.log("select", name);
+          return true;
+        }
+      }
+      return false;
+    },
     IsSelectedHouse: function (name) {
       if (
         this.selectedHouse.hasOwnProperty(name) &&

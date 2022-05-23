@@ -74,7 +74,6 @@ function UserSearch() {
         district: d.adname,
         coord: d.location,
       }));
-      console.log(res);
     }
   });
 }
