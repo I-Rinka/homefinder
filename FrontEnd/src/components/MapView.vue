@@ -226,7 +226,7 @@ emitter.on("goto-block", (house_name) => {
       block_data.details_map[house_name].lng,
       block_data.details_map[house_name].lat,
     ],
-    zoom: 16.5,
+    zoom: 18,
     duration: 500,
   });
 
