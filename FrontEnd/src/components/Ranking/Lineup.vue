@@ -436,12 +436,17 @@ watch(
   }
 );
 
+let initial = 0;
+
 function PreProcess() {
   nominal_attr_name.forEach((attr) => {
     data.nominal_mapping_map[attr] = new Map();
     let res = GenDefaultNominalMap(attr);
     data.nominal_attr_set[attr] = res;
-    data.nominal_filter[attr] = res;
+
+    if (initial == 0) {
+      data.nominal_filter[attr] = res;
+    }
   });
   quantitative_attr_name.forEach((attr) => {
     let res = null;
@@ -458,12 +463,10 @@ function PreProcess() {
       data.quantitative_mapping_type[attr] = true;
     }
     data.quantitative_attr_range[attr] = res;
-    data.quantitative_filter[attr] = [res.min, res.max];
 
-    // data.quantitative_details[attr] = {}
-    // data.quantitative_details[attr].origin_range = res
-    // data.quantitative_details[attr].mapping_type = ["deal_price", "unit_price"].includes(attr) ? true : false
-    // data.quantitative_details[attr].filter = [res.min, res.max]
+    if (initial == 0) {
+      data.quantitative_filter[attr] = [res.min, res.max];
+    }
   });
 
   let default_attr_list = enabled_strip.value.map((s) => s.name);
@@ -471,6 +474,10 @@ function PreProcess() {
     HandleScale(attr);
     CalculateScaledRecords(attr);
   });
+
+  if (props.origin_records.length > 0) {
+    initial = 1;
+  }
 }
 
 function CalculateQuanAttrRange(attr) {
