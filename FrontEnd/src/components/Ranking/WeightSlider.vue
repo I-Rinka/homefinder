@@ -333,7 +333,7 @@ function LoadHinterTimeout() {
     solution_trigger = setTimeout(() => {
       LoadHinterMT();
       solution_trigger = null;
-    }, 1000);
+    }, 100);
   }
 }
 

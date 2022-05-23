@@ -763,7 +763,6 @@ function LoadHinterMT() {
     return;
   }
 
-  setTimeout(() => {
     at_top_points = monotoneChainConvexHull(at_top_points);
     [data.current_at_top.current, data.current_at_top.old] = new_old_str(
       toRaw(data.current_at_top.old_points),
@@ -788,16 +787,10 @@ function LoadHinterMT() {
     currentAtTop.value.beginElement();
     currentInTop.value.beginElement();
     topHasSb.value.beginElement();
-  }, 800);
 }
 
   rank_store.Compute3WayRangeMT(    data.tri.map((d) => d.name),
     store.GetCriterias().map((d) => toRaw(d)),load_hinter)
-  // console.log("start hinter calculation");
-  // let res = await rank_store.Compute3WayRange(
-  //   data.tri.map((d) => d.name),
-  //   store.GetCriterias().map((d) => toRaw(d))
-  // );
 }
 
 
