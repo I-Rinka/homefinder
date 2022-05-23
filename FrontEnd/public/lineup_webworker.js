@@ -53,7 +53,6 @@ function Ranking(data) {
 
 function UpdateDATA(DATA) {
   DATA = DATA.DATA;
-  console.log("DATA updated", DATA);
 }
 
 function CheckFilter(index) {

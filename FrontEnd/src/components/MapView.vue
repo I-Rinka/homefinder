@@ -377,7 +377,6 @@ onMounted(() => {
         new_feature.getGeometry().flatCoordinates,
         new_feature.ol_uid
       );
-      console.log(weight_store.GetCriterias());
       new_feature.set("weight", w);
       data.user_marks.push(new_feature);
       MarkSource.addFeature(new_feature);

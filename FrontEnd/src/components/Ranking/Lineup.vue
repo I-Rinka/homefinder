@@ -637,7 +637,6 @@ watch(
     data.quantitative_mapping_type,
   ],
   () => {
-    console.log("watch ranking");
     MT_RankingScore();
     // data.ranking_score = RankingScore();
   },
@@ -917,7 +916,6 @@ function AddRanking(new_scores) {
 
 function LoadMoreScore() {
   if (data.ranking_score.length > 0) {
-    console.log("loading");
     ranking_worker.postMessage({
       op: "moreRanking",
       offset: data.ranking_score.length + 1,

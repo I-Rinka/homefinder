@@ -30,7 +30,7 @@ export const useHouseStore = defineStore("selectedHouse", {
         "8哩岛": {},
       },
       banned_rules: [
-        /.*[a-z]{2,}.*/i,
+        /.*[a-z]{1,}.*/i,
         /.*墅.*/,
         /.*大厦.*/,
         /.*公馆.*/,
@@ -86,7 +86,6 @@ export const useHouseStore = defineStore("selectedHouse", {
       for (let i = 0; i < this.banned_rules.length; i++) {
         const element = this.banned_rules[i];
         if (element.test(name)) {
-          console.log("select", name);
           return true;
         }
       }

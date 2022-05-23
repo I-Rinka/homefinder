@@ -147,8 +147,6 @@ export const useStore = defineStore("weight", {
           ? weight
           : this.GetDefaultWeight();
 
-      console.log("get w", w);
-
       let c = color ? color : "grey";
       let e = enabled ? enabled : false;
 
@@ -161,7 +159,6 @@ export const useStore = defineStore("weight", {
       let sum_weights = 0;
       for (let i = 0; i < this.criterias.length; i++) {
         this.criterias[i].weight *= reduce_proportion;
-        console.log("reduced:", this.criterias[i].weight);
         sum_weights += this.criterias[i].weight;
       }
       return 1 - sum_weights;

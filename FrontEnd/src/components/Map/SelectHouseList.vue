@@ -2,11 +2,7 @@
   <div class="void-selection" v-if="props.houses.length === 0">
     No Selected House
   </div>
-  <TransitionGroup
-    tag="div"
-    name="list-complete"
-    v-infinite-scroll="load"
-  >
+  <TransitionGroup tag="div" name="list-complete" v-infinite-scroll="load">
     <div
       class="select-item"
       v-for="i in list_count"
@@ -54,7 +50,9 @@ const data = reactive({
 });
 
 function load() {
-  data.count += 5;
+  if (props.houses.length - 1 > data.count) {
+    data.count += 5;
+  }
 }
 
 watch(
@@ -65,7 +63,12 @@ watch(
 const list_count = computed({
   set() {},
   get() {
-    return props.houses.length < data.count ? props.houses.length : data.count;
+    if (props.houses.length - 1 <= 0) {
+      return 0;
+    }
+    return props.houses.length < data.count + 1
+      ? props.houses.length - 1
+      : data.count;
   },
 });
 
