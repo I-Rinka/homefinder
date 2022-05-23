@@ -48,6 +48,22 @@
       {{ current_mode }}
     </div>
 
+    <SearchBox
+      style="
+        position: absolute;
+        left: 0.5%;
+        top: 2%;
+        padding: 2px 10px;
+        color: white;
+        font-weight: 600;
+        border-radius: 2px;
+        font-size: 12px;
+        filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.4));
+        user-select: none;
+      "
+    >
+    </SearchBox>
+
     <div class="select-pannel">
       <el-button
         style="position: relative; z-index: 2"
@@ -130,6 +146,7 @@ import TimeLine from "./TimeLine.vue";
 import VisAdaptor from "./Vis/VisAdaptor.vue";
 import SunChart from "./Vis/SunChart.vue";
 import SelectPannel from "./Map/SelectHouse.vue";
+import SearchBox from "./Map/SearchBox.vue";
 
 import Map from "ol/Map";
 import View from "ol/View";
@@ -630,18 +647,17 @@ function ChangeView() {
   from {
     opacity: 0.2;
 
-    transform: translateY(var(--y-start)) translateX(var(--x-start)) scale(1,1);
+    transform: translateY(var(--y-start)) translateX(var(--x-start)) scale(1, 1);
   }
 
   50% {
     opacity: 0.8;
-    transform: translateY(var(--y-mid)) translateX(var(--x-mid)) scale(1.5,1.5);
-
+    transform: translateY(var(--y-mid)) translateX(var(--x-mid)) scale(1.5, 1.5);
   }
   to {
     opacity: 0;
 
-    transform: translateY(var(--y-end)) translateX(var(--x-end)) scale(0.5,0.5);
+    transform: translateY(var(--y-end)) translateX(var(--x-end)) scale(0.5, 0.5);
   }
 }
 </style>
