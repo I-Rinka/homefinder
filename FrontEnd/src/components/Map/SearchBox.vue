@@ -20,16 +20,16 @@
     >
       <div
         v-for="res in data.searchResult"
-        :key="res.formatted_address"
+        :key="res.addr_name"
         class="location-list-item"
-        :title="`Click to Go to ${res.formatted_address}`"
+        :title="`Click to Go to ${res.addr_name}`"
       >
         <span>
           <el-icon style="position: relative; top: 2px"><Position /></el-icon>
-          {{ res.formatted_address }}
+          {{ res.addr_name }}
         </span>
         <span
-            v-if="typeof res.district==='string'"
+          v-if="typeof res.district === 'string'"
           style="
             background-color: rgb(195, 102, 98);
             margin-left: 20px;
@@ -37,7 +37,7 @@
             padding: 1px 5px 1px 5px;
             color: white;
             font-size: 1px;
-            transform: scale(0.9,0.9);
+            transform: scale(0.9, 0.9);
           "
           >{{ res.district }}</span
         >
@@ -67,7 +67,11 @@ function UserSearch() {
   data.searchResult = [];
   SearchLocation(data.input).then((res) => {
     if (res.info === "OK") {
-      data.searchResult = res.geocodes;
+      data.searchResult = res.pois.map((d) => ({
+        addr_name: d.name,
+        district: d.adname,
+        coord: d.location,
+      }));
       console.log(res);
     }
   });
@@ -76,6 +80,8 @@ function UserSearch() {
 
 <style lang="less">
 .geo-search {
+  position: absolute;
+  z-index: 100;
   .el-input {
     input {
       width: var(--input-width) !important;

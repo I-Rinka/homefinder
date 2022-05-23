@@ -9,12 +9,12 @@ export async function GetDistance(my_coord, target_coord) {
 
 let gaode_key = "7adde82815b3509bf5fda0408def55a5";
 export async function SearchLocation(location_name) {
-  let res = await axios.get("https://restapi.amap.com/v3/geocode/geo?", {
+  let res = await axios.get("https://restapi.amap.com/v3/place/text?", {
     params: {
       key: gaode_key,
-      address: location_name,
+      keywords: location_name,
       city: "北京",
-      batch: true,
+      offset: 10,
     },
   });
   return res.data;
