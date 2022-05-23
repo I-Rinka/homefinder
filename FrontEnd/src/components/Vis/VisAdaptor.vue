@@ -10,6 +10,9 @@
       title="Click to Select Houses"
     >
       <sun-chart
+        :style="{
+          opacity: sunchart_store.opacity,
+        }"
         class="adaptor-sun-chart"
         v-if="props.price_mode"
         :myCoordinates="
@@ -162,6 +165,10 @@ import { useHouseStore } from "../store/selectedHouse";
 
 import { config } from "../../config";
 import * as d3 from "d3";
+
+import { useSunStore } from "../store/sunchart";
+
+const sunchart_store = useSunStore();
 
 const popoverRef = ref();
 const visRef = ref();

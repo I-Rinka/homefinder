@@ -139,6 +139,7 @@ import {
 } from "./Map/cluster";
 import { emitter } from "./store/bus";
 import { useStore as useWeightStore } from "./store/weight";
+import { useSunStore } from "./store/sunchart";
 
 import { config as global_config } from "../config";
 
@@ -168,6 +169,7 @@ import VectorLayer from "ol/layer/Vector";
 import Supercluster from "supercluster";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
+import { Style } from "ol/style";
 
 // the configuration
 const config = {
@@ -227,6 +229,8 @@ emitter.on("goto-block", (house_name) => {
     zoom: 16.5,
     duration: 500,
   });
+
+  sun_store.Hide();
 });
 emitter.on("goto-coord", (coord) => {
   map.getView().animate({
@@ -237,6 +241,7 @@ emitter.on("goto-coord", (coord) => {
 });
 
 const weight_store = useWeightStore();
+const sun_store = useSunStore();
 
 const enabled_user_mark = computed(() => {
   let enabled_mark = weight_store
@@ -297,9 +302,15 @@ const current_mode_color = computed(() => {
 
 // The Openlayers
 useGeographic();
-
+const infoLayer = new VectorLayer();
 const map = new Map({
-  layers: [mapboxlayer, beijingLayer, MarkLayer, block_data.featureLayer],
+  layers: [
+    mapboxlayer,
+    beijingLayer,
+    block_data.featureLayer,
+    MarkLayer,
+    infoLayer,
+  ],
   view: new View({
     center: config.center,
     zoom: config.zoom,
@@ -441,6 +452,9 @@ function ChangeZoom(value) {
 }
 
 function ChangeView() {
+  // move map to cancel highlight
+  sun_store.Show();
+
   let zoom = map.getView().getZoom();
   data.real_zoom = zoom;
 
@@ -458,10 +472,6 @@ function ChangeView() {
   cluster_zoom < 1 ? 1 : cluster_zoom;
 
   let view_port = [map.getSize()[0], map.getSize()[1]];
-  // view_port[0] *= 1.3;
-  // view_port[1] *= 1.3;
-
-  // console.log(cluster_zoom);
 
   let currentExtent = map.getView().calculateExtent(view_port);
   // currentExtent = [currentExtent[0] * 1.2, currentExtent[1] * 1.2];
@@ -469,7 +479,7 @@ function ChangeView() {
   let features = GetFeatures(cluster_zoom, currentExtent);
   // console.log(features)
   data.features = features;
-
+  block_data.featureLayer.setStyle(new Style());
   block_data.featureLayer.setSource(
     new VectorSource({
       features: new GeoJSON().readFeatures({
