@@ -14,7 +14,18 @@ const call_back_set = {
 export const useRankStore = defineStore("rankstore", {
   state: () => {
     let rank_thread = new Worker("rank_webworker.js");
-
+    rank_thread.onmessage = (e) => {
+      switch (e.data.op) {
+        case "compute2way":
+          call_back_set.twowaycallback(e.data);
+          break;
+        case "compute3way":
+          call_back_set.threewaycallback(e.data);
+          break;
+        default:
+          break;
+      }
+    };
     return {
       current_solutions: [],
       current_solutions_scale: [],
@@ -84,8 +95,12 @@ export const useRankStore = defineStore("rankstore", {
       current_criterias,
       call_back
     ) {
+      call_back_set.twowaycallback = (d) => {
+        this.EmitRankFrequency(d.rank_map, d.sample_times);
+        call_back(d.change);
+      };
       this.rank_thread.postMessage({
-        op: "compute3way",
+        op: "compute2way",
         involved_criterias_top: JSON.parse(
           JSON.stringify(involved_criterias_top)
         ),
@@ -94,41 +109,18 @@ export const useRankStore = defineStore("rankstore", {
         ),
         current_criterias: JSON.parse(JSON.stringify(current_criterias)),
         current_solutions: JSON.parse(JSON.stringify(this.current_solutions)),
+        current_solutions_scale: JSON.parse(
+          JSON.stringify(this.current_solutions_scale)
+        ),
       });
-      call_back_set.twowaycallback = call_back;
-      this.rank_thread.onmessage = (e) => {
-        switch (e.data.op) {
-          case "compute2way":
-            // this.EmitRankFrequency(e.data.rank_map, e.data.sample_times);
-            call_back_set.twowaycallback(e.data.change);
-            break;
-          case "compute3way":
-            // this.EmitRankFrequency(e.data.rank_map, e.data.sample_times);
-            call_back_set.threewaycallback(e.data.change);
-            break;
-          default:
-            break;
-        }
-      };
     },
 
     Compute3WayRangeMT(involved_criterias, current_criterias, call_back) {
-      this.rank_thread.onmessage = (e) => {
-        switch (e.data.op) {
-          case "compute2way":
-            // this.EmitRankFrequency(e.data.rank_map, e.data.sample_times);
-            call_back_set.twowaycallback(e.data.change);
-            break;
-          case "compute3way":
-            // this.EmitRankFrequency(e.data.rank_map, e.data.sample_times);
-            // call_back_set.threewaycallback(e.data.change);
-            console.log("compute three way");
-            call_back(e.data.change);
-            break;
-          default:
-            break;
-        }
+      call_back_set.threewaycallback = (d) => {
+        this.EmitRankFrequency(d.rank_map, d.sample_times);
+        call_back(d.change);
       };
+
       this.rank_thread.postMessage({
         op: "compute3way",
         involved_criterias: JSON.parse(JSON.stringify(involved_criterias)),
@@ -138,7 +130,6 @@ export const useRankStore = defineStore("rankstore", {
           JSON.stringify(this.current_solutions_scale)
         ),
       });
-      call_back_set.threewaycallback = call_back;
     },
 
     // current_criterias {name,weight}

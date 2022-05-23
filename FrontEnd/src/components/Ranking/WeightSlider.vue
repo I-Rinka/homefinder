@@ -331,7 +331,7 @@ function LoadHinterTimeout() {
   // n_time = Date.now();
   if (solution_trigger === null) {
     solution_trigger = setTimeout(() => {
-      LoadHinter();
+      LoadHinterMT();
       solution_trigger = null;
     }, 1000);
   }
@@ -361,6 +361,37 @@ async function LoadHinter() {
     height: (res.topStillHasSb.at(-1) - res.topStillHasSb.at(0)) * height,
   };
   // console.log("slider compute spent time:", Date.now() - start_time);
+}
+
+function LoadHinterMT() {
+  let start_time = Date.now();
+
+  if (start_time - n_time < 20) {
+    return;
+  }
+
+  let call_back = (res) => {
+    data.hinter.hinter_top = {
+      top: res.notChangeCurrent.at(0) * height,
+      height:
+        (res.notChangeCurrent.at(-1) - res.notChangeCurrent.at(0)) * height,
+    };
+    data.hinter.hinter_middle = {
+      top: res.currentStillInTop.at(0) * height,
+      height:
+        (res.currentStillInTop.at(-1) - res.currentStillInTop.at(0)) * height,
+    };
+    data.hinter.hinter_bottom = {
+      top: res.topStillHasSb.at(0) * height,
+      height: (res.topStillHasSb.at(-1) - res.topStillHasSb.at(0)) * height,
+    };
+  };
+  rank_store.Compute2wayMT(
+    data.top.map((d) => d.name),
+    data.bottom.map((d) => d.name),
+    store.GetCriterias(),
+    call_back
+  );
 }
 onMounted(() => {
   LoadHinterTimeout();

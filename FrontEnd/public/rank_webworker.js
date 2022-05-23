@@ -5,7 +5,8 @@ onmessage = function (e) {
         e.data.involved_criterias_top,
         e.data.involved_criterias_bottom,
         e.data.current_criterias,
-        e.data.current_solutions
+        e.data.current_solutions,
+        e.data.current_solutions_scale
       );
       break;
     case "compute3way":
@@ -25,7 +26,8 @@ function Compute2way(
   involved_criterias_top,
   involved_criterias_bottom,
   current_criterias,
-  current_solutions
+  current_solutions,
+  current_solutions_scale
 ) {
   let involved_criterias = involved_criterias_top.concat(
     involved_criterias_bottom
@@ -102,8 +104,8 @@ function Compute2way(
 
       for (let i = 0; i < n_record_scores.length; i++) {
         const d = n_record_scores[i];
-        if (i < config.focused_rank) {
-          if (d.index < config.focused_rank) {
+        if (i < 5) {
+          if (d.index < 5) {
             flag = true;
           }
           if (d.index === 0) {
