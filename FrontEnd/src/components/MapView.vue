@@ -231,6 +231,7 @@ emitter.on("goto-block", (house_name) => {
   });
 
   sun_store.Hide();
+  sun_store.SetHighlightBlock(house_name);
 });
 emitter.on("goto-coord", (coord) => {
   map.getView().animate({

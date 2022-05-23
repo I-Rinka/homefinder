@@ -5,6 +5,7 @@ export const useSunStore = defineStore("sunchart", {
     return {
       onScreenPrice: { min: 0, max: 0 },
       opacity: 1,
+      currentBlock: "",
     };
   },
   actions: {
@@ -13,6 +14,10 @@ export const useSunStore = defineStore("sunchart", {
     },
     Show() {
       this.opacity = 1;
+      this.currentBlock = "";
+    },
+    SetHighlightBlock(block_name: string) {
+      this.currentBlock = block_name;
     },
   },
 });

@@ -8,11 +8,11 @@
       @click="ClickVis"
       v-click-outside="onClickOutside"
       title="Click to Select Houses"
+      :style="{
+        opacity: hide_opacity,
+      }"
     >
       <sun-chart
-        :style="{
-          opacity: sunchart_store.opacity,
-        }"
         class="adaptor-sun-chart"
         v-if="props.price_mode"
         :myCoordinates="
@@ -77,7 +77,7 @@
           </div>
         </template>
 
-        <template v-else-if="react_data.contained_blocks.length == 1">
+        <template v-else-if="react_data.contained_blocks.length === 1">
           <div>Select House?</div>
           <div style="text-align: left; font-size: 10px">
             ( {{ react_data.contained_blocks[0] }} )
@@ -213,6 +213,18 @@ const data = {
   history_cache: {},
   isCached: false,
 };
+
+const hide_opacity = computed(() => {
+  // emit signal to add addition feature on map
+  if (
+    sunchart_store.currentBlock === "" ||
+    react_data.contained_blocks[0] === sunchart_store.currentBlock ||
+    react_data.contained_blocks.includes(sunchart_store.currentBlock)
+  ) {
+    return 1;
+  }
+  return sunchart_store.opacity;
+});
 
 const react_data = reactive({
   contained_blocks: [],
