@@ -876,7 +876,7 @@ function HandleUserMarkChange(attr) {
   HandleScale(attr);
   CalculateScaledRecords(attr);
 
-  RankingScore();
+  MT_RankingScore();
 }
 emitter.on("change-point", HandleUserMarkChange);
 

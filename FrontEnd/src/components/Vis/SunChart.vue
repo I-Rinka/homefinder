@@ -1,13 +1,14 @@
 <template>
   <div class="sun-chart" style="pointer-events: none">
     <svg
+    style="transition: 0.5s;"
       :viewBox="view_box"
       width="600"
       height="600"
       xmlns="http://www.w3.org/2000/svg"
     >
       <circle
-        v-for="mark in user_marks"
+        v-for="mark in data.user_marks"
         :key="mark.id"
         class="arc"
         cx="0"
@@ -42,9 +43,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "@vue/reactivity";
+import { reactive, ref, toRaw } from "@vue/reactivity";
 import { computed, onMounted, watch } from "@vue/runtime-core";
-import { GetDistance as QueryDistance } from "../../database/baiduquery";
 
 const props = withDefaults(
   defineProps<{
@@ -59,10 +59,38 @@ const props = withDefaults(
   }
 );
 
+class WeightStrip {
+  id: string;
+  color: string;
+  radius: number;
+  orientation: number;
+  stroke_width: number;
+  angle: number;
+  constructor(
+    id?: string,
+    color?: string,
+    radius?: number,
+    orientation?: number,
+    stroke_width?: number,
+    angle?: number
+  ) {
+    this.id = id;
+    this.color = color;
+    this.radius = radius;
+    this.orientation = orientation;
+    this.stroke_width = stroke_width;
+    this.angle = angle;
+  }
+}
+
+const data = reactive({
+  user_marks: new Array<WeightStrip>(),
+});
+
 const emits = defineEmits(["click"]);
 
 let view_box = computed(() => {
-  if (user_marks.value.length <= 3) {
+  if (data.user_marks.length <= 3) {
     return "-500 -500 1000 1000";
   } else {
     let p = (props.marks.length - 3) * 200 + 1000;
@@ -98,30 +126,50 @@ function ClickMiddle() {
   emits("click");
 }
 
-const user_marks = computed(() => {
-  if (props.open_corona === false) {
-    return [];
-  }
-  return props.marks
+let timeOut = 1500;
+
+function ChangeWeightStrip() {
+  data.user_marks = props.marks
     .sort((a: any, b: any) => a.get("weight") - b.get("weight"))
     .map((feature: any, index: number) => {
       let angle = GetAngle(feature);
-      return {
-        id: index,
-        radius: (index + 3) * 12,
-        color: feature.get("color"),
-        stroke_width: 12,
-        orientation: GetRotation(
+
+      let weight_strip = new WeightStrip(
+        feature.ol_uid,
+        feature.get("color"),
+        (index + 3) * 12,
+        GetRotation(
           angle,
           GetOrientation(
             props.myCoordinates,
             feature.getGeometry().getCoordinates()
           )
         ),
-        angle: angle, // todo: calculate distance
-      };
+        12,
+        angle
+      );
+
+      return weight_strip;
     });
+}
+
+onMounted(() => {
+  ChangeWeightStrip();
 });
+
+watch(
+  () => [props.marks, props.myCoordinates],
+  () => {
+    setTimeout(() => {
+      ChangeWeightStrip();
+    }, timeOut);
+
+    // if (timeOut === 0) {
+    //   timeOut = 1500;
+    // }
+  },
+  { deep: true }
+);
 
 /* 
     radius
@@ -201,7 +249,7 @@ function GetOrientation(
 
 <style lang="less" scoped>
 .arc {
-  transition: 0.5s 0.5s;
+  transition: 0.5s;
 }
 
 .sun-chart {

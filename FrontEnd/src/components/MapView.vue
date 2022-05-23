@@ -349,8 +349,12 @@ onMounted(() => {
 
       // user mark
       map.getTargetElement().style.cursor =
-        feature.get("type") === "UserMark" ? "grab" : "move";
+        feature.get("type") === "UserMark" ? "grab" : "pointer";
     }
+  });
+
+  map.on("pointerdrag", function () {
+    map.getTargetElement().style.cursor = "-webkit-grabbing";
   });
 
   map.on("dblclick", (event) => {
