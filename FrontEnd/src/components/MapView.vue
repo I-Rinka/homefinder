@@ -358,6 +358,9 @@ onMounted(() => {
 
   map.on("pointerdrag", function () {
     map.getTargetElement().style.cursor = "-webkit-grabbing";
+
+    // move map to cancel highlight
+    sun_store.Show();
   });
 
   map.on("dblclick", (event) => {
@@ -431,6 +434,9 @@ function ResetPosition() {
     zoom: config.zoom,
     duration: 500,
   });
+
+  // move map to cancel highlight
+  sun_store.Show();
 }
 
 let zoomThrottle = null;
@@ -452,9 +458,6 @@ function ChangeZoom(value) {
 }
 
 function ChangeView() {
-  // move map to cancel highlight
-  sun_store.Show();
-
   let zoom = map.getView().getZoom();
   data.real_zoom = zoom;
 
