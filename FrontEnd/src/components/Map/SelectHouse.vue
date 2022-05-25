@@ -24,12 +24,21 @@
       <el-button
         v-if="data.current_view === 'favorite'"
         style="position: relative; left: 5px; top: 5px"
-        type="warning"
-        :icon="Star"
+        type="info"
+        :icon="Select"
         plain
         size="small"
         @click="AddToSelect"
         >Add to Select list</el-button
+      ><el-button
+        v-if="data.current_view === 'select'"
+        style="position: relative; left: 5px; top: 5px"
+        type="info"
+        :icon="Hide"
+        plain
+        size="small"
+        @click="AddToHidden"
+        >Add to Hidden list</el-button
       >
     </div>
     <div class="select-table">
@@ -74,7 +83,6 @@ import {
   Hide,
   CircleCloseFilled,
   Delete,
-  Star,
 } from "@element-plus/icons-vue";
 import { computed } from "@vue/runtime-core";
 
@@ -101,6 +109,16 @@ function AddToSelect() {
     if (Object.hasOwnProperty.call(house_store.favoriteHouse, key)) {
       const element = house_store.favoriteHouse[key];
       house_store.selectedHouse[key] = element;
+    }
+  }
+}
+function AddToHidden() {
+  house_store.selectedHouse = {};
+
+  for (const key in house_store.selectedHouse) {
+    if (Object.hasOwnProperty.call(house_store.selectedHouse, key)) {
+      const element = house_store.selectedHouse[key];
+      house_store.bannedHouse[key] = element;
     }
   }
 }

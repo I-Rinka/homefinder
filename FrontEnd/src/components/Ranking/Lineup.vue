@@ -220,6 +220,9 @@
         <div class="table-content-weights">
           <template v-for="d in enabled_strip" :key="d.name">
             <el-tooltip
+              v-if="
+                item.origin[d.name] && data.scaled_records[item.index]
+              "
               :content="
                 item.origin[d.name].toString() + ' ' + ScaleAndStep(d.name)[0]
               "
@@ -246,7 +249,7 @@
             </el-tooltip>
           </template>
           <div class="table-content-score">
-            {{ (item.score*100).toFixed(2) }}
+            {{ (item.score * 100).toFixed(2) }}
           </div>
 
           <!-- todo: Distance Criteria reference -->
