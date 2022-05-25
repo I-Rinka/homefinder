@@ -36,15 +36,16 @@ function Ranking(data) {
         let d = DATA.enabled_strip[j];
 
         if (!DATA.user_mark_records[d.name]) {
-          s += (record[d.name] * d.weight) / DATA.strip_percentage_sum.value;
+          s += (record[d.name] * d.weight) / DATA.strip_percentage_sum;
         } else {
-          s += (record[d.name] * d.weight) / DATA.strip_percentage_sum.value;
+          s += (record[d.name] * d.weight) / DATA.strip_percentage_sum;
         }
       }
       let obj = { index: i, score: s };
       scores.push(obj);
     }
   }
+  console.log("worker scores:", scores);
 
   scores.sort((a, b) => a.score - b.score);
   latest_ranking = scores;

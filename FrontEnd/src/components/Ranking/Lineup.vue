@@ -180,15 +180,10 @@
       </div>
     </div>
 
-    <TransitionGroup
-      tag="div"
-      name="list"
-      class="table"
-      v-infinite-scroll="LoadMoreScore"
-    >
+    <TransitionGroup tag="div" name="list" class="table">
       <div
         class="table-content"
-        v-for="(item, ii) in data.ranking_score"
+        v-for="item in data.ranking_score"
         :key="item.index"
         @dblclick="GotoBlock(item.origin.block)"
         title="Double Click to see where it is!"
@@ -220,12 +215,9 @@
         <div class="table-content-weights">
           <template v-for="d in enabled_strip" :key="d.name">
             <el-tooltip
-              v-if="
-                item.origin[d.name] &&
-                data.weight_strip_scaled_data[ii] &&
-                d.color
+              :content="
+                item.origin[d.name].toString() + ' ' + ScaleAndStep(d.name)[0]
               "
-              :content="item.origin[d.name] + ' ' + ScaleAndStep(d.name)[0]"
               :hide-after="0"
               placement="top"
               popper-class="popper"
@@ -237,7 +229,7 @@
                   '--strip-color': d.color,
                   '--strip-width': `${
                     (d.weight / strip_percentage_sum) *
-                    data.weight_strip_scaled_data[ii][d.name] *
+                    data.scaled_records[item.index][d.name] *
                     100
                   }%`,
                 }"
@@ -249,7 +241,7 @@
             </el-tooltip>
           </template>
           <div class="table-content-score">
-            {{ (item.score * 100).toFixed(2) }}
+            {{ item.score.toFixed(2) }}
           </div>
 
           <!-- todo: Distance Criteria reference -->
@@ -694,60 +686,9 @@ function MT_RankingScore() {
   console.log("post data used time:", Date.now() - start);
 }
 
-function UpdateWeight(records) {
-  // change strip width!!!!!!!!!
-  data.weight_strip_scaled_data = [];
-  let ranked_val = [];
-  let all_val = [];
-  for (let i = 0; i < records.length; i++) {
-    let val_obj = {};
-    for (let d of enabled_strip.value) {
-      let cur_val = data.scaled_records[records[i].index][d.name];
-      val_obj[d.name] = cur_val;
-      all_val.push(cur_val);
-    }
-    ranked_val.push(val_obj);
-  }
-
-  //calculate min and max
-  let strip_scale = {};
-  for (let d of enabled_strip.value) {
-    let r = ranked_val.map((value) => value[d.name]);
-    let min = Math.min(...r);
-    let max = Math.max(...r);
-    // let min = Math.min(...all_val)
-    // let max = Math.max(...all_val)
-    let scale = d3.scaleLinear().range([0.1, 1]).domain([min, max]);
-    strip_scale[d.name] = scale;
-  }
-
-  // re-calculate score
-  for (let i = 0; i < ranked_val.length; i++) {
-    let obj = {};
-    let score = 0;
-    for (let d of enabled_strip.value) {
-      let vv = strip_scale[d.name](ranked_val[i][d.name]);
-      obj[d.name] = vv;
-      score += (vv * d.weight) / strip_percentage_sum.value;
-    }
-    obj["score"] = score;
-    data.weight_strip_scaled_data.push(obj);
-
-    records[i].score = score;
-  }
-
-  records.sort((a, b) => {
-    return a.score - b.score;
-  });
-  data.weight_strip_scaled_data.sort((a, b) => {
-    return a.score - b.score;
-  });
-
-  return records;
-}
-
 function MT_ReceiveCalculatedScore(scores) {
   let num = scores.length < 100 ? scores.length : 100;
+  console.log(scores);
   // let num = scores.length;
   let records = [];
   for (let i = 0; i < num; i++) {
@@ -765,9 +706,6 @@ function MT_ReceiveCalculatedScore(scores) {
       score: element.score,
     });
   }
-
-  records = UpdateWeight(records.slice(0, 100));
-  
 
   rank_store.ChangeCurrentSolutions(records.slice(0, 100).map((d) => d.origin));
   let scaled_records = [];
