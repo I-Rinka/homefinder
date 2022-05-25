@@ -7,6 +7,11 @@
       height="600"
       xmlns="http://www.w3.org/2000/svg"
     >
+      <SunChartCorona
+        v-if="open_corona"
+        :coord="props.myCoordinates"
+        :inner-radius="corona_radius"
+      ></SunChartCorona>
       <circle
         v-for="mark in data.user_marks"
         :key="mark.id"
@@ -33,12 +38,6 @@
         :fill="color"
         @click="ClickMiddle"
       />
-
-      <SunChartCorona
-        v-if="open_corona"
-        :coord="props.myCoordinates"
-        :inner-radius="corona_radius"
-      ></SunChartCorona>
     </svg>
     <div class="sun-chart-text-container">
       <div class="sun-chart-text" :style="{ fontSize: `${price_text_size}px` }">
