@@ -320,7 +320,6 @@ function RemoveHouse() {
 
 function UpdatePrice() {
   if (react_data.type === "region") {
-    react_data.name = props.feature.properties.name;
     GetAndCacheRegionPrice().then(() => {
       GetTimeAvgPrice(props.current_time.year, props.current_time.month);
 
@@ -367,6 +366,19 @@ function UpdatePrice() {
 
 let request_controller = new AbortController();
 
+let sunchart_store_key = "";
+
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
 onMounted(() => {
   if (props.map && props.feature) {
     ol_data.overlay = new Overlay({
@@ -395,12 +407,19 @@ onMounted(() => {
             .catch((err) => console.log(sub_region, "error"));
         }
       }
+
+      if (react_data.type === "region") {
+        react_data.name = props.feature.properties.name;
+      } else if (react_data.type === "blocks") {
+        react_data.name = props.feature.properties.contained_features.toString().hashCode();
+      } else {
+        react_data.name = props.feature.properties.contained_features.toString().hashCode();
+      }
     }
-
-    // console.log(toRaw(props.feature));
-
     props.map.addOverlay(ol_data.overlay);
     UpdatePrice();
+
+    sunchart_store_key = react_data.name;
   }
 });
 
@@ -409,6 +428,9 @@ onBeforeUnmount(() => {
   if (props.map && props.feature) {
     props.map.removeOverlay(ol_data.overlay);
   }
+
+  delete sunchart_store.currentOnScreenBlocks[sunchart_store_key];
+  console.log(sunchart_store.currentOnScreenBlocks);
 });
 
 function GetSubRegionData() {
@@ -476,6 +498,9 @@ async function RequestPrice(year, month) {
         data.history_cache = BlocksTimeCache[react_data.name];
       }
       unit_price.value = data.history_cache[token];
+      sunchart_store.currentOnScreenBlocks[sunchart_store_key] = {
+        unit_price: unit_price.value,
+      };
     }
   } else {
     if (BlocksTimeCache[react_data.contained_blocks]) {
@@ -484,6 +509,9 @@ async function RequestPrice(year, month) {
           BlocksTimeCache[toRaw(react_data.contained_blocks)];
       }
       unit_price.value = data.history_cache[token];
+      sunchart_store.currentOnScreenBlocks[sunchart_store_key] = {
+        unit_price: unit_price.value,
+      };
     } else {
       if (year == 2020 && month == 12) {
         try {
@@ -498,6 +526,9 @@ async function RequestPrice(year, month) {
               props.current_time.month === month
             ) {
               unit_price.value = res.unit_price;
+              sunchart_store.currentOnScreenBlocks[sunchart_store_key] = {
+                unit_price: unit_price.value,
+              };
             }
           }
         } catch (error) {
@@ -520,6 +551,9 @@ async function RequestPrice(year, month) {
               props.current_time.month === month
             ) {
               unit_price.value = res.unit_price;
+              sunchart_store.currentOnScreenBlocks[sunchart_store_key] = {
+                unit_price: unit_price.value,
+              };
             }
           }
         } catch (error) {
@@ -542,6 +576,9 @@ async function GetTimeAvgPrice(year, month) {
   } else {
     if (data.history_cache[token] != -1) {
       unit_price.value = data.history_cache[token];
+      sunchart_store.currentOnScreenBlocks[sunchart_store_key] = {
+        unit_price: unit_price.value,
+      };
     }
   }
 }
@@ -569,6 +606,9 @@ let patch_cache = function () {
       props.current_time.month === n_month
     ) {
       unit_price.value = data.history_cache[token];
+      sunchart_store.currentOnScreenBlocks[sunchart_store_key] = {
+        unit_price: unit_price.value,
+      };
     }
   } while (
     n_year > config.timeRange[0].year ||
@@ -640,22 +680,31 @@ let interlop_function = d3.interpolateRgbBasis([
   "#d9ef8b",
   "#a6d96a",
   "#66bd63",
-  "#1a9850",
+  // "#1a9850",
 ]);
 let sun_chart_color = computed(() => {
-  if (props.basePrice && props.basePrice > 0) {
-    if (unit_price.value <= 0) {
-      return "rgba(200,200,200,0.5)";
-    }
-    return interlop_function(
-      1 - ((unit_price.value - props.basePrice) / 10000 + 0.5)
-    );
-  } else {
-    if (unit_price.value <= 0) {
-      return "rgba(200,200,200,0.5)";
-    }
-    return interlop_function(1 - unit_price.value / 50000);
+  if (unit_price.value<0) {
+    return "rgba(0,0,0,0.2)"
   }
+  let value_mapping = d3
+    .scaleLinear()
+    .range([0, 1])
+    .domain([sunchart_store.maxPrice, sunchart_store.minPrice]);
+  return interlop_function(value_mapping(unit_price.value));
+
+  // if (props.basePrice && props.basePrice > 0) {
+  //   if (unit_price.value <= 0) {
+  //     return "rgba(200,200,200,0.5)";
+  //   }
+  //   return interlop_function(
+  //     1 - ((unit_price.value - props.basePrice) / 10000 + 0.5)
+  //   );
+  // } else {
+  //   if (unit_price.value <= 0) {
+  //     return "rgba(200,200,200,0.5)";
+  //   }
+  //   return interlop_function(1 - unit_price.value / 50000);
+  // }
 });
 
 function ClickVis() {

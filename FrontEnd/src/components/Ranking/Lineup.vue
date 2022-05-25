@@ -577,9 +577,6 @@ function HandleQuanFilterChange(attr) {
 }
 
 function CalculateQuantitativeScale(name, is_positive_correlation) {
-  // let min = data.quantitative_attr_range[name].min
-  // let max = data.quantitative_attr_range[name].max
-
   let min = data.quantitative_filter[name][0];
   let max = data.quantitative_filter[name][1];
 
