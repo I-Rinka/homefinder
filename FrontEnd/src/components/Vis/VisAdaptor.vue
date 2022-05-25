@@ -430,7 +430,6 @@ onBeforeUnmount(() => {
   }
 
   delete sunchart_store.currentOnScreenBlocks[sunchart_store_key];
-  console.log(sunchart_store.currentOnScreenBlocks);
 });
 
 function GetSubRegionData() {
@@ -709,7 +708,6 @@ let sun_chart_color = computed(() => {
 
 function ClickVis() {
   react_data.tooltip_visibility = true;
-  console.log(toRaw(props.feature));
 }
 
 function AddToBlackList() {
