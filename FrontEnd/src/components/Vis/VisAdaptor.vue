@@ -708,6 +708,7 @@ let sun_chart_color = computed(() => {
 
 function ClickVis() {
   react_data.tooltip_visibility = true;
+  console.log(props.feature.geometry.coordinates)
 }
 
 function AddToBlackList() {

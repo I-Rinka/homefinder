@@ -1,7 +1,7 @@
 <template>
   <div class="sun-chart" style="pointer-events: none">
     <svg
-    style="transition: 0.5s;"
+      style="transition: 0.5s"
       :viewBox="view_box"
       width="600"
       height="600"
@@ -33,6 +33,8 @@
         :fill="color"
         @click="ClickMiddle"
       />
+
+      <SunChartCorona v-if="open_corona" :coord="props.myCoordinates"></SunChartCorona>
     </svg>
     <div class="sun-chart-text-container">
       <div class="sun-chart-text" :style="{ fontSize: `${price_text_size}px` }">
@@ -45,6 +47,7 @@
 <script setup lang="ts">
 import { reactive, ref, toRaw } from "@vue/reactivity";
 import { computed, onMounted, watch } from "@vue/runtime-core";
+import SunChartCorona from "./SunChartCorona.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -58,6 +61,8 @@ const props = withDefaults(
     open_corona: true,
   }
 );
+
+const open_corona = computed(() => props.open_corona);
 
 class WeightStrip {
   id: string;
@@ -101,8 +106,7 @@ let view_box = computed(() => {
 
 let price_r = computed(() => {
   if (
-    props.marks.length == 0 ||
-    (props.open_corona != undefined && props.open_corona === false)
+    props.marks.length == 0
   ) {
     return 45;
   } else if (props.marks.length) {
@@ -113,8 +117,7 @@ let price_r = computed(() => {
 // font size
 let price_text_size = computed(() => {
   if (
-    props.marks.length == 0 ||
-    (props.open_corona != undefined && props.open_corona === false)
+    props.marks.length == 0
   ) {
     return 12;
   } else if (props.marks.length) {

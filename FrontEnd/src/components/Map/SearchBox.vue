@@ -51,7 +51,7 @@
 import { Search, Position } from "@element-plus/icons-vue";
 import { reactive } from "@vue/reactivity";
 import { ClickOutside as vClickOutside } from "element-plus";
-import { SearchLocation } from "../../database/onlineMapQuery";
+import { SearchLocation } from "../../database/onlineQuery";
 import coordtransform from "coordtransform";
 import { emitter } from "../store/bus";
 
