@@ -246,7 +246,7 @@
             </el-tooltip>
           </template>
           <div class="table-content-score">
-            {{ item.score.toFixed(2) }}
+            {{ (item.score*100).toFixed(2) }}
           </div>
 
           <!-- todo: Distance Criteria reference -->

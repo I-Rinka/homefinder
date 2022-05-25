@@ -21,6 +21,16 @@
         @click="RemoveAll"
         >Remove All</el-button
       >
+      <el-button
+        v-if="data.current_view === 'favorite'"
+        style="position: relative; left: 5px; top: 5px"
+        type="warning"
+        :icon="Star"
+        plain
+        size="small"
+        @click="AddToSelect"
+        >Add to Select list</el-button
+      >
     </div>
     <div class="select-table">
       <select-house-list
@@ -64,6 +74,7 @@ import {
   Hide,
   CircleCloseFilled,
   Delete,
+  Star,
 } from "@element-plus/icons-vue";
 import { computed } from "@vue/runtime-core";
 
@@ -82,6 +93,15 @@ function RemoveAll() {
     house_store.favoriteHouse = {};
   } else if (data.current_view === "hidden") {
     house_store.bannedHouse = {};
+  }
+}
+
+function AddToSelect() {
+  for (const key in house_store.favoriteHouse) {
+    if (Object.hasOwnProperty.call(house_store.favoriteHouse, key)) {
+      const element = house_store.favoriteHouse[key];
+      house_store.selectedHouse[key] = element;
+    }
   }
 }
 </script>
