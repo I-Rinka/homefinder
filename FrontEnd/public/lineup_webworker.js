@@ -20,7 +20,7 @@ function MoreRanking(data) {
   let offset = data.offset;
   postMessage({
     op: "moreRanking",
-    scores: latest_ranking.slice(0, offset + 5 + 1),
+    scores: latest_ranking.slice(offset + 1, offset + 3 + 1),
   });
 }
 function Ranking(data) {
@@ -45,7 +45,6 @@ function Ranking(data) {
       scores.push(obj);
     }
   }
-  console.log("worker scores:", scores);
 
   scores.sort((a, b) => a.score - b.score);
   latest_ranking = scores;

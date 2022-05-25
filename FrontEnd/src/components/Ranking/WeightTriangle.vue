@@ -608,7 +608,7 @@ function LoadHinterTimeout() {
     solution_trigger = setTimeout(() => {
       LoadHinterMT();
       solution_trigger = null;
-    }, 200);
+    }, 1250);
   }
 }
 

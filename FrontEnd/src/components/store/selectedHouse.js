@@ -28,6 +28,7 @@ export const useHouseStore = defineStore("selectedHouse", {
         珠江峰景: {},
         K2玉蘭湾: {},
         "8哩岛": {},
+        矩阵四期: {},
       },
       banned_rules: [
         /.*[a-z]{1,}.*/i,

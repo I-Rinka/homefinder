@@ -180,7 +180,12 @@
       </div>
     </div>
 
-    <TransitionGroup tag="div" name="list" class="table">
+    <TransitionGroup
+      tag="div"
+      name="list"
+      class="table"
+      v-infinite-scroll="LoadMoreScore"
+    >
       <div
         class="table-content"
         v-for="item in data.ranking_score"
@@ -687,8 +692,7 @@ function MT_RankingScore() {
 }
 
 function MT_ReceiveCalculatedScore(scores) {
-  let num = scores.length < 100 ? scores.length : 100;
-  console.log(scores);
+  let num = scores.length < 1000 ? scores.length : 1000;
   // let num = scores.length;
   let records = [];
   for (let i = 0; i < num; i++) {
@@ -707,10 +711,10 @@ function MT_ReceiveCalculatedScore(scores) {
     });
   }
 
-  rank_store.ChangeCurrentSolutions(records.slice(0, 100).map((d) => d.origin));
+  rank_store.ChangeCurrentSolutions(records.slice(0, 200).map((d) => d.origin));
   let scaled_records = [];
   records.forEach((d) => scaled_records.push(data.scaled_records[d.index]));
-  rank_store.ChangeCurrentScale(scaled_records.slice(0, 100));
+  rank_store.ChangeCurrentScale(scaled_records.slice(0, 200));
 
   record_update = records.slice(0, 99);
 
@@ -718,7 +722,7 @@ function MT_ReceiveCalculatedScore(scores) {
     record_timeout = setTimeout(() => {
       data.ranking_score = record_update;
       record_timeout = null;
-    }, 1000);
+    }, 250);
   }
 
   console.log("update used time:", Date.now() - start);
@@ -835,10 +839,6 @@ ranking_worker.onmessage = (e) => {
 };
 
 function AddRanking(scores) {
-  // let num = data.ranking_score.length + new_scores.length;
-  // let scores = toRaw(data.ranking_score).concat(new_scores);
-  // let scores = toRaw(data.ranking_score).concat(new_scores);
-  console.log(scores);
   let records = [];
   for (let i = 0; i < scores.length; i++) {
     const element = scores[i];
@@ -855,12 +855,7 @@ function AddRanking(scores) {
       score: element.score,
     });
   }
-
-  UpdateWeight(records);
-  data.ranking_score = records;
-  // for (let i = data.ranking_score.length; i < records.length; i++) {
-  //   data.ranking_score.push(records[i]);
-  // }
+  data.ranking_score = data.ranking_score.concat(records);
 }
 
 function LoadMoreScore() {
@@ -953,7 +948,7 @@ function LoadMoreScore() {
   background-color: var(--strip-color);
   width: var(--strip-width);
 
-  transition: 0.5s;
+  transition: 0.25s;
   position: relative;
 
   &:hover {
@@ -1004,7 +999,7 @@ function LoadMoreScore() {
     padding: 0px 20px 5px 20px;
     background-color: rgb(207, 100, 100);
     animation: enter 0.5s;
-    transition: 0.5s;
+    transition: 0.25s;
     // transition-delay: 0.5s;
     color: white;
     font-size: 13px;
