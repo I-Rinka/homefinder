@@ -34,7 +34,11 @@
         @click="ClickMiddle"
       />
 
-      <SunChartCorona v-if="open_corona" :coord="props.myCoordinates"></SunChartCorona>
+      <SunChartCorona
+        v-if="open_corona"
+        :coord="props.myCoordinates"
+        :inner-radius="corona_radius"
+      ></SunChartCorona>
     </svg>
     <div class="sun-chart-text-container">
       <div class="sun-chart-text" :style="{ fontSize: `${price_text_size}px` }">
@@ -63,6 +67,9 @@ const props = withDefaults(
 );
 
 const open_corona = computed(() => props.open_corona);
+const corona_radius = computed(() =>
+  60 > data.user_marks.length * 15 + 38 ? 60 : data.user_marks.length * 15 + 38
+);
 
 class WeightStrip {
   id: string;
@@ -105,9 +112,7 @@ let view_box = computed(() => {
 });
 
 let price_r = computed(() => {
-  if (
-    props.marks.length == 0
-  ) {
+  if (props.marks.length == 0) {
     return 45;
   } else if (props.marks.length) {
     return 29;
@@ -116,9 +121,7 @@ let price_r = computed(() => {
 
 // font size
 let price_text_size = computed(() => {
-  if (
-    props.marks.length == 0
-  ) {
+  if (props.marks.length == 0) {
     return 12;
   } else if (props.marks.length) {
     return 3;
@@ -174,7 +177,7 @@ watch(
   { deep: true }
 );
 
-/* 
+/*
     radius
     color
     stroke_width

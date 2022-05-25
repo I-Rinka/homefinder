@@ -8,6 +8,7 @@ export const useSunStore = defineStore("sunchart", {
       opacity: 1,
       currentBlock: "",
       currentOnScreenBlocks: {},
+      openCorona: false,
     };
   },
   getters: {

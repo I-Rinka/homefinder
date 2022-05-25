@@ -1,6 +1,24 @@
 <template>
-
-
+  <g v-for="i in 8" :key="'corona' + i">
+    <circle
+      fill="rgba(128,128,128,0.5)"
+      :cx="GetXY(i * 45, props.innerRadius)[0]"
+      :cy="GetXY(i * 45, props.innerRadius)[1]"
+      :r="6"
+    ></circle>
+    <circle
+      fill="rgba(128,128,128,0.5)"
+      :cx="GetXY(i * 45, props.innerRadius + 14)[0]"
+      :cy="GetXY(i * 45, props.innerRadius + 14)[1]"
+      :r="5"
+    ></circle>
+    <circle
+      fill="rgba(128,128,128,0.5)"
+      :cx="GetXY(i * 45, props.innerRadius + 25)[0]"
+      :cy="GetXY(i * 45, props.innerRadius + 25)[1]"
+      :r="4"
+    ></circle>
+  </g>
 </template>
 
 <script lang="ts" setup>
@@ -9,9 +27,13 @@ import { onMounted, onBeforeUnmount } from "@vue/runtime-core";
 import { EnabledPOI, GetPOIs, poi_type } from "../../database/onlineQuery";
 import coordtransform from "coordtransform";
 
-const props = defineProps<{
-  coord: [number, number];
-}>();
+const props = withDefaults(
+  defineProps<{
+    coord: [number, number];
+    innerRadius?: number;
+  }>(),
+  { innerRadius: 60 }
+);
 
 const data = reactive({
   categories: {
@@ -44,11 +66,16 @@ async function GenCorona(coord: [number, number]) {
     request_controller = new AbortController();
   }
 
-  console.log(data.corona)
+  console.log(data.corona);
+}
+
+function GetXY(rotate: number, offset: number) {
+  let deg = (Math.PI * rotate) / 180;
+  return [Math.cos(deg) * offset, Math.sin(deg) * offset];
 }
 
 onMounted(() => {
-  GenCorona(coordtransform.wgs84togcj02(props.coord[0], props.coord[1]));
+  //   GenCorona(coordtransform.wgs84togcj02(props.coord[0], props.coord[1]));
 });
 
 onBeforeUnmount(() => {

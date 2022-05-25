@@ -462,6 +462,12 @@ function ChangeView() {
   let zoom = map.getView().getZoom();
   data.real_zoom = zoom;
 
+  if (data.real_zoom > global_config.subRegionZoom) {
+    sun_store.openCorona = true;
+  } else {
+    sun_store.openCorona = false;
+  }
+
   let new_percentage_zoom = Math.floor(
     ((zoom - config.minZoom) * 100) / (config.maxZoom - config.minZoom)
   );

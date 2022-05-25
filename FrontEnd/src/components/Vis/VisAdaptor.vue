@@ -23,7 +23,7 @@
         :marks="props.markArray"
         :color="sun_chart_color"
         :text="computed_price"
-        :open_corona="props.open_corona"
+        :open_corona="props.open_corona&&sunchart_store.openCorona"
       ></sun-chart>
       <trend-vis
         class="adaptor-trend-vis"
