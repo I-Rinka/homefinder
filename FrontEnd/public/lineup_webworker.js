@@ -20,7 +20,7 @@ function MoreRanking(data) {
   let offset = data.offset;
   postMessage({
     op: "moreRanking",
-    scores: latest_ranking.slice(offset + 1, offset + 5 + 1),
+    scores: latest_ranking.slice(0, offset + 5 + 1),
   });
 }
 function Ranking(data) {

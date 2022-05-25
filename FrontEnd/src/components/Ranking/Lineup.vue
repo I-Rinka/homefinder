@@ -767,6 +767,7 @@ function MT_ReceiveCalculatedScore(scores) {
   }
 
   records = UpdateWeight(records.slice(0, 100));
+  
 
   rank_store.ChangeCurrentSolutions(records.slice(0, 100).map((d) => d.origin));
   let scaled_records = [];
@@ -895,11 +896,13 @@ ranking_worker.onmessage = (e) => {
   }
 };
 
-function AddRanking(new_scores) {
-  let num = data.ranking_score.length + new_scores.length;
-  let scores = toRaw(data.ranking_score).concat(new_scores);
+function AddRanking(scores) {
+  // let num = data.ranking_score.length + new_scores.length;
+  // let scores = toRaw(data.ranking_score).concat(new_scores);
+  // let scores = toRaw(data.ranking_score).concat(new_scores);
+  console.log(scores);
   let records = [];
-  for (let i = 0; i < num; i++) {
+  for (let i = 0; i < scores.length; i++) {
     const element = scores[i];
     // add user mark record to origin
     let ori = props.origin_records[element.index];
@@ -916,9 +919,10 @@ function AddRanking(new_scores) {
   }
 
   UpdateWeight(records);
-  for (let i = data.ranking_score.length; i < records.length; i++) {
-    data.ranking_score.push(records[i]);
-  }
+  data.ranking_score = records;
+  // for (let i = data.ranking_score.length; i < records.length; i++) {
+  //   data.ranking_score.push(records[i]);
+  // }
 }
 
 function LoadMoreScore() {
