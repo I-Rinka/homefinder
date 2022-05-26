@@ -103,7 +103,7 @@
                   class="enabled-name"
                   :style="{ '--strip-color': d.color }"
                 >
-                  <el-checkbox :label="d.name"> </el-checkbox>
+                  <el-checkbox :label="d.label"> </el-checkbox>
                 </div>
               </el-checkbox-group>
             </div>
@@ -123,7 +123,7 @@
                   class="enabled-name"
                   :style="{ '--strip-color': d.color }"
                 >
-                  <el-checkbox :label="d.name"> </el-checkbox>
+                  <el-checkbox :label="d.label"> </el-checkbox>
                 </div>
               </el-checkbox-group>
             </div>
@@ -169,7 +169,7 @@
                   class="enabled-name"
                   :style="{ '--strip-color': d.color }"
                 >
-                  <el-checkbox :label="d.name"> </el-checkbox>
+                  <el-checkbox :label="d.label"> </el-checkbox>
                 </div>
               </el-checkbox-group>
             </div>
@@ -369,6 +369,10 @@ function Root3(number) {
       margin: 5px;
       font-size: 4px;
       background-color: var(--strip-color);
+      label {
+        text-shadow: 0px 0px 4px #000000c0;
+        color: white !important;
+      }
     }
     .el-button {
       margin-top: 10px;
