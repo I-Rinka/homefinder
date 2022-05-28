@@ -220,9 +220,7 @@
         <div class="table-content-weights">
           <template v-for="d in enabled_strip" :key="d.name">
             <el-tooltip
-              v-if="
-                item.origin[d.name] && data.scaled_records[item.index]
-              "
+              v-if="item.origin[d.name] && data.scaled_records[item.index]"
               :content="
                 item.origin[d.name].toString() + ' ' + ScaleAndStep(d.name)[0]
               "
@@ -687,11 +685,17 @@ function MT_RankingScore() {
       ),
       user_mark_records: JSON.parse(JSON.stringify(user_mark_records)),
     },
+    time_stamp: start,
   });
   console.log("post data used time:", Date.now() - start);
 }
 
-function MT_ReceiveCalculatedScore(scores) {
+function MT_ReceiveCalculatedScore(scores, time_stamp) {
+  if (time_stamp && time_stamp < start) {
+    console.log("not update");
+    return;
+  }
+
   let num = scores.length < 1000 ? scores.length : 1000;
   // let num = scores.length;
   let records = [];
@@ -716,13 +720,23 @@ function MT_ReceiveCalculatedScore(scores) {
   records.forEach((d) => scaled_records.push(data.scaled_records[d.index]));
   rank_store.ChangeCurrentScale(scaled_records.slice(0, 200));
 
-  record_update = records.slice(0, 99);
+  record_update = records.slice(0, 15);
 
   if (record_timeout === null) {
     record_timeout = setTimeout(() => {
-      data.ranking_score = record_update;
+      if (time_stamp) {
+        if (time_stamp >= start) {
+          console.log(time_stamp, start);
+          data.ranking_score = record_update;
+        } else {
+          console.log("no update");
+        }
+      } else {
+        console.log("no time stamp");
+        data.ranking_score = record_update;
+      }
       record_timeout = null;
-    }, 250);
+    }, 500);
   }
 
   console.log("update used time:", Date.now() - start);
@@ -828,7 +842,7 @@ let ranking_worker = new Worker("lineup_webworker.js");
 ranking_worker.onmessage = (e) => {
   switch (e.data.op) {
     case "ranking":
-      MT_ReceiveCalculatedScore(e.data.scores);
+      MT_ReceiveCalculatedScore(e.data.scores, e.data.time_stamp);
       break;
     case "moreRanking":
       AddRanking(e.data.scores);
@@ -905,7 +919,7 @@ function LoadMoreScore() {
   // margin: 5px;
   background-color: whitesmoke;
 
-  transition: 0.5s;
+  transition: 1s;
   &:hover {
     background-color: white;
   }
@@ -947,8 +961,9 @@ function LoadMoreScore() {
 
   background-color: var(--strip-color);
   width: var(--strip-width);
-
-  transition: 0.25s;
+  transition-delay: 1s !important;
+  transition-property: width;
+  transition: 0.5s !important;
   position: relative;
 
   &:hover {

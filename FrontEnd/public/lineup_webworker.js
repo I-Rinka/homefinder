@@ -48,7 +48,7 @@ function Ranking(data) {
 
   scores.sort((a, b) => a.score - b.score);
   latest_ranking = scores;
-  postMessage({ op: "ranking", scores: scores });
+  postMessage({ op: "ranking", scores: scores, time_stamp: data.time_stamp });
 }
 
 function UpdateDATA(DATA) {
