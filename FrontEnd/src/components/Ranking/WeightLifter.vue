@@ -103,7 +103,7 @@
                   class="enabled-name"
                   :style="{ '--strip-color': d.color }"
                 >
-                  <el-checkbox :label="d.label"> </el-checkbox>
+                  <el-checkbox :label="d.name"> </el-checkbox>
                 </div>
               </el-checkbox-group>
             </div>
@@ -123,7 +123,7 @@
                   class="enabled-name"
                   :style="{ '--strip-color': d.color }"
                 >
-                  <el-checkbox :label="d.label"> </el-checkbox>
+                  <el-checkbox :label="d.name"> </el-checkbox>
                 </div>
               </el-checkbox-group>
             </div>
@@ -169,7 +169,7 @@
                   class="enabled-name"
                   :style="{ '--strip-color': d.color }"
                 >
-                  <el-checkbox :label="d.label"> </el-checkbox>
+                  <el-checkbox :label="d.name"> </el-checkbox>
                 </div>
               </el-checkbox-group>
             </div>
