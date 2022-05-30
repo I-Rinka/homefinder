@@ -30,9 +30,22 @@
         v-else-if="!props.price_mode"
         :history_records="react_data.history_records"
         :subregion_records="GetSubRegionData()"
-        :selection_time="props.selection_time"
+        :selection_time="
+          using_baseline_selection
+            ? props.current_baseline_selection[0]
+            : props.selection_time
+        "
         :subregion_name="react_data.sub_region_name"
         :feature_type="react_data.type"
+      ></trend-vis>
+      <trend-vis
+        class="adaptor-trend-vis"
+        style="top: -204px;opacity: 0.7;"
+        v-if="using_baseline_selection"
+        :history_records="react_data.history_records"
+        :selection_time="props.current_baseline_selection[1]"
+        :feature_type="react_data.type"
+        :color="'#487cc6'"
       ></trend-vis>
       <div
         class="adaptor-title"
@@ -44,7 +57,7 @@
         class="adaptor-title2"
         v-else-if="react_data.type === 'region' && !props.price_mode"
       >
-        {{ react_data.name }}
+        <!-- {{ react_data.name }} -->
       </div>
     </div>
 
@@ -256,6 +269,18 @@ const hide_opacity = computed(() => {
   return sunchart_store.opacity;
 });
 
+const using_baseline_selection = computed(() => {
+  if (
+    props.current_baseline_selection[0] &&
+    props.current_baseline_selection[0][1] &&
+    props.current_baseline_selection[0][1].year != 0
+  ) {
+    return true;
+  }
+
+  return false;
+});
+
 const react_data = reactive({
   contained_blocks: [],
   history_records: [],
@@ -325,6 +350,7 @@ watch(
     UpdateBaselinePrice(new_val.year, new_val.month);
   }
 );
+
 function UpdateBaselinePrice(year, month) {
   let token = year + "," + month;
   if (!data.history_cache.hasOwnProperty(token)) {

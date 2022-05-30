@@ -47,6 +47,11 @@ const props = defineProps({
     type: String,
     required: false,
   },
+  color:{
+    type:String,
+    required:false,
+    default:"rgba(184, 48, 31,.8)"
+  }
 });
 
 watch(
@@ -166,7 +171,7 @@ function Update() {
 
   bar_group
     .select("rect") // bar
-    .style("fill", "rgba(184, 48, 31,.8)")
+    .style("fill", props.color)
     .attr("width", (d, i, nodes) =>
       nodes[i].getAttribute("width")
         ? nodes[i].getAttribute("width")

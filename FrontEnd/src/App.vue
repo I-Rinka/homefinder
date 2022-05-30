@@ -96,6 +96,7 @@ function ChangeSelectMode(b) {
       :baseline_time="data.baseline_time"
       :selection_time="data.selection_time"
       :use_baseline="data.use_baseline"
+      :current_baseline_selection="data.current_baseline_selection"
     ></map-view>
     <time-line
       @changeCurrentTime="ChangeCurrentTime"
