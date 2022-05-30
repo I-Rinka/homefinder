@@ -1,0 +1,3 @@
+# d:/User/Downloads/cloc-1.92.exe ./get_block_json.ipynb  ./get_newest_record.ipynb ./coordTransform_utils.py ./get_block_json.ipynb ./get_regions_record.ipynb ./upload_data.sh ./upload_position.sh  ../Backend/api/ ../Backend/db/ ../Backend/main.js ../Frontend/public/  ../Frontend/index.html  ../Frontend/src/
+
+cloc ./Frontend/get_block_json.ipynb  ./Frontend/get_newest_record.ipynb ./Frontend/coordTransform_utils.py ./Frontend/get_block_json.ipynb ./Frontend/get_regions_record.ipynb ./Frontend/upload_data.sh ./Frontend/upload_position.sh  ./Backend/api/ ./Backend/db/ ./Backend/main.js ./Frontend/public/  ./Frontend/index.html  ./Frontend/src/

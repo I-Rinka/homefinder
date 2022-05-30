@@ -1,48 +1,48 @@
 import { MongoClient } from "mongodb";
 import { url } from "./mongo.js";
 
-// export function selectHouse(req, res) {
-//     let lat1 = req.query.lat1;
-//     let lat2 = req.query.lat2;
+export function selectHouse_range(req, res) {
+    let lat1 = req.query.lat1;
+    let lat2 = req.query.lat2;
 
-//     let lng1 = req.query.lng1;
-//     let lng2 = req.query.lng2;
+    let lng1 = req.query.lng1;
+    let lng2 = req.query.lng2;
 
-//     if (lat2 == undefined && lng2 == undefined) {
-//         lat2 = lat1;
-//         lng2 = lng1;
-//     }
+    if (lat2 == undefined && lng2 == undefined) {
+        lat2 = lat1;
+        lng2 = lng1;
+    }
 
-//     lat1 = parseFloat(lat1);
-//     lat2 = parseFloat(lat2);
-//     lng1 = parseFloat(lng1);
-//     lng2 = parseFloat(lng2);
-//     MongoClient.connect(url, (err, db) => {
-//         if (err) {
-//             console.log(err);
-//         }
-//         let dbo = db.db("homefinder");
-//         let query = {
-//             lat: { $lte: lat1, $gte: lat2 },
-//             lng: { $gte: lng1, $lte: lng2 },
-//         };
-//         let result_handler = (err, result) => {
-//             if (err) {
-//                 console.log(err);
-//             } else {
-//                 console.log("res:", result);
-//                 res.send(result);
-//             }
-//             db.close();
-//         };
+    lat1 = parseFloat(lat1);
+    lat2 = parseFloat(lat2);
+    lng1 = parseFloat(lng1);
+    lng2 = parseFloat(lng2);
+    MongoClient.connect(url, (err, db) => {
+        if (err) {
+            console.log(err);
+        }
+        let dbo = db.db("homefinder");
+        let query = {
+            lat: { $lte: lat1, $gte: lat2 },
+            lng: { $gte: lng1, $lte: lng2 },
+        };
+        let result_handler = (err, result) => {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log("res:", result);
+                res.send(result);
+            }
+            db.close();
+        };
 
-//         if (lat1 && lat2 && lng1 && lng2) {
-//             dbo.collection("house_coord").find(query).toArray(result_handler);
-//         } else {
-//             dbo.collection("house_coord").find().toArray(result_handler);
-//         }
-//     });
-// }
+        if (lat1 && lat2 && lng1 && lng2) {
+            dbo.collection("house_coord").find(query).toArray(result_handler);
+        } else {
+            dbo.collection("house_coord").find().toArray(result_handler);
+        }
+    });
+}
 
 export function selectHouse(req, res) {
   let mode = req.query.mode;
