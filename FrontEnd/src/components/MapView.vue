@@ -104,6 +104,9 @@
         :current_time="props.current_time"
         :selection_time="props.selection_time"
         :open_corona="data.real_zoom <= 20"
+        :use_baseline="props.use_baseline"
+        :baseline_time="props.baseline_time"
+        :current_baseline_selection="props.current_baseline_selection"
       ></vis-adaptor>
     </div>
   </div>

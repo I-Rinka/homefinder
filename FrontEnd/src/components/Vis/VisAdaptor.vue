@@ -23,7 +23,7 @@
         :marks="props.markArray"
         :color="sun_chart_color"
         :text="computed_price"
-        :open_corona="props.open_corona&&sunchart_store.openCorona"
+        :open_corona="props.open_corona && sunchart_store.openCorona"
       ></sun-chart>
       <trend-vis
         class="adaptor-trend-vis"
@@ -203,9 +203,39 @@ const props = defineProps({
     default: null,
     required: false,
   },
+  use_baseline: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
+  baseline_time: { year: 0, month: 0 },
+  current_baseline_selection: {
+    type: Array,
+    required: false,
+    default: [
+      [
+        { year: 0, month: 0 },
+        { year: 0, month: 0 },
+      ],
+      [
+        { year: 0, month: 0 },
+        { year: 0, month: 0 },
+      ],
+    ],
+  },
 });
 
-const unit_price = ref(-1);
+const unit_price = computed({
+  get() {
+    if (props.use_baseline) {
+      return react_data.current_price - react_data.baseline_price;
+    }
+    return react_data.current_price;
+  },
+  set(v) {
+    react_data.current_price = v;
+  },
+});
 
 const house_store = useHouseStore();
 
@@ -234,6 +264,8 @@ const react_data = reactive({
   sub_region_name: "",
   tooltip_visibility: false,
   is_stared: false,
+  current_price: -1,
+  baseline_price: 0,
 });
 
 const ol_data = {
@@ -255,9 +287,7 @@ watch(
 watch(
   () => props.current_time,
   (new_val) => {
-    if (props.price_mode) {
-      GetTimeAvgPrice(new_val.year, new_val.month);
-    }
+    GetTimeAvgPrice(new_val.year, new_val.month);
   }
 );
 
@@ -285,6 +315,108 @@ watch(
     UpdatePrice();
   }
 );
+
+// for baseline
+watch(
+  () => props.baseline_time,
+  (new_val) => {
+    console.log("baseline update", new_val);
+    UpdateBaselinePrice(new_val.year, new_val.month);
+  }
+);
+function UpdateBaselinePrice(year, month) {
+  let token = year + "," + month;
+  if (!data.history_cache.hasOwnProperty(token)) {
+    data.history_cache[token] = -1;
+    if (!data.isCached) {
+      RequestPrice_baseline(year, month);
+    }
+  } else {
+    if (data.history_cache[token] != -1) {
+      react_data.baseline_price = data.history_cache[token];
+      sunchart_store.currentOnScreenBlocks[sunchart_store_key] = {
+        unit_price: unit_price.value,
+      };
+    }
+  }
+}
+
+async function RequestPrice_baseline(year, month) {
+  let token = year + "," + month;
+
+  if (react_data.type === "region") {
+    if (BlocksTimeCache[react_data.name]) {
+      if (!data.isCached) {
+        data.history_cache = BlocksTimeCache[react_data.name];
+      }
+      react_data.baseline_price = data.history_cache[token];
+      sunchart_store.currentOnScreenBlocks[sunchart_store_key] = {
+        unit_price: unit_price.value,
+      };
+    }
+  } else {
+    if (BlocksTimeCache[react_data.contained_blocks]) {
+      if (!data.isCached) {
+        data.history_cache =
+          BlocksTimeCache[toRaw(react_data.contained_blocks)];
+      }
+      react_data.baseline_price = data.history_cache[token];
+      sunchart_store.currentOnScreenBlocks[sunchart_store_key] = {
+        unit_price: unit_price.value,
+      };
+    } else {
+      if (year == 2020 && month == 12) {
+        try {
+          let res = await GetBlocksAvgPrice(
+            react_data.contained_blocks,
+            request_controller
+          );
+          if (res) {
+            data.history_cache[token] = res.unit_price;
+            if (
+              props.current_time.year === year &&
+              props.current_time.month === month
+            ) {
+              react_data.baseline_price = res.unit_price;
+              sunchart_store.currentOnScreenBlocks[sunchart_store_key] = {
+                unit_price: unit_price.value,
+              };
+            }
+          }
+        } catch (error) {
+          if (error.message !== "canceled") {
+            throw error;
+          }
+        }
+      } else {
+        try {
+          let res = await GetBlocksAvgPriceYearMonth(
+            react_data.contained_blocks,
+            year,
+            month,
+            request_controller
+          );
+          if (res) {
+            data.history_cache[token] = res.unit_price;
+            if (
+              props.current_time.year === year &&
+              props.current_time.month === month
+            ) {
+              react_data.baseline_price = res.unit_price;
+              sunchart_store.currentOnScreenBlocks[sunchart_store_key] = {
+                unit_price: unit_price.value,
+              };
+            }
+          }
+        } catch (error) {
+          if (error.message !== "canceled") {
+            throw error;
+          }
+        }
+      }
+    }
+  }
+}
 
 function GetContainedBlock() {
   react_data.contained_blocks = props.feature.properties.contained_features;
@@ -368,12 +500,14 @@ let request_controller = new AbortController();
 
 let sunchart_store_key = "";
 
-String.prototype.hashCode = function() {
-  var hash = 0, i, chr;
+String.prototype.hashCode = function () {
+  var hash = 0,
+    i,
+    chr;
   if (this.length === 0) return hash;
   for (i = 0; i < this.length; i++) {
-    chr   = this.charCodeAt(i);
-    hash  = ((hash << 5) - hash) + chr;
+    chr = this.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
     hash |= 0; // Convert to 32bit integer
   }
   return hash;
@@ -411,9 +545,13 @@ onMounted(() => {
       if (react_data.type === "region") {
         react_data.name = props.feature.properties.name;
       } else if (react_data.type === "blocks") {
-        react_data.name = props.feature.properties.contained_features.toString().hashCode();
+        react_data.name = props.feature.properties.contained_features
+          .toString()
+          .hashCode();
       } else {
-        react_data.name = props.feature.properties.contained_features.toString().hashCode();
+        react_data.name = props.feature.properties.contained_features
+          .toString()
+          .hashCode();
       }
     }
     props.map.addOverlay(ol_data.overlay);
@@ -682,8 +820,8 @@ let interlop_function = d3.interpolateRgbBasis([
   // "#1a9850",
 ]);
 let sun_chart_color = computed(() => {
-  if (unit_price.value<0) {
-    return "rgba(0,0,0,0.2)"
+  if (unit_price.value < 0) {
+    return "rgba(0,0,0,0.2)";
   }
   let value_mapping = d3
     .scaleLinear()
@@ -708,7 +846,7 @@ let sun_chart_color = computed(() => {
 
 function ClickVis() {
   react_data.tooltip_visibility = true;
-  console.log(props.feature.geometry.coordinates)
+  console.log(props.feature.geometry.coordinates);
 }
 
 function AddToBlackList() {
