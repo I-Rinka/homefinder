@@ -264,7 +264,7 @@ const react_data = reactive({
   sub_region_name: "",
   tooltip_visibility: false,
   is_stared: false,
-  current_price: -1,
+  current_price: 0,
   baseline_price: 0,
 });
 
@@ -292,17 +292,18 @@ watch(
 );
 
 let computed_price = computed(() => {
-  if (unit_price.value > 0) {
-    if (props.basePrice && props.basePrice > 0) {
-      let price = ProcessUnitPrice(unit_price.value - props.basePrice);
-      if (price[0] === "-") {
-        return price;
-      } else {
-        return "+" + price;
-      }
+  if (props.use_baseline) {
+    if (unit_price.value < 0) {
+      return "- " + ProcessUnitPrice(unit_price.value).slice(1);
+    } else if (unit_price.value > 0) {
+      return "+ " + ProcessUnitPrice(unit_price.value);
     } else {
-      return ProcessUnitPrice(unit_price.value);
+      return "0";
     }
+  }
+
+  if (unit_price.value >= 0) {
+    return ProcessUnitPrice(unit_price.value);
   } else {
     return "";
   }
@@ -820,8 +821,15 @@ let interlop_function = d3.interpolateRgbBasis([
   // "#1a9850",
 ]);
 let sun_chart_color = computed(() => {
-  if (unit_price.value < 0) {
+  if (unit_price.value === 0) {
     return "rgba(0,0,0,0.2)";
+  }
+  if (unit_price.value < 0) {
+    let value_mapping = d3
+      .scaleLinear()
+      .range([0.5, 1])
+      .domain([0, sunchart_store.minPrice]);
+    return d3.interpolateBlues(value_mapping(unit_price.value));
   }
   let value_mapping = d3
     .scaleLinear()
