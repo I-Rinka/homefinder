@@ -7,11 +7,11 @@
       height="600"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <SunChartCorona
+      <!-- <SunChartCorona
         v-if="open_corona"
         :coord="props.myCoordinates"
         :inner-radius="corona_radius"
-      ></SunChartCorona>
+      ></SunChartCorona> -->
       <circle
         v-for="mark in data.user_marks"
         :key="mark.id"

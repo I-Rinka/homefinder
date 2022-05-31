@@ -113,7 +113,7 @@ function ChangeSelectMode(b) {
 
 <style>
 body {
-  padding: 0vh 0.5vw 0vh 0.5vw;
+  /* padding: 0vh 0.5vw 0vh 0.5vw; */
   height: 98vh;
   width: 99vw;
   overflow: hidden;
