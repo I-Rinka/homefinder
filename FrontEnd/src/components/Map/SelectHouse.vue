@@ -38,7 +38,7 @@
         plain
         size="small"
         @click="AddToHidden"
-        >Add to Hidden list</el-button
+        >Hidde All</el-button
       >
     </div>
     <div class="select-table">

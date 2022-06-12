@@ -110,7 +110,12 @@ export const useHouseStore = defineStore("selectedHouse", {
     AddHouseByRegionName: async function (region_name) {
       try {
         let res = await SelectHouseByRegion(region_name);
-        res.forEach((d) => this.AddHouse(d.block));
+        res.forEach((d) => {
+          this.AddHouse(d.block);
+          if (block_data_map && block_data_map[d.block]) {
+            block_data_map[d.block].region = region_name;
+          }
+        });
       } catch (error) {
         console.log("error!", error);
       }
@@ -199,9 +204,8 @@ export const useHouseStore = defineStore("selectedHouse", {
       let y0 = rect.y + rect.height / 2;
       let y1 = 10;
 
-      newDiv.style = `--x-start: ${x0}px; --y-start: ${y0}px; --x-mid: ${
-        ((x1 - x0) * 2) / 3 + x0
-      }px; --y-mid:${y1 - 15}px; --x-end: ${x1}px; --y-end:${y1}px`;
+      newDiv.style = `--x-start: ${x0}px; --y-start: ${y0}px; --x-mid: ${((x1 - x0) * 2) / 3 + x0
+        }px; --y-mid:${y1 - 15}px; --x-end: ${x1}px; --y-end:${y1}px`;
       newDiv.classList.add("add-animation");
     },
   },
