@@ -1,6 +1,8 @@
 # homefinder
 graduate design 《基于房屋交易历史成交记录的购房决策可视分析方法研究与实现》
 
+Vue3+vite+Node.js+Mongodb
+
 <img width="446" alt="image" src="https://user-images.githubusercontent.com/50841088/173733071-98cb9d5e-f8f3-43eb-b302-cde75e74261b.png">
 
 系统流程 | pipeline：
@@ -30,6 +32,8 @@ npm run dev
 ```
 
 工作量统计 ｜ code line count
+
+Dependes on [AlDanial/cloc](https://github.com/AlDanial/cloc)
 
 ```sh
 sh ./count_code.sh 
