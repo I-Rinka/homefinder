@@ -28,3 +28,30 @@ cd ./FrontEnd
 npm install 
 npm run dev
 ```
+
+工作量统计 ｜ code line count
+
+```sh
+sh ./count_code.sh 
+
+      58 text files.
+      57 unique files.                              
+       7 files ignored.
+       
+github.com/AlDanial/cloc v 1.92  T=0.82 s (69.6 files/s, 14508.7 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Vuejs Component                 17            722            271           6586
+JavaScript                      21            268             81           2671
+TypeScript                       4             24             17            333
+Jupyter Notebook                 4              0            398            225
+Python                           1             26             38            111
+JSON                             5              0              0             91
+HTML                             1              0              0             13
+Bourne Shell                     2              0              0              2
+Markdown                         2              0              0              2
+-------------------------------------------------------------------------------
+SUM:                            57           1040            805          10034
+-------------------------------------------------------------------------------
+```
