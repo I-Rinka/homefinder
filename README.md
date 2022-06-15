@@ -24,7 +24,7 @@ npm run serve
 
 cd ..
 
-cd ./Frontend
+cd ./FrontEnd
 npm install 
 npm run dev
 ```
